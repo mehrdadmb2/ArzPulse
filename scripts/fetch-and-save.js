@@ -10,7 +10,7 @@ const HISTORY_DIR = path.join(DATA_DIR, 'history');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(HISTORY_DIR)) fs.mkdirSync(HISTORY_DIR, { recursive: true });
 
-// تبدیل XAUT/USDT به گرم ۱۸ عیار با توجه به قیمت تتر
+// تبدیل XAUT (به تتر) به گرم ۱۸ عیار با استفاده از قیمت تتر
 function convertXautToGram18K(xautPriceInUSDT, usdtPriceInIRR) {
   const OUNCE_TO_GRAM = 31.1034768;
   const PURITY_18K = 0.750;
@@ -18,18 +18,13 @@ function convertXautToGram18K(xautPriceInUSDT, usdtPriceInIRR) {
   return Math.round((pricePerOunceIRR / OUNCE_TO_GRAM) * PURITY_18K);
 }
 
-// تابع کمکی برای درخواست HTTPS
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { 'User-Agent': 'ArzPulse/1.0.0' } }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(e);
-        }
+        try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
       });
     }).on('error', reject);
   });
@@ -61,26 +56,16 @@ async function fetchPrice(src, dst) {
       fetchPrice('xaut', 'usdt')   // XAUT به تتر
     ]);
 
-    // قیمت تتر به ریال (برای تبدیل طلا)
-    const usdtToIRR = usdt.bestSell; // یا میانگین buy/sell
+    const usdtPrice = usdt.bestSell;
+    const gold18K = convertXautToGram18K(xaut.bestSell, usdtPrice);
 
-    // محاسبه طلا
-    const gold18K = convertXautToGram18K(xaut.bestSell, usdtToIRR);
-
-    // ساخت آبجکت قیمت‌ها
-    const prices = {
-      BTC: btc,
-      ETH: eth,
-      USDT: usdt,
-      NOT: not,
-      XAUT: xaut   // نگه می‌داریم برای رفرنس
-    };
+    const prices = { BTC: btc, ETH: eth, USDT: usdt, NOT: not, XAUT: xaut };
 
     const latestData = {
       timestamp: new Date().toISOString(),
       prices,
       gold18K,
-      usdtPrice: usdtToIRR
+      usdtPrice
     };
 
     // ذخیره latest.json
@@ -89,13 +74,10 @@ async function fetchPrice(src, dst) {
       JSON.stringify(latestData, null, 2)
     );
 
-    // ذخیره تاریخچه روزانه
+    // ذخیره تاریخچه روزانه (فقط ۷ روز نگهداری شود)
     const today = new Date().toISOString().split('T')[0];
     const historyFile = path.join(HISTORY_DIR, `${today}.json`);
-    let history = [];
-    if (fs.existsSync(historyFile)) {
-      history = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
-    }
+    let history = fs.existsSync(historyFile) ? JSON.parse(fs.readFileSync(historyFile, 'utf8')) : [];
     history.push({
       time: new Date().toISOString(),
       BTC: btc.lastPrice,
@@ -104,7 +86,7 @@ async function fetchPrice(src, dst) {
       NOT: not.lastPrice,
       GOLD18K: gold18K
     });
-    // فقط ۷ روز اخیر نگهداری شود (حذف روزهای قدیمی‌تر)
+    // حذف داده‌های قدیمی‌تر از ۷ روز
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     history = history.filter(entry => new Date(entry.time) >= sevenDaysAgo);
@@ -116,7 +98,7 @@ async function fetchPrice(src, dst) {
       JSON.stringify({
         lastUpdate: latestData.timestamp,
         gold18K,
-        usdtPrice: usdtToIRR
+        usdtPrice
       }, null, 2)
     );
 
