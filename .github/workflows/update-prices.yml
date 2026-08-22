@@ -1,10 +1,9 @@
-# .github/workflows/update-prices.yml
 name: Update Crypto Prices
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # هر ۵ دقیقه
-  workflow_dispatch:        # اجرای دستی
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   update:
@@ -12,17 +11,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
       - name: Run fetch script
         run: node scripts/fetch-and-save.js
-
       - name: Commit and push
         run: |
           git config --local user.email "action@github.com"
