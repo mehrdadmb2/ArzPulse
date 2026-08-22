@@ -3,9 +3,6 @@ name: Build and Deploy Site to docs
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'site/**'
-      - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
 
 jobs:
@@ -20,7 +17,6 @@ jobs:
         run: cd site && npm install
       - name: Build and Export
         run: cd site && npm run build && npm run export
-        # خروجی در ../docs ذخیره می‌شود (طبق next.config.js)
       - name: Commit and push docs
         run: |
           git config --local user.email "action@github.com"
