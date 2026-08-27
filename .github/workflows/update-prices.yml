@@ -21,6 +21,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/
+          # اضافه کردن پوشه جدید docs/data و همچنین فایل index.html در صورت تغییر
+          git add docs/data/
+          git add docs/index.html
           git diff --staged --quiet || git commit -m "Auto-update prices $(date -u '+%Y-%m-%d %H:%M:%S')"
           git push
