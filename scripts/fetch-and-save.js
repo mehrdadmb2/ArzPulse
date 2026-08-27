@@ -5,7 +5,8 @@ const https = require('https');
 
 // ---------- تنظیمات ----------
 const BASE_URL = 'https://apiv2.nobitex.ir';
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// ⭐ تغییر مسیر به docs/data
+const DATA_DIR = path.join(__dirname, '..', 'docs', 'data');
 const HISTORY_DIR = path.join(DATA_DIR, 'history');
 
 console.log(`📁 مسیر پوشه داده: ${DATA_DIR}`);
@@ -13,11 +14,11 @@ console.log(`📁 مسیر پوشه داده: ${DATA_DIR}`);
 // ---------- ایجاد پوشه‌ها ----------
 if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
-    console.log('📁 پوشه data ایجاد شد.');
+    console.log('📁 پوشه docs/data ایجاد شد.');
 }
 if (!fs.existsSync(HISTORY_DIR)) {
     fs.mkdirSync(HISTORY_DIR, { recursive: true });
-    console.log('📁 پوشه history ایجاد شد.');
+    console.log('📁 پوشه docs/data/history ایجاد شد.');
 }
 
 // ---------- تبدیل XAUT به گرم ۱۸ عیار ----------
@@ -81,13 +82,11 @@ function fetchJson(url, timeout = 10000, retries = 2) {
 async function fetchPrice(src, dst) {
     const url = `${BASE_URL}/market/stats?srcCurrency=${src}&dstCurrency=${dst}`;
     const json = await fetchJson(url);
-    
-    // بررسی پاسخ
+
     if (!json || json.status !== 'ok' || !json.stats) {
         throw new Error('پاسخ نامعتبر از نوبیتکس');
     }
 
-    // پیدا کردن کلید مناسب در stats (مثلاً "btc-rls" یا "eth-rls")
     const key = Object.keys(json.stats).find(k => k === `${src}-${dst}`);
     if (!key) {
         throw new Error(`کلید ${src}-${dst} در پاسخ وجود ندارد`);
@@ -110,7 +109,6 @@ async function fetchPrice(src, dst) {
     console.log('🚀 ArzPulse Price Fetcher شروع شد');
     console.log(`📅 ${new Date().toISOString()}`);
 
-    // بارگذاری داده‌های قبلی (برای fallback)
     let lastData = null;
     const latestPath = path.join(DATA_DIR, 'latest.json');
     if (fs.existsSync(latestPath)) {
@@ -135,7 +133,6 @@ async function fetchPrice(src, dst) {
     let hasError = false;
     let errorDetails = [];
 
-    // دریافت تک‌تک هر دارایی
     for (const asset of assets) {
         try {
             console.log(`📡 دریافت ${asset.symbol} (${asset.src}/${asset.dst})...`);
@@ -145,7 +142,6 @@ async function fetchPrice(src, dst) {
             console.error(`❌ خطا در دریافت ${asset.symbol}:`, error.message);
             hasError = true;
             errorDetails.push(`${asset.symbol}: ${error.message}`);
-            // استفاده از داده‌های قبلی اگر موجود باشد
             if (lastData && lastData.prices && lastData.prices[asset.symbol]) {
                 results[asset.symbol] = lastData.prices[asset.symbol];
                 console.log(`↩️ استفاده از داده‌های کش برای ${asset.symbol}`);
@@ -156,13 +152,11 @@ async function fetchPrice(src, dst) {
         }
     }
 
-    // محاسبه طلا و دلار
     const usdtPrice = results.USDT ? results.USDT.bestSell || 0 : 0;
     const xautPrice = results.XAUT ? results.XAUT.bestSell || 0 : 0;
     const gold18K = convertXautToGram18K(xautPrice, usdtPrice);
     const dollarPrice = usdtPrice;
 
-    // ساخت آبجکت نهایی
     const latestData = {
         timestamp: new Date().toISOString(),
         prices: results,
@@ -173,11 +167,10 @@ async function fetchPrice(src, dst) {
         errorDetails: errorDetails
     };
 
-    // ذخیره latest.json
     fs.writeFileSync(latestPath, JSON.stringify(latestData, null, 2));
     console.log(`✅ latest.json ذخیره شد: ${latestPath}`);
 
-    // ذخیره تاریخچه روزانه
+    // تاریخچه
     const today = new Date().toISOString().split('T')[0];
     const historyFile = path.join(HISTORY_DIR, `${today}.json`);
     let history = [];
@@ -197,7 +190,6 @@ async function fetchPrice(src, dst) {
         GOLD18K: gold18K,
         DOLLAR: dollarPrice
     });
-    // فقط ۳۰ روز اخیر نگهداری شود
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     history = history.filter(entry => new Date(entry.time) >= thirtyDaysAgo);
@@ -218,7 +210,6 @@ async function fetchPrice(src, dst) {
     fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
     console.log(`📄 meta.json ذخیره شد: ${metaPath}`);
 
-    // نمایش خلاصه قیمت‌ها
     console.log('📊 خلاصه قیمت‌های دریافت‌شده:');
     for (const [symbol, data] of Object.entries(results)) {
         console.log(`   ${symbol}: خرید ${data.bestBuy || 0} | فروش ${data.bestSell || 0} | آخرین ${data.lastPrice || 0}`);
