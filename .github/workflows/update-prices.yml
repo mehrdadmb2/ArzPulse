@@ -2,7 +2,8 @@ name: Update Crypto Prices
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    # هر ۲ دقیقه یکبار اجرا می‌شود (برای داده‌های تقریباً لحظه‌ای)
+    - cron: '*/2 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -21,7 +22,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          # اضافه کردن پوشه جدید docs/data و همچنین فایل index.html در صورت تغییر
           git add docs/data/
           git add docs/index.html
           git diff --staged --quiet || git commit -m "Auto-update prices $(date -u '+%Y-%m-%d %H:%M:%S')"
