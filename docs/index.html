@@ -4,26 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArzPulse – قیمت‌های لحظه‌ای نوبیتکس</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Google Font: Vazirmatn (فارسی) -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <style>
-        /* ===== RESET ===== */
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             color: #fff;
             padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #24243e 70%, #1a1a2e 100%);
+            overflow-x: hidden;
             position: relative;
+            background: #0f0c29;
         }
+
+        /* ============================================================
+           BACKGROUND: PARTICLES + GRADIENT
+           ============================================================ */
         #particles-canvas {
             position: fixed;
             top: 0;
@@ -33,18 +46,62 @@
             z-index: 0;
             pointer-events: none;
         }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #24243e 70%, #1a1a2e 100%);
+        }
+
+        .bg-gradient::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(251, 191, 36, 0.10) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 30%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+                radial-gradient(ellipse at 70% 70%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+            animation: gradientOrbit 25s ease-in-out infinite alternate;
+        }
+
+        @keyframes gradientOrbit {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            100% {
+                transform: translate(3%, 2%) scale(1.1) rotate(3deg);
+            }
+        }
+
+        /* ============================================================
+           GLASS CONTAINER
+           ============================================================ */
         .container {
             position: relative;
             z-index: 1;
             max-width: 1400px;
             width: 100%;
             background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(20px);
-            border-radius: 48px;
-            padding: 28px 24px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 56px;
+            padding: 28px 26px;
             border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 40px 80px -16px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 40px 80px -16px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
         }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
         .header {
             display: flex;
             justify-content: space-between;
@@ -55,13 +112,21 @@
         }
         .logo {
             font-size: 2.2rem;
-            font-weight: 800;
+            font-weight: 900;
             background: linear-gradient(to right, #f6d365, #fda085);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 60px rgba(253, 160, 133, 0.15);
+        }
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(to right, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .header-controls {
             display: flex;
@@ -76,39 +141,41 @@
             padding: 4px;
             display: flex;
             gap: 4px;
+            backdrop-filter: blur(8px);
         }
         .currency-toggle button {
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.4);
-            padding: 6px 18px;
+            padding: 6px 20px;
             border-radius: 100px;
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-family: inherit;
+            font-family: 'Vazirmatn', sans-serif;
         }
         .currency-toggle button.active {
             background: rgba(251, 191, 36, 0.2);
             color: #fbbf24;
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.1);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.08);
         }
         .currency-toggle button:hover:not(.active) {
             color: rgba(255, 255, 255, 0.7);
         }
         .badge {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.25);
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.2);
             color: #6ee7b7;
-            padding: 6px 16px;
+            padding: 6px 18px;
             border-radius: 100px;
             font-size: 0.75rem;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             animation: pulse-badge 2s infinite;
+            backdrop-filter: blur(8px);
         }
         .badge-dot {
             width: 8px;
@@ -136,6 +203,10 @@
                 opacity: 0.2;
             }
         }
+
+        /* ============================================================
+           TOP CARDS (Gold & Dollar)
+           ============================================================ */
         .top-cards {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -147,12 +218,17 @@
             border-radius: 24px;
             padding: 18px 22px;
             border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
         .top-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
         }
         .top-card.gold {
             background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(245, 158, 11, 0.04));
@@ -162,29 +238,49 @@
             background: linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(16, 185, 129, 0.03));
             border-color: rgba(52, 211, 153, 0.15);
         }
+        .top-card .info {
+            display: flex;
+            flex-direction: column;
+        }
         .top-card .label {
             font-size: 0.8rem;
             color: rgba(255, 255, 255, 0.5);
             display: flex;
             align-items: center;
             gap: 6px;
+            font-weight: 600;
+        }
+        .top-card .label i {
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
         .top-card .value {
             font-size: 1.8rem;
-            font-weight: 700;
-            margin-top: 4px;
+            font-weight: 800;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
         }
         .top-card.gold .value {
             color: #fbbf24;
+            text-shadow: 0 0 40px rgba(251, 191, 36, 0.12);
         }
         .top-card.dollar .value {
             color: #6ee7b7;
+            text-shadow: 0 0 40px rgba(52, 211, 153, 0.12);
         }
         .top-card .sub {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: rgba(255, 255, 255, 0.3);
             margin-top: 2px;
         }
+        .top-card .icon-big {
+            font-size: 2.8rem;
+            opacity: 0.3;
+        }
+
+        /* ============================================================
+           PRICE GRID
+           ============================================================ */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -195,14 +291,27 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 24px;
-            padding: 18px 16px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 18px 16px 16px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+        .price-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
+            pointer-events: none;
         }
         .price-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.6);
         }
         .price-card .symbol-row {
             display: flex;
@@ -211,30 +320,37 @@
             margin-bottom: 8px;
         }
         .price-card .symbol {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1.15rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+        }
+        .price-card .symbol i {
+            font-size: 1.4rem;
+            width: 28px;
+            text-align: center;
         }
         .price-card .change {
             font-size: 0.7rem;
-            font-weight: 600;
-            padding: 2px 12px;
+            font-weight: 700;
+            padding: 3px 14px;
             border-radius: 100px;
+            backdrop-filter: blur(4px);
         }
         .change.up {
-            background: rgba(16, 185, 129, 0.2);
+            background: rgba(16, 185, 129, 0.18);
             color: #34d399;
         }
         .change.down {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.18);
             color: #f87171;
         }
         .change.neutral {
             background: rgba(255, 255, 255, 0.06);
             color: #9ca3af;
         }
+
         .price-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -248,16 +364,16 @@
         }
         .price-details .row .label {
             color: rgba(255, 255, 255, 0.35);
+            font-weight: 400;
+        }
+        .price-details .row .value {
+            font-weight: 600;
         }
         .price-details .row .value.buy {
             color: #6ee7b7;
         }
         .price-details .row .value.sell {
             color: #fca5a5;
-        }
-        .price-details .row .value.last {
-            color: #fff;
-            font-weight: 600;
         }
         .price-details .row .value.high {
             color: #34d399;
@@ -268,13 +384,17 @@
         .price-details .row .value.volume {
             color: #93c5fd;
         }
+
         .last-price {
-            margin-top: 10px;
+            margin-top: 12px;
             text-align: left;
-            font-size: 1.2rem;
-            font-weight: 700;
+            font-size: 1.25rem;
+            font-weight: 800;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 8px;
+            padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
         }
         .last-price .unit {
             font-size: 0.65rem;
@@ -282,19 +402,33 @@
             color: rgba(255, 255, 255, 0.3);
             margin-right: 4px;
         }
+        .last-price .usd-hint {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ============================================================
+           CHART SECTION
+           ============================================================ */
         .chart-section {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 24px;
             padding: 18px 18px 8px 18px;
             margin-bottom: 20px;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .chart-section:hover {
+            border-color: rgba(255, 255, 255, 0.08);
         }
         .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             gap: 10px;
         }
         .chart-title {
@@ -303,6 +437,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
+        }
+        .chart-title i {
+            font-size: 1rem;
+            opacity: 0.6;
         }
         .chart-controls {
             display: flex;
@@ -310,26 +449,28 @@
             flex-wrap: wrap;
         }
         .chart-controls button {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.06);
             color: rgba(255, 255, 255, 0.4);
-            padding: 3px 14px;
+            padding: 4px 16px;
             border-radius: 100px;
             font-size: 0.7rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
+            transition: all 0.25s ease;
+            font-family: 'Vazirmatn', sans-serif;
+            backdrop-filter: blur(4px);
         }
-        .chart-controls button:hover,
-        .chart-controls button.active {
-            background: rgba(255, 255, 255, 0.1);
+        .chart-controls button:hover {
+            background: rgba(255, 255, 255, 0.08);
             color: #fff;
-            border-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.12);
         }
         .chart-controls button.active {
             background: rgba(251, 191, 36, 0.15);
-            border-color: rgba(251, 191, 36, 0.25);
+            border-color: rgba(251, 191, 36, 0.2);
             color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.05);
         }
         .chart-wrapper {
             position: relative;
@@ -340,11 +481,16 @@
             width: 100% !important;
             height: 100% !important;
         }
+
+        /* ============================================================
+           STATUS & FOOTER
+           ============================================================ */
         .status {
-            margin-top: 8px;
+            margin-top: 10px;
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.25);
             text-align: center;
+            font-weight: 400;
         }
         .status.error {
             color: #f87171;
@@ -353,25 +499,35 @@
             color: #fbbf24;
         }
         .footer {
-            margin-top: 18px;
+            margin-top: 20px;
             text-align: center;
             font-size: 0.7rem;
             color: rgba(255, 255, 255, 0.15);
             border-top: 1px solid rgba(255, 255, 255, 0.04);
-            padding-top: 14px;
+            padding-top: 16px;
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 16px;
         }
         .footer a {
             color: rgba(255, 255, 255, 0.25);
             text-decoration: none;
             transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         .footer a:hover {
             color: rgba(255, 255, 255, 0.6);
         }
+        .footer a i {
+            font-size: 0.8rem;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -380,12 +536,18 @@
             .logo {
                 font-size: 1.6rem;
             }
+            .logo i {
+                font-size: 1.5rem;
+            }
             .top-cards {
                 grid-template-columns: 1fr;
                 gap: 12px;
             }
             .top-card .value {
                 font-size: 1.4rem;
+            }
+            .top-card .icon-big {
+                font-size: 2rem;
             }
             .grid {
                 grid-template-columns: 1fr 1fr;
@@ -406,8 +568,11 @@
                 justify-content: center;
             }
             .currency-toggle button {
-                padding: 4px 12px;
+                padding: 4px 14px;
                 font-size: 0.7rem;
+            }
+            .last-price {
+                font-size: 1rem;
             }
         }
         @media (max-width: 480px) {
@@ -427,16 +592,22 @@
 </head>
 <body>
 
+    <!-- ===== BACKGROUND ===== -->
+    <div class="bg-gradient"></div>
     <canvas id="particles-canvas"></canvas>
 
+    <!-- ===== MAIN CONTAINER ===== -->
     <div class="container" id="app">
 
+        <!-- HEADER -->
         <div class="header">
-            <div class="logo">✨ ArzPulse</div>
+            <div class="logo">
+                <i class="fas fa-chart-line"></i> ArzPulse
+            </div>
             <div class="header-controls">
                 <div class="currency-toggle" id="currencyToggle">
-                    <button class="active" data-currency="IRR">ریال</button>
-                    <button data-currency="USD">دلار</button>
+                    <button class="active" data-currency="IRR"><i class="fas fa-rial"></i> ریال</button>
+                    <button data-currency="USD"><i class="fas fa-dollar-sign"></i> دلار</button>
                 </div>
                 <div class="badge">
                     <span class="badge-dot"></span>
@@ -445,31 +616,40 @@
             </div>
         </div>
 
+        <!-- TOP CARDS -->
         <div class="top-cards">
             <div class="top-card gold">
-                <div class="label">🏆 هر گرم طلای ۱۸ عیار</div>
-                <div class="value" id="goldPrice">–</div>
-                <div class="sub" id="goldSub">نرخ تتر: –</div>
+                <div class="info">
+                    <div class="label"><i class="fas fa-crown"></i> هر گرم طلای ۱۸ عیار</div>
+                    <div class="value" id="goldPrice">–</div>
+                    <div class="sub" id="goldSub">نرخ تتر: –</div>
+                </div>
+                <div class="icon-big"><i class="fas fa-coins"></i></div>
             </div>
             <div class="top-card dollar">
-                <div class="label">💵 قیمت دلار</div>
-                <div class="value" id="dollarPrice">–</div>
-                <div class="sub" id="dollarSub">نرخ بازار (USDT)</div>
+                <div class="info">
+                    <div class="label"><i class="fas fa-dollar-sign"></i> قیمت دلار</div>
+                    <div class="value" id="dollarPrice">–</div>
+                    <div class="sub" id="dollarSub">نرخ بازار (USDT)</div>
+                </div>
+                <div class="icon-big"><i class="fas fa-globe-americas"></i></div>
             </div>
         </div>
 
+        <!-- PRICE GRID -->
         <div class="grid" id="priceGrid"></div>
 
+        <!-- CHART SECTION -->
         <div class="chart-section">
             <div class="chart-header">
-                <div class="chart-title">📈 قیمت <span id="chartSymbol">بیت‌کوین</span> (۳۰ روز)</div>
+                <div class="chart-title"><i class="fas fa-chart-simple"></i> قیمت <span id="chartSymbol">بیت‌کوین</span> (۳۰ روز)</div>
                 <div class="chart-controls" id="chartControls">
-                    <button data-symbol="BTC" class="active">BTC</button>
-                    <button data-symbol="ETH">ETH</button>
-                    <button data-symbol="USDT">USDT</button>
-                    <button data-symbol="NOT">NOT</button>
-                    <button data-symbol="GOLD">طلا</button>
-                    <button data-symbol="DOLLAR">دلار</button>
+                    <button data-symbol="BTC" class="active"><i class="fab fa-bitcoin"></i> BTC</button>
+                    <button data-symbol="ETH"><i class="fab fa-ethereum"></i> ETH</button>
+                    <button data-symbol="USDT"><i class="fas fa-coins"></i> USDT</button>
+                    <button data-symbol="NOT"><i class="fas fa-rocket"></i> NOT</button>
+                    <button data-symbol="GOLD"><i class="fas fa-crown"></i> طلا</button>
+                    <button data-symbol="DOLLAR"><i class="fas fa-dollar-sign"></i> دلار</button>
                 </div>
             </div>
             <div class="chart-wrapper">
@@ -477,13 +657,15 @@
             </div>
         </div>
 
+        <!-- STATUS -->
         <div class="status" id="statusBar">در حال دریافت داده‌ها...</div>
 
+        <!-- FOOTER -->
         <div class="footer">
-            <span>📊 <a href="https://nobitex.ir" target="_blank">نوبیتکس</a></span>
-            <span>🔄 بروزرسانی هر ۵ دقیقه</span>
-            <span>🤖 <a href="https://t.me/ArzPulseBot" target="_blank">ربات تلگرام</a></span>
-            <span>📦 <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank">گیت‌هاب</a></span>
+            <span><i class="fas fa-database"></i> داده‌ها از <a href="https://nobitex.ir" target="_blank">نوبیتکس</a></span>
+            <span><i class="fas fa-clock"></i> بروزرسانی هر ۲ دقیقه</span>
+            <span><i class="fab fa-telegram"></i> <a href="https://t.me/ArzPulseBot" target="_blank">ربات تلگرام</a></span>
+            <span><i class="fab fa-github"></i> <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank">گیت‌هاب</a></span>
         </div>
     </div>
 
@@ -492,20 +674,17 @@
             'use strict';
 
             // ==========================================================
-            // تنظیمات مسیر - ⭐ اینجا را دقیق تنظیم کنید
+            // SETTINGS
             // ==========================================================
-            // چون سایت در زیرمسیر /ArzPulse/ است، از basePath استفاده می‌کنیم
-            const basePath = '/ArzPulse';
+            const basePath = window.location.pathname.includes('/ArzPulse/') ? '/ArzPulse' : '';
             const DATA_URL = `${basePath}/data/latest.json`;
             const HISTORY_BASE = `${basePath}/data/history/`;
 
-            console.log(`📂 مسیر داده: ${DATA_URL}`);
-
             const ASSETS = [
-                { symbol: 'BTC', name: 'بیت‌کوین', emoji: '🪙', color: '#f7931a' },
-                { symbol: 'ETH', name: 'اتریوم', emoji: '💎', color: '#627eea' },
-                { symbol: 'USDT', name: 'تتر', emoji: '💵', color: '#26a17b' },
-                { symbol: 'NOT', name: 'نات‌کوین', emoji: '📈', color: '#a855f7' }
+                { symbol: 'BTC', name: 'بیت‌کوین', icon: 'fab fa-bitcoin', color: '#f7931a' },
+                { symbol: 'ETH', name: 'اتریوم', icon: 'fab fa-ethereum', color: '#627eea' },
+                { symbol: 'USDT', name: 'تتر', icon: 'fas fa-coins', color: '#26a17b' },
+                { symbol: 'NOT', name: 'نات‌کوین', icon: 'fas fa-rocket', color: '#a855f7' }
             ];
 
             let currentCurrency = 'IRR';
@@ -515,22 +694,19 @@
             let fullHistory = [];
 
             // ==========================================================
-            // توابع کمکی
+            // HELPERS
             // ==========================================================
-            function formatNumber(num, currency = 'IRR') {
+            function formatNumber(num) {
                 if (num === undefined || num === null || isNaN(num)) return '۰';
-                const val = Math.round(num);
-                if (currency === 'USD' && latestData && latestData.dollarPrice && latestData.dollarPrice > 0) {
-                    return (val / latestData.dollarPrice).toFixed(2);
-                }
-                return val.toLocaleString('fa-IR').replace(/,/g, '،');
+                return Math.round(num).toLocaleString('fa-IR').replace(/,/g, '،');
             }
 
             function formatCurrency(num, currency = 'IRR') {
                 if (num === undefined || num === null || isNaN(num)) return '–';
-                const formatted = formatNumber(num, currency);
+                const formatted = formatNumber(num);
                 if (currency === 'USD') {
-                    return formatted === '۰' ? '–' : `$${formatted}`;
+                    if (formatted === '۰') return '–';
+                    return `$${formatted}`;
                 }
                 return formatted === '۰' ? '–' : `${formatted} ریال`;
             }
@@ -554,7 +730,7 @@
             }
 
             // ==========================================================
-            // ذرات پس‌زمینه
+            // PARTICLES BACKGROUND
             // ==========================================================
             function initParticles() {
                 const canvas = document.getElementById('particles-canvas');
@@ -562,7 +738,7 @@
                 const ctx = canvas.getContext('2d');
                 let w, h;
                 const particles = [];
-                const COUNT = 70;
+                const COUNT = 80;
 
                 function resize() {
                     w = canvas.width = window.innerWidth;
@@ -575,10 +751,11 @@
                     constructor() {
                         this.x = Math.random() * w;
                         this.y = Math.random() * h;
-                        this.size = Math.random() * 2 + 0.5;
-                        this.speedX = (Math.random() - 0.5) * 0.3;
-                        this.speedY = (Math.random() - 0.5) * 0.3;
-                        this.opacity = Math.random() * 0.4 + 0.1;
+                        this.size = Math.random() * 2.5 + 0.5;
+                        this.speedX = (Math.random() - 0.5) * 0.35;
+                        this.speedY = (Math.random() - 0.5) * 0.35;
+                        this.opacity = Math.random() * 0.5 + 0.15;
+                        this.color = `hsl(${40 + Math.random() * 20}, 80%, ${60 + Math.random() * 30}%)`;
                     }
                     update() {
                         this.x += this.speedX;
@@ -589,8 +766,10 @@
                     draw() {
                         ctx.beginPath();
                         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255, 215, 100, ${this.opacity})`;
+                        ctx.fillStyle = this.color;
+                        ctx.globalAlpha = this.opacity;
                         ctx.fill();
+                        ctx.globalAlpha = 1;
                     }
                 }
 
@@ -602,17 +781,18 @@
                     ctx.clearRect(0, 0, w, h);
                     particles.forEach(p => { p.update();
                         p.draw(); });
+                    // Connect nearby particles
                     for (let i = 0; i < particles.length; i++) {
                         for (let j = i + 1; j < particles.length; j++) {
                             const dx = particles[i].x - particles[j].x;
                             const dy = particles[i].y - particles[j].y;
                             const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < 120) {
+                            if (dist < 130) {
                                 ctx.beginPath();
                                 ctx.moveTo(particles[i].x, particles[i].y);
                                 ctx.lineTo(particles[j].x, particles[j].y);
-                                ctx.strokeStyle = `rgba(255, 215, 100, ${0.05 * (1 - dist / 120)})`;
-                                ctx.lineWidth = 0.5;
+                                ctx.strokeStyle = `rgba(255, 215, 100, ${0.06 * (1 - dist / 130)})`;
+                                ctx.lineWidth = 0.6;
                                 ctx.stroke();
                             }
                         }
@@ -623,18 +803,15 @@
             }
 
             // ==========================================================
-            // دریافت داده‌ها
+            // DATA FETCHING
             // ==========================================================
             async function fetchLatestData() {
                 try {
-                    console.log(`⏳ درخواست به: ${DATA_URL}`);
                     const res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
-                    if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-                    const data = await res.json();
-                    console.log('✅ داده‌های latest دریافت شد:', data);
-                    return data;
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return await res.json();
                 } catch (e) {
-                    console.error('❌ خطا در fetch latest:', e);
+                    console.error('❌ خطا در دریافت داده‌ها:', e);
                     return null;
                 }
             }
@@ -670,7 +847,7 @@
             }
 
             // ==========================================================
-            // رندر قیمت‌ها
+            // RENDER PRICES
             // ==========================================================
             function renderPrices(data) {
                 if (!data || !data.prices) {
@@ -685,13 +862,14 @@
                 const usdtPrice = data.usdtPrice || 0;
                 const dollarPrice = data.dollarPrice || usdtPrice;
 
+                // Gold & Dollar
                 const gold = data.gold18K || 0;
                 document.getElementById('goldPrice').textContent = formatCurrency(gold, currency);
                 document.getElementById('goldSub').textContent = `نرخ تتر: ${formatCurrency(usdtPrice, currency)}`;
-
                 document.getElementById('dollarPrice').textContent = formatCurrency(dollarPrice, currency);
-                document.getElementById('dollarSub').textContent = `نرخ بازار (USDT)`;
+                document.getElementById('dollarSub').textContent = 'نرخ بازار (USDT)';
 
+                // Price cards
                 const grid = document.getElementById('priceGrid');
                 let html = '';
                 ASSETS.forEach(a => {
@@ -699,11 +877,14 @@
                     if (p && p.bestSell > 0) {
                         const change = p.change || 0;
                         const cls = getChangeClass(change);
+                        const arrow = getChangeArrow(change);
+                        const emoji = getChangeEmoji(change);
+                        const usdPrice = dollarPrice > 0 ? (p.lastPrice / dollarPrice).toFixed(2) : '۰';
                         html += `
                             <div class="price-card">
                                 <div class="symbol-row">
-                                    <span class="symbol">${a.emoji} ${a.symbol}</span>
-                                    <span class="change ${cls}">${getChangeEmoji(change)} ${getChangeArrow(change)} ${Math.abs(change).toFixed(2)}%</span>
+                                    <span class="symbol"><i class="${a.icon}" style="color:${a.color};"></i> ${a.symbol}</span>
+                                    <span class="change ${cls}">${emoji} ${arrow} ${Math.abs(change).toFixed(2)}%</span>
                                 </div>
                                 <div class="price-details">
                                     <div class="row"><span class="label">خرید</span><span class="value buy">${formatCurrency(p.bestBuy, currency)}</span></div>
@@ -713,7 +894,8 @@
                                     <div class="row" style="grid-column: 1 / -1;"><span class="label">حجم (۲۴h)</span><span class="value volume">${p.volume ? p.volume.toFixed(2) : '۰'}</span></div>
                                 </div>
                                 <div class="last-price">
-                                    ${formatNumber(p.lastPrice, currency)} <span class="unit">${currency === 'USD' ? 'USD' : 'ریال'}</span>
+                                    <span>${formatNumber(p.lastPrice, currency)} <span class="unit">${currency === 'USD' ? 'USD' : 'ریال'}</span></span>
+                                    <span class="usd-hint"><i class="fas fa-dollar-sign"></i> ${usdPrice}</span>
                                 </div>
                             </div>
                         `;
@@ -721,7 +903,7 @@
                         html += `
                             <div class="price-card" style="opacity:0.4;">
                                 <div class="symbol-row">
-                                    <span class="symbol">${a.emoji} ${a.symbol}</span>
+                                    <span class="symbol"><i class="${a.icon}" style="color:${a.color};"></i> ${a.symbol}</span>
                                     <span class="change neutral">⏳</span>
                                 </div>
                                 <div style="text-align:center;padding:20px 0;color:rgba(255,255,255,0.25);font-size:0.8rem;">
@@ -733,6 +915,7 @@
                 });
                 grid.innerHTML = html;
 
+                // Status
                 const time = data.timestamp ? new Date(data.timestamp).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran' }) :
                     'نامشخص';
                 const status = document.getElementById('statusBar');
@@ -743,7 +926,7 @@
             }
 
             // ==========================================================
-            // نمودار
+            // CHART
             // ==========================================================
             function updateChart(history, symbol) {
                 const canvas = document.getElementById('priceChart');
@@ -801,11 +984,12 @@
                             label: symbol,
                             data: prices,
                             borderColor: color,
-                            backgroundColor: color + '15',
+                            backgroundColor: color + '18',
                             fill: true,
-                            tension: 0.3,
-                            pointRadius: 1.5,
-                            borderWidth: 2
+                            tension: 0.35,
+                            pointRadius: 1.8,
+                            pointBackgroundColor: color,
+                            borderWidth: 2.5
                         }]
                     },
                     options: {
@@ -830,7 +1014,7 @@
                                 grid: { color: 'rgba(255,255,255,0.04)' },
                                 ticks: {
                                     color: 'rgba(255,255,255,0.25)',
-                                    font: { size: 9 },
+                                    font: { size: 9, family: 'Vazirmatn' },
                                     maxTicksLimit: 15
                                 }
                             },
@@ -838,7 +1022,7 @@
                                 grid: { color: 'rgba(255,255,255,0.04)' },
                                 ticks: {
                                     color: 'rgba(255,255,255,0.25)',
-                                    font: { size: 9 },
+                                    font: { size: 9, family: 'Vazirmatn' },
                                     callback: function(value) {
                                         if (currentCurrency === 'USD' && latestData?.dollarPrice) {
                                             return `$${(value / latestData.dollarPrice).toFixed(1)}`;
@@ -892,7 +1076,7 @@
             }
 
             // ==========================================================
-            // بارگذاری داده‌ها
+            // LOAD DATA
             // ==========================================================
             async function loadData() {
                 const status = document.getElementById('statusBar');
@@ -931,7 +1115,7 @@
             }
 
             // ==========================================================
-            // کنترل‌ها
+            // CONTROLS
             // ==========================================================
             function setupCurrencyToggle() {
                 const buttons = document.querySelectorAll('#currencyToggle button');
@@ -964,21 +1148,21 @@
             }
 
             // ==========================================================
-            // راه‌اندازی
+            // INIT
             // ==========================================================
             initParticles();
 
-            // اولین بارگیری با تاخیر جزئی برای اطمینان از رندر DOM
             setTimeout(() => {
                 loadData();
             }, 100);
 
             setupCurrencyToggle();
             setupChartControls();
-            setInterval(loadData, 5 * 60 * 1000);
+            setInterval(loadData, 2 * 60 * 1000);
 
-            console.log('🚀 ArzPulse Dashboard v2 loaded');
+            console.log('🚀 ArzPulse Dashboard v3 loaded');
         })();
     </script>
+
 </body>
 </html>
