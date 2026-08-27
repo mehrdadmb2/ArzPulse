@@ -77,21 +77,31 @@ function fetchJson(url, timeout = 10000, retries = 2) {
     });
 }
 
-// ---------- دریافت قیمت از نوبیتکس (تک‌تک) ----------
+// ---------- دریافت قیمت از نوبیتکس (با ساختار صحیح) ----------
 async function fetchPrice(src, dst) {
     const url = `${BASE_URL}/market/stats?srcCurrency=${src}&dstCurrency=${dst}`;
     const json = await fetchJson(url);
-    if (!json || !json.stats) {
-        throw new Error(`پاسخ نامعتبر: 'stats' وجود ندارد`);
+    
+    // بررسی پاسخ
+    if (!json || json.status !== 'ok' || !json.stats) {
+        throw new Error('پاسخ نامعتبر از نوبیتکس');
     }
+
+    // پیدا کردن کلید مناسب در stats (مثلاً "btc-rls" یا "eth-rls")
+    const key = Object.keys(json.stats).find(k => k === `${src}-${dst}`);
+    if (!key) {
+        throw new Error(`کلید ${src}-${dst} در پاسخ وجود ندارد`);
+    }
+
+    const data = json.stats[key];
     return {
-        bestBuy: parseFloat(json.stats.bestBuy) || 0,
-        bestSell: parseFloat(json.stats.bestSell) || 0,
-        lastPrice: parseFloat(json.stats.lastPrice) || 0,
-        volume: parseFloat(json.stats.volume) || 0,
-        high: parseFloat(json.stats.high) || 0,
-        low: parseFloat(json.stats.low) || 0,
-        change: parseFloat(json.stats.change) || 0
+        bestBuy: parseFloat(data.bestBuy) || 0,
+        bestSell: parseFloat(data.bestSell) || 0,
+        lastPrice: parseFloat(data.latest) || 0,
+        volume: parseFloat(data.volumeSrc) || 0,
+        high: parseFloat(data.dayHigh) || 0,
+        low: parseFloat(data.dayLow) || 0,
+        change: parseFloat(data.dayChange) || 0
     };
 }
 
@@ -221,12 +231,6 @@ async function fetchPrice(src, dst) {
     } else {
         console.log('✅ تمام داده‌ها با موفقیت دریافت شدند.');
     }
-
-    // بررسی وجود فایل‌ها
-    console.log('🔍 بررسی فایل‌های ایجاد شده:');
-    console.log(`   - latest.json: ${fs.existsSync(latestPath) ? '✅' : '❌'}`);
-    console.log(`   - meta.json: ${fs.existsSync(metaPath) ? '✅' : '❌'}`);
-    console.log(`   - history/${today}.json: ${fs.existsSync(historyFile) ? '✅' : '❌'}`);
 
     console.log('🏁 ArzPulse Price Fetcher پایان یافت.');
 })();
