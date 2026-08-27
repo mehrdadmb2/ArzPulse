@@ -1,0 +1,22 @@
+name: Keep Alive – Prevent Cron Deactivation
+
+on:
+  schedule:
+    # هر هفته یکبار (یکشنبه ساعت ۰۰:۰۰ UTC)
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make a dummy commit if no changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          # ایجاد یک commit خالی برای فعال نگه داشتن مخزن
+          git commit --allow-empty -m "🔄 Keep-alive: prevent cron deactivation" || echo "No changes to commit"
+          git push
