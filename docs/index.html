@@ -7,9 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <style>
-        /* ============================================================
-           RESET & BASE
-           ============================================================ */
+        /* ===== RESET ===== */
         * {
             margin: 0;
             padding: 0;
@@ -26,8 +24,6 @@
             background: linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #24243e 70%, #1a1a2e 100%);
             position: relative;
         }
-
-        /* ===== BACKGROUND PARTICLES ===== */
         #particles-canvas {
             position: fixed;
             top: 0;
@@ -37,8 +33,6 @@
             z-index: 0;
             pointer-events: none;
         }
-
-        /* ===== GLASS CONTAINER ===== */
         .container {
             position: relative;
             z-index: 1;
@@ -46,14 +40,11 @@
             width: 100%;
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-radius: 48px;
             padding: 28px 24px;
             border: 1px solid rgba(255, 255, 255, 0.06);
             box-shadow: 0 40px 80px -16px rgba(0, 0, 0, 0.8);
         }
-
-        /* ===== HEADER ===== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -145,8 +136,6 @@
                 opacity: 0.2;
             }
         }
-
-        /* ===== TOP CARDS (Gold & Dollar) ===== */
         .top-cards {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -196,8 +185,6 @@
             color: rgba(255, 255, 255, 0.3);
             margin-top: 2px;
         }
-
-        /* ===== PRICE GRID ===== */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -295,8 +282,6 @@
             color: rgba(255, 255, 255, 0.3);
             margin-right: 4px;
         }
-
-        /* ===== CHART SECTION ===== */
         .chart-section {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -355,8 +340,6 @@
             width: 100% !important;
             height: 100% !important;
         }
-
-        /* ===== STATUS & FOOTER ===== */
         .status {
             margin-top: 8px;
             font-size: 0.75rem;
@@ -389,8 +372,6 @@
         .footer a:hover {
             color: rgba(255, 255, 255, 0.6);
         }
-
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -446,13 +427,10 @@
 </head>
 <body>
 
-    <!-- BACKGROUND PARTICLES -->
     <canvas id="particles-canvas"></canvas>
 
-    <!-- MAIN CONTAINER -->
     <div class="container" id="app">
 
-        <!-- HEADER -->
         <div class="header">
             <div class="logo">✨ ArzPulse</div>
             <div class="header-controls">
@@ -467,7 +445,6 @@
             </div>
         </div>
 
-        <!-- TOP CARDS: GOLD & DOLLAR -->
         <div class="top-cards">
             <div class="top-card gold">
                 <div class="label">🏆 هر گرم طلای ۱۸ عیار</div>
@@ -481,10 +458,8 @@
             </div>
         </div>
 
-        <!-- PRICE GRID -->
         <div class="grid" id="priceGrid"></div>
 
-        <!-- CHART SECTION -->
         <div class="chart-section">
             <div class="chart-header">
                 <div class="chart-title">📈 قیمت <span id="chartSymbol">بیت‌کوین</span> (۳۰ روز)</div>
@@ -502,10 +477,8 @@
             </div>
         </div>
 
-        <!-- STATUS -->
         <div class="status" id="statusBar">در حال دریافت داده‌ها...</div>
 
-        <!-- FOOTER -->
         <div class="footer">
             <span>📊 <a href="https://nobitex.ir" target="_blank">نوبیتکس</a></span>
             <span>🔄 بروزرسانی هر ۵ دقیقه</span>
@@ -519,11 +492,14 @@
             'use strict';
 
             // ==========================================================
-            // تنظیمات
+            // تنظیمات مسیر - ⭐ اینجا را دقیق تنظیم کنید
             // ==========================================================
-            const basePath = window.location.pathname.includes('/ArzPulse/') ? '/ArzPulse' : '';
+            // چون سایت در زیرمسیر /ArzPulse/ است، از basePath استفاده می‌کنیم
+            const basePath = '/ArzPulse';
             const DATA_URL = `${basePath}/data/latest.json`;
             const HISTORY_BASE = `${basePath}/data/history/`;
+
+            console.log(`📂 مسیر داده: ${DATA_URL}`);
 
             const ASSETS = [
                 { symbol: 'BTC', name: 'بیت‌کوین', emoji: '🪙', color: '#f7931a' },
@@ -544,7 +520,7 @@
             function formatNumber(num, currency = 'IRR') {
                 if (num === undefined || num === null || isNaN(num)) return '۰';
                 const val = Math.round(num);
-                if (currency === 'USD' && latestData && latestData.dollarPrice) {
+                if (currency === 'USD' && latestData && latestData.dollarPrice && latestData.dollarPrice > 0) {
                     return (val / latestData.dollarPrice).toFixed(2);
                 }
                 return val.toLocaleString('fa-IR').replace(/,/g, '،');
@@ -553,7 +529,10 @@
             function formatCurrency(num, currency = 'IRR') {
                 if (num === undefined || num === null || isNaN(num)) return '–';
                 const formatted = formatNumber(num, currency);
-                return currency === 'USD' ? `$${formatted}` : `${formatted} ریال`;
+                if (currency === 'USD') {
+                    return formatted === '۰' ? '–' : `$${formatted}`;
+                }
+                return formatted === '۰' ? '–' : `${formatted} ریال`;
             }
 
             function getChangeEmoji(change) {
@@ -648,8 +627,9 @@
             // ==========================================================
             async function fetchLatestData() {
                 try {
+                    console.log(`⏳ درخواست به: ${DATA_URL}`);
                     const res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
                     const data = await res.json();
                     console.log('✅ داده‌های latest دریافت شد:', data);
                     return data;
@@ -669,7 +649,9 @@
                         const dateStr = d.toISOString().split('T')[0];
                         const url = `${HISTORY_BASE}${dateStr}.json`;
                         promises.push(
-                            fetch(url).then(r => r.ok ? r.json() : null).catch(() => null)
+                            fetch(url + '?t=' + Date.now(), { cache: 'no-store' })
+                            .then(r => r.ok ? r.json() : null)
+                            .catch(() => null)
                         );
                     }
                     const results = await Promise.all(promises);
@@ -692,8 +674,9 @@
             // ==========================================================
             function renderPrices(data) {
                 if (!data || !data.prices) {
-                    document.getElementById('statusBar').textContent = '⚠️ داده‌ای در دسترس نیست';
-                    document.getElementById('statusBar').className = 'status error';
+                    const status = document.getElementById('statusBar');
+                    status.textContent = '⚠️ داده‌ای در دسترس نیست';
+                    status.className = 'status error';
                     return;
                 }
 
@@ -702,16 +685,13 @@
                 const usdtPrice = data.usdtPrice || 0;
                 const dollarPrice = data.dollarPrice || usdtPrice;
 
-                // طلا
                 const gold = data.gold18K || 0;
                 document.getElementById('goldPrice').textContent = formatCurrency(gold, currency);
                 document.getElementById('goldSub').textContent = `نرخ تتر: ${formatCurrency(usdtPrice, currency)}`;
 
-                // دلار
                 document.getElementById('dollarPrice').textContent = formatCurrency(dollarPrice, currency);
                 document.getElementById('dollarSub').textContent = `نرخ بازار (USDT)`;
 
-                // کارت‌ها
                 const grid = document.getElementById('priceGrid');
                 let html = '';
                 ASSETS.forEach(a => {
@@ -753,11 +733,11 @@
                 });
                 grid.innerHTML = html;
 
-                // وضعیت
                 const time = data.timestamp ? new Date(data.timestamp).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran' }) :
                     'نامشخص';
-                document.getElementById('statusBar').textContent = `✅ آخرین بروزرسانی: ${time}`;
-                document.getElementById('statusBar').className = 'status';
+                const status = document.getElementById('statusBar');
+                status.textContent = `✅ آخرین بروزرسانی: ${time}`;
+                status.className = 'status';
                 document.getElementById('liveStatus').textContent = 'زنده';
                 document.querySelector('.badge-dot').style.background = '#34d399';
             }
@@ -837,9 +817,10 @@
                                 callbacks: {
                                     label: function(context) {
                                         const val = context.parsed.y;
-                                        return currentCurrency === 'USD' ?
-                                            `$${(val / (latestData?.dollarPrice || 1)).toFixed(2)}` :
-                                            `${Math.round(val).toLocaleString('fa-IR').replace(/,/g, '،')} ریال`;
+                                        if (currentCurrency === 'USD' && latestData?.dollarPrice) {
+                                            return `$${(val / latestData.dollarPrice).toFixed(2)}`;
+                                        }
+                                        return `${Math.round(val).toLocaleString('fa-IR').replace(/,/g, '،')} ریال`;
                                     }
                                 }
                             }
@@ -859,8 +840,8 @@
                                     color: 'rgba(255,255,255,0.25)',
                                     font: { size: 9 },
                                     callback: function(value) {
-                                        if (currentCurrency === 'USD') {
-                                            return `$${(value / (latestData?.dollarPrice || 1)).toFixed(1)}`;
+                                        if (currentCurrency === 'USD' && latestData?.dollarPrice) {
+                                            return `$${(value / latestData.dollarPrice).toFixed(1)}`;
                                         }
                                         return Math.round(value).toLocaleString('fa-IR').replace(/,/g, '،');
                                     }
@@ -925,7 +906,7 @@
                         if (hasValid) {
                             renderPrices(latest);
                         } else {
-                            status.textContent = '⚠️ داده‌های قیمت نامعتبر';
+                            status.textContent = '⚠️ داده‌های قیمت نامعتبر (مقادیر صفر)';
                             status.className = 'status warning';
                         }
                     } else {
@@ -986,7 +967,12 @@
             // راه‌اندازی
             // ==========================================================
             initParticles();
-            loadData();
+
+            // اولین بارگیری با تاخیر جزئی برای اطمینان از رندر DOM
+            setTimeout(() => {
+                loadData();
+            }, 100);
+
             setupCurrencyToggle();
             setupChartControls();
             setInterval(loadData, 5 * 60 * 1000);
@@ -994,6 +980,5 @@
             console.log('🚀 ArzPulse Dashboard v2 loaded');
         })();
     </script>
-
 </body>
 </html>
