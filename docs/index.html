@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArzPulse – قیمت‌های لحظه‌ای نوبیتکس</title>
+    <!-- Chart.js برای نمودار -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ===== GLASSMORPHISM CONTAINER ===== */
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 30px 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            gap: 12px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(253, 160, 133, 0.3);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo span {
+            font-size: 1.8rem;
+        }
+        .badge {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse-badge 2s infinite;
+        }
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: #34d399;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 1.2s infinite;
+        }
+
+        /* ===== GOLD CARD ===== */
+        .gold-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .gold-card:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.1);
+        }
+        .gold-card .label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .gold-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fbbf24;
+            text-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+        }
+        .gold-card .sub {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ===== PRICE GRID ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        /* ===== PRICE CARD ===== */
+        .price-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 18px 16px;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+        .price-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+        }
+        .price-card .symbol {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .price-card .change {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 100px;
+        }
+        .change.up {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+        .change.down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        .change.neutral {
+            background: rgba(255, 255, 255, 0.08);
+            color: #9ca3af;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 0.85rem;
+        }
+        .price-row .label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .price-row .value {
+            font-weight: 600;
+        }
+        .price-row .value.buy {
+            color: #6ee7b7;
+        }
+        .price-row .value.sell {
+            color: #fca5a5;
+        }
+
+        .last-price {
+            margin-top: 12px;
+            text-align: left;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 10px;
+        }
+        .last-price small {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.3);
+            margin-right: 4px;
+        }
+
+        /* ===== CHART SECTION ===== */
+        .chart-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 20px 20px 10px 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(8px);
+        }
+        .chart-section .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+        .chart-section .chart-title {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-section .chart-controls {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .chart-section .chart-controls button {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .chart-section .chart-controls button:hover,
+        .chart-section .chart-controls button.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .chart-section .chart-controls button.active {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ===== STATUS ===== */
+        .status {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 18px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer a {
+            color: rgba(255, 255, 255, 0.35);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer a:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes pulse-badge {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .container {
+                padding: 14px;
+            }
+            .logo {
+                font-size: 1.4rem;
+            }
+            .gold-card .value {
+                font-size: 1.4rem;
+            }
+            .grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .price-card {
+                padding: 12px;
+            }
+            .last-price {
+                font-size: 1rem;
+            }
+            .chart-wrapper {
+                height: 200px;
+            }
+            .chart-section .chart-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .chart-section .chart-controls {
+                justify-content: center;
+            }
+        }
+        @media (max-width: 420px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo">
+                <span>✨</span> ArzPulse
+            </div>
+            <div class="badge">
+                <span class="badge-dot"></span>
+                <span id="liveStatus">زنده</span>
+            </div>
+        </div>
+
+        <!-- GOLD CARD -->
+        <div class="gold-card" id="goldCard">
+            <div>
+                <div class="label">🏆 هر گرم طلای ۱۸ عیار</div>
+                <div class="value" id="goldPrice">–</div>
+            </div>
+            <div class="sub" id="goldSub">نرخ تتر: – ریال</div>
+        </div>
+
+        <!-- PRICE GRID -->
+        <div class="grid" id="priceGrid">
+            <!-- کارت‌ها به‌صورت dynamic پر می‌شوند -->
+        </div>
+
+        <!-- CHART SECTION -->
+        <div class="chart-section" id="chartSection">
+            <div class="chart-header">
+                <div class="chart-title">📈 قیمت <span id="chartSymbol">بیت‌کوین</span> (۲۴ ساعت)</div>
+                <div class="chart-controls" id="chartControls">
+                    <button data-symbol="BTC" class="active">BTC</button>
+                    <button data-symbol="ETH">ETH</button>
+                    <button data-symbol="USDT">USDT</button>
+                    <button data-symbol="NOT">NOT</button>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- STATUS -->
+        <div class="status" id="statusBar">در حال دریافت داده‌ها...</div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <span>📊 داده‌ها از <a href="https://nobitex.ir" target="_blank">نوبیتکس</a></span>
+            <span>🔄 بروزرسانی هر ۵ دقیقه</span>
+            <span>🤖 <a href="https://t.me/ArzPulseBot" target="_blank">ربات تلگرام</a></span>
+            <span>📦 <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank">گیت‌هاب</a></span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ==========================================================
+            // تنظیمات
+            // ==========================================================
+            const DATA_URL = '/ArzPulse/data/latest.json';
+            const HISTORY_URL = '/ArzPulse/data/history/';
+
+            const ASSETS = [
+                { symbol: 'BTC', name: 'بیت‌کوین', emoji: '🪙', color: '#f7931a' },
+                { symbol: 'ETH', name: 'اتریوم', emoji: '💎', color: '#627eea' },
+                { symbol: 'USDT', name: 'تتر', emoji: '💵', color: '#26a17b' },
+                { symbol: 'NOT', name: 'نات‌کوین', emoji: '📈', color: '#a855f7' }
+            ];
+
+            let chartInstance = null;
+            let currentSymbol = 'BTC';
+            let historyData = {};
+
+            // ==========================================================
+            // توابع کمکی
+            // ==========================================================
+            function formatNumber(num) {
+                if (num === undefined || num === null || isNaN(num)) return '۰';
+                return Math.round(num).toLocaleString('fa-IR').replace(/,/g, '،');
+            }
+
+            function getChangeEmoji(change) {
+                if (change > 0) return '🟢';
+                if (change < 0) return '🔴';
+                return '⚪';
+            }
+
+            function getChangeClass(change) {
+                if (change > 0) return 'up';
+                if (change < 0) return 'down';
+                return 'neutral';
+            }
+
+            function getChangeArrow(change) {
+                if (change > 0) return '▲';
+                if (change < 0) return '▼';
+                return '–';
+            }
+
+            // ==========================================================
+            // دریافت داده‌ها
+            // ==========================================================
+            async function fetchLatestData() {
+                try {
+                    const res = await fetch(DATA_URL);
+                    if (!res.ok) throw new Error('Network error');
+                    return await res.json();
+                } catch (e) {
+                    console.warn('Failed to fetch latest data:', e);
+                    return null;
+                }
+            }
+
+            async function fetchHistory(symbol) {
+                try {
+                    // دریافت تاریخچه از فایل امروز
+                    const today = new Date().toISOString().split('T')[0];
+                    const url = `${HISTORY_URL}${today}.json`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('History not available');
+                    const data = await res.json();
+                    return data;
+                } catch (e) {
+                    console.warn('Failed to fetch history:', e);
+                    return null;
+                }
+            }
+
+            // ==========================================================
+            // رندر کردن کارت‌ها
+            // ==========================================================
+            function renderPrices(data) {
+                const grid = document.getElementById('priceGrid');
+                const goldEl = document.getElementById('goldPrice');
+                const goldSub = document.getElementById('goldSub');
+                const statusEl = document.getElementById('statusBar');
+                const liveBadge = document.getElementById('liveStatus');
+
+                if (!data || !data.prices) {
+                    statusEl.textContent = '⚠️ داده‌ای در دسترس نیست';
+                    statusEl.style.color = 'rgba(239, 68, 68, 0.7)';
+                    return;
+                }
+
+                const isFallback = data.fromFallback || false;
+
+                // وضعیت
+                if (isFallback) {
+                    statusEl.textContent = '⚠️ استفاده از داده‌های ذخیره‌شده (نوبیتکس در دسترس نیست)';
+                    statusEl.style.color = 'rgba(251, 191, 36, 0.6)';
+                    liveBadge.textContent = 'آفلاین (کش)';
+                    document.querySelector('.badge').style.borderColor = 'rgba(251, 191, 36, 0.4)';
+                    document.querySelector('.badge-dot').style.background = '#fbbf24';
+                } else {
+                    const time = data.timestamp ? new Date(data.timestamp).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran' }) :
+                        'نامشخص';
+                    statusEl.textContent = `✅ آخرین بروزرسانی: ${time}`;
+                    statusEl.style.color = 'rgba(255,255,255,0.3)';
+                    liveBadge.textContent = 'زنده';
+                    document.querySelector('.badge').style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                    document.querySelector('.badge-dot').style.background = '#34d399';
+                }
+
+                // طلا
+                if (data.gold18K > 0) {
+                    goldEl.textContent = `${formatNumber(data.gold18K)} ریال`;
+                    goldSub.textContent = `نرخ تتر: ${formatNumber(data.usdtPrice)} ریال`;
+                } else {
+                    goldEl.textContent = '–';
+                    goldSub.textContent = 'نرخ تتر: –';
+                }
+
+                // کارت‌ها
+                let html = '';
+                ASSETS.forEach(a => {
+                    const p = data.prices[a.symbol];
+                    if (p && p.bestSell > 0) {
+                        const change = p.change || 0;
+                        const cls = getChangeClass(change);
+                        const arrow = getChangeArrow(change);
+                        html += `
+                            <div class="price-card">
+                                <div class="symbol">
+                                    <span>${a.emoji} ${a.symbol}</span>
+                                    <span class="change ${cls}">${getChangeEmoji(change)} ${arrow} ${Math.abs(change).toFixed(2)}%</span>
+                                </div>
+                                <div class="price-row">
+                                    <span class="label">خرید</span>
+                                    <span class="value buy">${formatNumber(p.bestBuy)}</span>
+                                </div>
+                                <div class="price-row">
+                                    <span class="label">فروش</span>
+                                    <span class="value sell">${formatNumber(p.bestSell)}</span>
+                                </div>
+                                <div class="last-price">
+                                    ${formatNumber(p.lastPrice)} <small>ریال</small>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="price-card" style="opacity:0.5;">
+                                <div class="symbol">
+                                    <span>${a.emoji} ${a.symbol}</span>
+                                    <span class="change neutral">⏳</span>
+                                </div>
+                                <div style="text-align:center;padding:16px 0;color:rgba(255,255,255,0.3);font-size:0.85rem;">
+                                    داده در دسترس نیست
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                grid.innerHTML = html;
+            }
+
+            // ==========================================================
+            // نمودار
+            // ==========================================================
+            function updateChart(data, symbol) {
+                const canvas = document.getElementById('priceChart');
+                if (!canvas) return;
+
+                // استخراج داده‌های تاریخی
+                let history = data && data.history ? data.history : [];
+
+                if (!history || history.length === 0) {
+                    // اگر تاریخچه نداشتیم، از داده‌های mock استفاده می‌کنیم
+                    history = generateMockHistory(symbol);
+                }
+
+                // استخراج قیمت‌ها
+                const prices = history.map(h => {
+                    if (symbol === 'GOLD') return h.GOLD18K || 0;
+                    return h[symbol] || 0;
+                }).filter(p => p > 0);
+
+                const labels = history.map((h, i) => {
+                    const d = new Date(h.time);
+                    return d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+                }).slice(0, prices.length);
+
+                const symbolNames = {
+                    BTC: 'بیت‌کوین',
+                    ETH: 'اتریوم',
+                    USDT: 'تتر',
+                    NOT: 'نات‌کوین'
+                };
+
+                document.getElementById('chartSymbol').textContent = symbolNames[symbol] || symbol;
+
+                // رنگ‌ها
+                const colors = {
+                    BTC: '#f7931a',
+                    ETH: '#627eea',
+                    USDT: '#26a17b',
+                    NOT: '#a855f7'
+                };
+                const color = colors[symbol] || '#fbbf24';
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                const ctx = canvas.getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels.length > 0 ? labels : ['داده در دسترس نیست'],
+                        datasets: [{
+                            label: symbol,
+                            data: prices.length > 0 ? prices : [0],
+                            borderColor: color,
+                            backgroundColor: color + '30',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 2,
+                            pointBackgroundColor: color,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatNumber(context.parsed.y) + ' ریال';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255,255,255,0.05)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255,255,255,0.3)',
+                                    font: { size: 10 },
+                                    maxTicksLimit: 12
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'rgba(255,255,255,0.05)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255,255,255,0.3)',
+                                    font: { size: 10 },
+                                    callback: function(value) {
+                                        return formatNumber(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ==========================================================
+            // تولید داده‌های mock برای نمودار (در صورت نبود تاریخچه)
+            // ==========================================================
+            function generateMockHistory(symbol) {
+                const data = [];
+                const now = Date.now();
+                let basePrice = 0;
+                switch (symbol) {
+                    case 'BTC':
+                        basePrice = 6400000000;
+                        break;
+                    case 'ETH':
+                        basePrice = 425000000;
+                        break;
+                    case 'USDT':
+                        basePrice = 58600;
+                        break;
+                    case 'NOT':
+                        basePrice = 855;
+                        break;
+                    default:
+                        basePrice = 1000000;
+                }
+
+                for (let i = 0; i < 24; i++) {
+                    const time = new Date(now - (23 - i) * 60 * 60 * 1000);
+                    const variation = (Math.random() - 0.5) * 0.03;
+                    const price = Math.round(basePrice * (1 + variation * (i / 12)));
+                    data.push({
+                        time: time.toISOString(),
+                        [symbol]: price
+                    });
+                }
+                return data;
+            }
+
+            // ==========================================================
+            // بارگذاری داده‌ها
+            // ==========================================================
+            async function loadData() {
+                const statusEl = document.getElementById('statusBar');
+                statusEl.textContent = '⏳ در حال دریافت داده‌ها...';
+
+                try {
+                    // دریافت داده‌های لحظه‌ای
+                    const latest = await fetchLatestData();
+
+                    if (latest && latest.prices) {
+                        const hasValidData = Object.values(latest.prices).some(p => p && p.bestSell > 0);
+                        if (hasValidData) {
+                            renderPrices(latest);
+                            // دریافت تاریخچه برای نمودار
+                            const hist = await fetchHistory(currentSymbol);
+                            if (hist && hist.length > 0) {
+                                updateChart({ history: hist }, currentSymbol);
+                            } else {
+                                // استفاده از داده‌های mock
+                                const mockHist = generateMockHistory(currentSymbol);
+                                updateChart({ history: mockHist }, currentSymbol);
+                            }
+                            return;
+                        }
+                    }
+
+                    // اگر داده‌ای نبود
+                    statusEl.textContent = '⚠️ داده‌ای در دسترس نیست. لطفاً بعداً تلاش کنید.';
+                    statusEl.style.color = 'rgba(239, 68, 68, 0.7)';
+
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    statusEl.textContent = '❌ خطا در دریافت داده‌ها. صفحه را مجدداً بارگذاری کنید.';
+                    statusEl.style.color = 'rgba(239, 68, 68, 0.7)';
+                }
+            }
+
+            // ==========================================================
+            // کنترل‌های نمودار
+            // ==========================================================
+            function setupChartControls() {
+                const buttons = document.querySelectorAll('#chartControls button');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        buttons.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        currentSymbol = this.dataset.symbol;
+                        // بارگذاری مجدد تاریخچه برای نماد جدید
+                        loadChartData(currentSymbol);
+                    });
+                });
+            }
+
+            async function loadChartData(symbol) {
+                try {
+                    const hist = await fetchHistory(symbol);
+                    if (hist && hist.length > 0) {
+                        updateChart({ history: hist }, symbol);
+                    } else {
+                        const mockHist = generateMockHistory(symbol);
+                        updateChart({ history: mockHist }, symbol);
+                    }
+                } catch (e) {
+                    console.warn('Failed to load chart data:', e);
+                    const mockHist = generateMockHistory(symbol);
+                    updateChart({ history: mockHist }, symbol);
+                }
+            }
+
+            // ==========================================================
+            // اجرا
+            // ==========================================================
+            loadData();
+            setupChartControls();
+
+            // بروزرسانی خودکار هر ۵ دقیقه
+            setInterval(loadData, 5 * 60 * 1000);
+
+            console.log('🚀 ArzPulse Dashboard loaded successfully');
+        })();
+    </script>
+
+</body>
+</html>
