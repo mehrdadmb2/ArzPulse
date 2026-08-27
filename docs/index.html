@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArzPulse – قیمت‌های لحظه‌ای نوبیتکس</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ===== GLASSMORPHISM CONTAINER ===== */
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 30px 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #f6d365, #fda085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(253, 160, 133, 0.3);
+            letter-spacing: -0.5px;
+        }
+        .badge {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse-badge 2s infinite;
+        }
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: #34d399;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 1.2s infinite;
+        }
+
+        /* ===== GOLD CARD ===== */
+        .gold-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(8px);
+        }
+        .gold-card .label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .gold-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fbbf24;
+            text-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+        }
+        .gold-card .sub {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ===== PRICE GRID ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        /* ===== PRICE CARD ===== */
+        .price-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 20px 18px;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .price-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+        }
+        .price-card .symbol {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .price-card .change {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 100px;
+        }
+        .change.up { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .change.down { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .change.neutral { background: rgba(255, 255, 255, 0.1); color: #9ca3af; }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .price-row .label { color: rgba(255, 255, 255, 0.4); }
+        .price-row .value { font-weight: 600; }
+        .price-row .value.buy { color: #6ee7b7; }
+        .price-row .value.sell { color: #fca5a5; }
+
+        .last-price {
+            margin-top: 14px;
+            text-align: left;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+        }
+        .last-price small {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.3);
+            margin-right: 4px;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.25);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 20px;
+        }
+        .footer a {
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes pulse-badge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        /* ===== LOADING SHIMMER ===== */
+        .loading-shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+            height: 100px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .container { padding: 16px; }
+            .logo { font-size: 1.6rem; }
+            .gold-card .value { font-size: 1.5rem; }
+            .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .price-card { padding: 14px; }
+            .last-price { font-size: 1.1rem; }
+        }
+        @media (max-width: 420px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">✨ ArzPulse</div>
+        <div class="badge">
+            <span class="badge-dot"></span>
+            <span id="liveStatus">زنده</span>
+        </div>
+    </div>
+
+    <!-- GOLD CARD -->
+    <div class="gold-card" id="goldCard">
+        <div>
+            <div class="label">🏆 هر گرم طلای ۱۸ عیار</div>
+            <div class="value" id="goldPrice">–</div>
+        </div>
+        <div class="sub" id="goldSub">نرخ تتر: – ریال</div>
+    </div>
+
+    <!-- PRICE GRID -->
+    <div class="grid" id="priceGrid">
+        <!-- کارت‌ها به‌صورت dynamic پر می‌شوند -->
+    </div>
+
+    <!-- STATUS -->
+    <div class="status" id="statusBar">در حال دریافت داده‌ها...</div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span>📊 داده‌ها از <a href="https://nobitex.ir" target="_blank">نوبیتکس</a> • </span>
+        <span>🔄 بروزرسانی هر ۵ دقیقه • </span>
+        <span>🤖 <a href="https://t.me/ArzPulseBot" target="_blank">ربات تلگرام</a></span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ==========================================================
+        // تنظیمات
+        // ==========================================================
+        const NOBITEX_API = 'https://apiv2.nobitex.ir/market/stats';
+        const DATA_FALLBACK = '/ArzPulse/data/latest.json';  // مسیر نسبی به فایل ذخیره‌شده
+
+        const ASSETS = [
+            { src: 'btc', dst: 'rls', symbol: 'BTC', name: 'بیت‌کوین', emoji: '🪙' },
+            { src: 'eth', dst: 'rls', symbol: 'ETH', name: 'اتریوم', emoji: '💎' },
+            { src: 'usdt', dst: 'rls', symbol: 'USDT', name: 'تتر', emoji: '💵' },
+            { src: 'not', dst: 'rls', symbol: 'NOT', name: 'نات‌کوین', emoji: '📈' }
+        ];
+
+        // ==========================================================
+        // توابع کمکی
+        // ==========================================================
+        function formatNumber(num) {
+            if (num === undefined || num === null || isNaN(num)) return '۰';
+            return Math.round(num).toLocaleString('fa-IR').replace(/,/g, '،');
+        }
+
+        function getChangeEmoji(change) {
+            if (change > 0) return '🟢';
+            if (change < 0) return '🔴';
+            return '⚪';
+        }
+
+        function getChangeClass(change) {
+            if (change > 0) return 'up';
+            if (change < 0) return 'down';
+            return 'neutral';
+        }
+
+        function getChangeArrow(change) {
+            if (change > 0) return '▲';
+            if (change < 0) return '▼';
+            return '–';
+        }
+
+        // ==========================================================
+        // دریافت قیمت از نوبیتکس (با fallback)
+        // ==========================================================
+        async function fetchFromNobitex(src, dst) {
+            const url = `${NOBITEX_API}?srcCurrency=${src}&dstCurrency=${dst}`;
+            const res = await fetch(url, {
+                headers: {
+                    'User-Agent': 'ArzPulse/1.0.0',
+                    'Accept': 'application/json'
+                }
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data || !data.stats) throw new Error('پاسخ نامعتبر');
+            return {
+                bestBuy: parseFloat(data.stats.bestBuy) || 0,
+                bestSell: parseFloat(data.stats.bestSell) || 0,
+                lastPrice: parseFloat(data.stats.lastPrice) || 0,
+                change: parseFloat(data.stats.change) || 0,
+                volume: parseFloat(data.stats.volume) || 0,
+                high: parseFloat(data.stats.high) || 0,
+                low: parseFloat(data.stats.low) || 0
+            };
+        }
+
+        async function fetchAllPrices() {
+            // دریافت همزمان از نوبیتکس
+            const results = await Promise.allSettled(
+                ASSETS.map(a => fetchFromNobitex(a.src, a.dst))
+            );
+
+            const prices = {};
+            let allOk = true;
+            ASSETS.forEach((a, i) => {
+                if (results[i].status === 'fulfilled') {
+                    prices[a.symbol] = results[i].value;
+                } else {
+                    allOk = false;
+                    prices[a.symbol] = null;
+                }
+            });
+
+            // دریافت XAUT به تتر برای طلا
+            let xautPrice = 0;
+            try {
+                const xaut = await fetchFromNobitex('xaut', 'usdt');
+                xautPrice = xaut.bestSell || 0;
+            } catch {
+                allOk = false;
+            }
+
+            // قیمت تتر (از USDT که دریافت کردیم)
+            const usdtPrice = prices.USDT ? prices.USDT.bestSell : 0;
+
+            // محاسبه طلا
+            const OUNCE_TO_GRAM = 31.1034768;
+            const PURITY_18K = 0.750;
+            const gold18K = Math.round((xautPrice * usdtPrice / OUNCE_TO_GRAM) * PURITY_18K);
+
+            return {
+                prices,
+                gold18K,
+                usdtPrice,
+                timestamp: new Date().toISOString(),
+                success: allOk && Object.values(prices).every(p => p !== null)
+            };
+        }
+
+        // ==========================================================
+        // دریافت از فایل fallback (latest.json)
+        // ==========================================================
+        async function fetchFromFallback() {
+            try {
+                const res = await fetch(DATA_FALLBACK);
+                if (!res.ok) throw new Error('Fallback not available');
+                const data = await res.json();
+                if (!data || !data.prices) throw new Error('Invalid fallback data');
+
+                const prices = {};
+                ASSETS.forEach(a => {
+                    if (data.prices[a.symbol]) {
+                        prices[a.symbol] = data.prices[a.symbol];
+                    } else {
+                        prices[a.symbol] = null;
+                    }
+                });
+
+                return {
+                    prices,
+                    gold18K: data.gold18K || 0,
+                    usdtPrice: data.usdtPrice || 0,
+                    timestamp: data.timestamp || new Date().toISOString(),
+                    success: true,
+                    fromFallback: true
+                };
+            } catch {
+                return null;
+            }
+        }
+
+        // ==========================================================
+        // رندر کردن کارت‌ها
+        // ==========================================================
+        function renderPrices(data) {
+            const grid = document.getElementById('priceGrid');
+            const goldEl = document.getElementById('goldPrice');
+            const goldSub = document.getElementById('goldSub');
+            const statusEl = document.getElementById('statusBar');
+            const liveBadge = document.getElementById('liveStatus');
+
+            // وضعیت
+            if (data.fromFallback) {
+                statusEl.textContent = '⚠️ استفاده از داده‌های ذخیره‌شده (نوبیتکس در دسترس نیست)';
+                statusEl.style.color = 'rgba(251, 191, 36, 0.6)';
+                liveBadge.textContent = 'آفلاین (کش)';
+                document.querySelector('.badge').style.borderColor = 'rgba(251, 191, 36, 0.4)';
+                document.querySelector('.badge-dot').style.background = '#fbbf24';
+            } else {
+                statusEl.textContent = `✅ آخرین بروزرسانی: ${new Date(data.timestamp).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran' })}`;
+                statusEl.style.color = 'rgba(255,255,255,0.3)';
+                liveBadge.textContent = 'زنده';
+                document.querySelector('.badge').style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                document.querySelector('.badge-dot').style.background = '#34d399';
+            }
+
+            // طلا
+            if (data.gold18K > 0) {
+                goldEl.textContent = `${formatNumber(data.gold18K)} ریال`;
+                goldSub.textContent = `نرخ تتر: ${formatNumber(data.usdtPrice)} ریال`;
+            } else {
+                goldEl.textContent = '–';
+                goldSub.textContent = 'نرخ تتر: –';
+            }
+
+            // کارت‌ها
+            let html = '';
+            ASSETS.forEach(a => {
+                const p = data.prices[a.symbol];
+                if (p && p.bestSell > 0) {
+                    const change = p.change || 0;
+                    const cls = getChangeClass(change);
+                    const arrow = getChangeArrow(change);
+                    html += `
+                        <div class="price-card">
+                            <div class="symbol">
+                                <span>${a.emoji} ${a.symbol}</span>
+                                <span class="change ${cls}">${getChangeEmoji(change)} ${arrow} ${Math.abs(change).toFixed(2)}%</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="label">خرید</span>
+                                <span class="value buy">${formatNumber(p.bestBuy)}</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="label">فروش</span>
+                                <span class="value sell">${formatNumber(p.bestSell)}</span>
+                            </div>
+                            <div class="last-price">
+                                ${formatNumber(p.lastPrice)} <small>ریال</small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="price-card" style="opacity:0.5;">
+                            <div class="symbol">
+                                <span>${a.emoji} ${a.symbol}</span>
+                                <span class="change neutral">⏳</span>
+                            </div>
+                            <div style="text-align:center;padding:20px 0;color:rgba(255,255,255,0.3);">
+                                داده در دسترس نیست
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            grid.innerHTML = html;
+        }
+
+        // ==========================================================
+        // تابع اصلی بارگذاری داده
+        // ==========================================================
+        async function loadData() {
+            const statusEl = document.getElementById('statusBar');
+            statusEl.textContent = '⏳ در حال دریافت داده‌ها از نوبیتکس...';
+
+            try {
+                // تلاش برای دریافت از نوبیتکس
+                const liveData = await fetchAllPrices();
+                if (liveData.success) {
+                    renderPrices(liveData);
+                    return;
+                }
+
+                // اگر نوبیتکس موفق نبود، از fallback استفاده کن
+                statusEl.textContent = '⏳ تلاش برای دریافت داده‌های ذخیره‌شده...';
+                const fallback = await fetchFromFallback();
+                if (fallback) {
+                    renderPrices(fallback);
+                    return;
+                }
+
+                // هیچ داده‌ای در دسترس نیست
+                statusEl.textContent = '❌ هیچ داده‌ای در دسترس نیست. لطفاً بعداً تلاش کنید.';
+                statusEl.style.color = 'rgba(239, 68, 68, 0.7)';
+                document.getElementById('goldPrice').textContent = '–';
+
+            } catch (error) {
+                console.error('خطا در بارگذاری داده:', error);
+                statusEl.textContent = '❌ خطا در دریافت داده‌ها. لطفاً صفحه را مجدداً بارگذاری کنید.';
+                statusEl.style.color = 'rgba(239, 68, 68, 0.7)';
+            }
+        }
+
+        // ==========================================================
+        // اجرا
+        // ==========================================================
+        loadData();
+
+        // بروزرسانی خودکار هر ۵ دقیقه
+        setInterval(loadData, 5 * 60 * 1000);
+
+        console.log('🚀 ArzPulse Dashboard loaded successfully');
+    })();
+</script>
+
+</body>
+</html>
