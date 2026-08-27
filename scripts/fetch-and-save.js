@@ -3,14 +3,22 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-// تنظیمات
+// ---------- تنظیمات ----------
 const BASE_URL = 'https://apiv2.nobitex.ir';
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const HISTORY_DIR = path.join(DATA_DIR, 'history');
 
-// ایجاد پوشه‌ها
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-if (!fs.existsSync(HISTORY_DIR)) fs.mkdirSync(HISTORY_DIR, { recursive: true });
+console.log(`📁 مسیر پوشه داده: ${DATA_DIR}`);
+
+// ---------- ایجاد پوشه‌ها ----------
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    console.log('📁 پوشه data ایجاد شد.');
+}
+if (!fs.existsSync(HISTORY_DIR)) {
+    fs.mkdirSync(HISTORY_DIR, { recursive: true });
+    console.log('📁 پوشه history ایجاد شد.');
+}
 
 // ---------- تبدیل XAUT به گرم ۱۸ عیار ----------
 function convertXautToGram18K(xautPriceInUSDT, usdtPriceInIRR) {
@@ -37,7 +45,7 @@ function fetchJson(url, timeout = 10000, retries = 2) {
                         resolve(JSON.parse(data));
                     } catch (e) {
                         if (retryCount < retries) {
-                            console.log(`🔄 Retry ${retryCount + 1}/${retries} for ${url}`);
+                            console.log(`🔄 تلاش مجدد ${retryCount + 1}/${retries} برای ${url}`);
                             setTimeout(() => attempt(retryCount + 1), 1000);
                         } else {
                             reject(new Error('JSON parse error: ' + e.message));
@@ -47,7 +55,7 @@ function fetchJson(url, timeout = 10000, retries = 2) {
             });
             req.on('error', (err) => {
                 if (retryCount < retries) {
-                    console.log(`🔄 Retry ${retryCount + 1}/${retries} for ${url}`);
+                    console.log(`🔄 تلاش مجدد ${retryCount + 1}/${retries} برای ${url}`);
                     setTimeout(() => attempt(retryCount + 1), 1000);
                 } else {
                     reject(err);
@@ -56,7 +64,7 @@ function fetchJson(url, timeout = 10000, retries = 2) {
             req.setTimeout(timeout, () => {
                 req.destroy();
                 if (retryCount < retries) {
-                    console.log(`🔄 Timeout retry ${retryCount + 1}/${retries} for ${url}`);
+                    console.log(`🔄 Timeout, تلاش مجدد ${retryCount + 1}/${retries} برای ${url}`);
                     setTimeout(() => attempt(retryCount + 1), 1000);
                 } else {
                     reject(new Error('Request timeout'));
@@ -70,13 +78,11 @@ function fetchJson(url, timeout = 10000, retries = 2) {
 // ---------- دریافت قیمت از نوبیتکس ----------
 async function fetchPrice(src, dst) {
     const url = `${BASE_URL}/market/stats?srcCurrency=${src}&dstCurrency=${dst}`;
-    console.log(`📡 Fetching ${src}/${dst}...`);
+    console.log(`📡 دریافت ${src}/${dst}...`);
     const json = await fetchJson(url);
-    
     if (!json || !json.stats) {
-        throw new Error(`Invalid response for ${src}/${dst}: missing 'stats'`);
+        throw new Error(`پاسخ نامعتبر برای ${src}/${dst}: 'stats' وجود ندارد`);
     }
-    
     return {
         bestBuy: parseFloat(json.stats.bestBuy) || 0,
         bestSell: parseFloat(json.stats.bestSell) || 0,
@@ -88,22 +94,20 @@ async function fetchPrice(src, dst) {
     };
 }
 
-// ---------- دریافت همه بازارهای ریالی (یکباره) ----------
+// ---------- دریافت همه بازارهای ریالی ----------
 async function fetchAllRialStats() {
-    console.log('📡 Fetching all Rial markets at once...');
+    console.log('📡 دریافت یکباره همه بازارهای ریالی...');
     const url = `${BASE_URL}/market/stats?dstCurrency=rls`;
     const json = await fetchJson(url);
-    
     if (!json || !json.stats) {
-        throw new Error('Invalid response for all Rial markets');
+        throw new Error('پاسخ نامعتبر برای همه بازارهای ریالی');
     }
-    
     return json.stats;
 }
 
 // ---------- تابع اصلی ----------
 (async () => {
-    console.log('🚀 ArzPulse Price Fetcher Started');
+    console.log('🚀 ArzPulse Price Fetcher شروع شد');
     console.log(`📅 ${new Date().toISOString()}`);
 
     // بارگذاری داده‌های قبلی (برای fallback)
@@ -113,9 +117,9 @@ async function fetchAllRialStats() {
         try {
             const raw = fs.readFileSync(latestPath, 'utf8');
             lastData = JSON.parse(raw);
-            console.log('📂 Previous data loaded for fallback.');
+            console.log('📂 داده‌های قبلی برای fallback بارگذاری شد.');
         } catch (e) {
-            console.warn('⚠️ Could not load previous data:', e.message);
+            console.warn('⚠️ نتوانستیم داده‌های قبلی را بخوانیم:', e.message);
         }
     }
 
@@ -124,18 +128,14 @@ async function fetchAllRialStats() {
     let errorDetails = [];
 
     try {
-        // روش جدید: دریافت یکباره همه بازارهای ریالی
+        // دریافت یکباره همه بازارهای ریالی
         const allStats = await fetchAllRialStats();
-        
-        // نگاشت symbolهای مورد نظر
         const symbolMap = {
             'BTCIRT': 'BTC',
             'ETHIRT': 'ETH',
             'USDTIRT': 'USDT',
             'NOTIRT': 'NOT'
         };
-
-        // استخراج داده‌های مورد نظر
         for (const [key, value] of Object.entries(allStats)) {
             if (symbolMap[key]) {
                 results[symbolMap[key]] = {
@@ -147,34 +147,33 @@ async function fetchAllRialStats() {
                     low: parseFloat(value.low) || 0,
                     change: parseFloat(value.change) || 0
                 };
-                console.log(`✅ ${symbolMap[key]} fetched successfully.`);
+                console.log(`✅ ${symbolMap[key]} دریافت شد.`);
             }
         }
 
-        // دریافت XAUT به تتر (جداگانه)
+        // دریافت XAUT به تتر
         try {
             const xautData = await fetchPrice('xaut', 'usdt');
             results['XAUT'] = xautData;
-            console.log('✅ XAUT fetched successfully.');
+            console.log('✅ XAUT دریافت شد.');
         } catch (xautError) {
-            console.error('❌ Failed to fetch XAUT:', xautError.message);
+            console.error('❌ خطا در دریافت XAUT:', xautError.message);
             hasError = true;
             errorDetails.push('XAUT: ' + xautError.message);
             if (lastData && lastData.prices && lastData.prices.XAUT) {
                 results['XAUT'] = lastData.prices.XAUT;
-                console.log('↩️ Using cached data for XAUT');
+                console.log('↩️ استفاده از داده‌های کش برای XAUT');
             } else {
                 results['XAUT'] = { bestBuy: 0, bestSell: 0, lastPrice: 0, volume: 0, high: 0, low: 0, change: 0 };
             }
         }
 
     } catch (error) {
-        console.error('❌ Failed to fetch all Rial markets:', error.message);
+        console.error('❌ خطا در دریافت همه بازارهای ریالی:', error.message);
         hasError = true;
         errorDetails.push('AllRial: ' + error.message);
-        
-        // Fallback به روش قدیمی (دریافت تک‌تک)
-        console.log('↩️ Falling back to individual fetching...');
+        // Fallback به روش تک‌تک
+        console.log('↩️ Fallback به دریافت تک‌تک...');
         const assets = [
             { src: 'btc', dst: 'rls', symbol: 'BTC' },
             { src: 'eth', dst: 'rls', symbol: 'ETH' },
@@ -182,18 +181,17 @@ async function fetchAllRialStats() {
             { src: 'not', dst: 'rls', symbol: 'NOT' },
             { src: 'xaut', dst: 'usdt', symbol: 'XAUT' }
         ];
-
         for (const asset of assets) {
             try {
                 results[asset.symbol] = await fetchPrice(asset.src, asset.dst);
-                console.log(`✅ ${asset.symbol} fetched successfully.`);
+                console.log(`✅ ${asset.symbol} دریافت شد.`);
             } catch (err) {
-                console.error(`❌ Failed to fetch ${asset.symbol}:`, err.message);
+                console.error(`❌ خطا در دریافت ${asset.symbol}:`, err.message);
                 hasError = true;
                 errorDetails.push(`${asset.symbol}: ${err.message}`);
                 if (lastData && lastData.prices && lastData.prices[asset.symbol]) {
                     results[asset.symbol] = lastData.prices[asset.symbol];
-                    console.log(`↩️ Using cached data for ${asset.symbol}`);
+                    console.log(`↩️ استفاده از داده‌های کش برای ${asset.symbol}`);
                 } else {
                     results[asset.symbol] = { bestBuy: 0, bestSell: 0, lastPrice: 0, volume: 0, high: 0, low: 0, change: 0 };
                 }
@@ -205,26 +203,24 @@ async function fetchAllRialStats() {
     const usdtPrice = results.USDT ? results.USDT.bestSell || 0 : 0;
     const xautPrice = results.XAUT ? results.XAUT.bestSell || 0 : 0;
     const gold18K = convertXautToGram18K(xautPrice, usdtPrice);
-    
-    // قیمت دلار = نرخ تتر (USDT)
     const dollarPrice = usdtPrice;
 
-    // ساخت آبجکت نهایی با فیلدهای اضافی
+    // ساخت آبجکت نهایی
     const latestData = {
         timestamp: new Date().toISOString(),
         prices: results,
         gold18K: gold18K,
         usdtPrice: usdtPrice,
-        dollarPrice: dollarPrice,      // قیمت دلار (همان USDT)
+        dollarPrice: dollarPrice,
         hasError: hasError,
         errorDetails: errorDetails
     };
 
     // ذخیره latest.json
     fs.writeFileSync(latestPath, JSON.stringify(latestData, null, 2));
-    console.log('✅ latest.json saved.');
+    console.log(`✅ latest.json ذخیره شد: ${latestPath}`);
 
-    // ---------- ذخیره تاریخچه روزانه برای نمودار ----------
+    // ذخیره تاریخچه روزانه
     const today = new Date().toISOString().split('T')[0];
     const historyFile = path.join(HISTORY_DIR, `${today}.json`);
     let history = [];
@@ -232,11 +228,9 @@ async function fetchAllRialStats() {
         try {
             history = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
         } catch (e) {
-            console.warn('⚠️ Could not parse history, starting fresh.');
+            console.warn('⚠️ نتوانستیم تاریخچه را بخوانیم، از نو شروع می‌کنیم.');
         }
     }
-    
-    // اضافه کردن نقطه جدید
     history.push({
         time: new Date().toISOString(),
         BTC: results.BTC ? results.BTC.lastPrice || 0 : 0,
@@ -246,13 +240,12 @@ async function fetchAllRialStats() {
         GOLD18K: gold18K,
         DOLLAR: dollarPrice
     });
-    
     // فقط ۳۰ روز اخیر نگهداری شود
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     history = history.filter(entry => new Date(entry.time) >= thirtyDaysAgo);
     fs.writeFileSync(historyFile, JSON.stringify(history, null, 2));
-    console.log('📊 History updated.');
+    console.log(`📊 تاریخچه روزانه ذخیره شد: ${historyFile}`);
 
     // متا
     const meta = {
@@ -264,13 +257,21 @@ async function fetchAllRialStats() {
         errorCount: errorDetails.length,
         errors: errorDetails
     };
-    fs.writeFileSync(path.join(DATA_DIR, 'meta.json'), JSON.stringify(meta, null, 2));
+    const metaPath = path.join(DATA_DIR, 'meta.json');
+    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+    console.log(`📄 meta.json ذخیره شد: ${metaPath}`);
 
     if (hasError) {
-        console.warn('⚠️ Some errors occurred:', errorDetails.join('; '));
+        console.warn('⚠️ برخی خطاها رخ داد:', errorDetails.join('; '));
     } else {
-        console.log('✅ All data fetched successfully.');
+        console.log('✅ تمام داده‌ها با موفقیت دریافت شدند.');
     }
 
-    console.log('🏁 ArzPulse Price Fetcher Finished.');
+    // بررسی وجود فایل‌ها
+    console.log('🔍 بررسی فایل‌های ایجاد شده:');
+    console.log(`   - latest.json: ${fs.existsSync(latestPath) ? '✅' : '❌'}`);
+    console.log(`   - meta.json: ${fs.existsSync(metaPath) ? '✅' : '❌'}`);
+    console.log(`   - history/${today}.json: ${fs.existsSync(historyFile) ? '✅' : '❌'}`);
+
+    console.log('🏁 ArzPulse Price Fetcher پایان یافت.');
 })();
