@@ -3,10 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
+// تنظیمات
 const BASE_URL = 'https://apiv2.nobitex.ir';
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const HISTORY_DIR = path.join(DATA_DIR, 'history');
 
+// ایجاد پوشه‌ها
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(HISTORY_DIR)) fs.mkdirSync(HISTORY_DIR, { recursive: true });
 
@@ -18,30 +20,50 @@ function convertXautToGram18K(xautPriceInUSDT, usdtPriceInIRR) {
     return Math.round((xautPriceInUSDT * usdtPriceInIRR / OUNCE_TO_GRAM) * PURITY_18K);
 }
 
-// ---------- دریافت JSON با timeout ----------
-function fetchJson(url, timeout = 10000) {
+// ---------- دریافت JSON با timeout و retry ----------
+function fetchJson(url, timeout = 10000, retries = 2) {
     return new Promise((resolve, reject) => {
-        const req = https.get(url, {
-            headers: {
-                'User-Agent': 'ArzPulse/1.0.0',
-                'Accept': 'application/json'
-            }
-        }, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    resolve(JSON.parse(data));
-                } catch (e) {
-                    reject(new Error('JSON parse error: ' + e.message));
+        const attempt = (retryCount) => {
+            const req = https.get(url, {
+                headers: {
+                    'User-Agent': 'ArzPulse/1.0.0',
+                    'Accept': 'application/json'
+                }
+            }, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (e) {
+                        if (retryCount < retries) {
+                            console.log(`🔄 Retry ${retryCount + 1}/${retries} for ${url}`);
+                            setTimeout(() => attempt(retryCount + 1), 1000);
+                        } else {
+                            reject(new Error('JSON parse error: ' + e.message));
+                        }
+                    }
+                });
+            });
+            req.on('error', (err) => {
+                if (retryCount < retries) {
+                    console.log(`🔄 Retry ${retryCount + 1}/${retries} for ${url}`);
+                    setTimeout(() => attempt(retryCount + 1), 1000);
+                } else {
+                    reject(err);
                 }
             });
-        });
-        req.on('error', reject);
-        req.setTimeout(timeout, () => {
-            req.destroy();
-            reject(new Error('Request timeout'));
-        });
+            req.setTimeout(timeout, () => {
+                req.destroy();
+                if (retryCount < retries) {
+                    console.log(`🔄 Timeout retry ${retryCount + 1}/${retries} for ${url}`);
+                    setTimeout(() => attempt(retryCount + 1), 1000);
+                } else {
+                    reject(new Error('Request timeout'));
+                }
+            });
+        };
+        attempt(0);
     });
 }
 
@@ -99,6 +121,7 @@ async function fetchAllRialStats() {
 
     let results = {};
     let hasError = false;
+    let errorDetails = [];
 
     try {
         // روش جدید: دریافت یکباره همه بازارهای ریالی
@@ -136,6 +159,7 @@ async function fetchAllRialStats() {
         } catch (xautError) {
             console.error('❌ Failed to fetch XAUT:', xautError.message);
             hasError = true;
+            errorDetails.push('XAUT: ' + xautError.message);
             if (lastData && lastData.prices && lastData.prices.XAUT) {
                 results['XAUT'] = lastData.prices.XAUT;
                 console.log('↩️ Using cached data for XAUT');
@@ -147,6 +171,8 @@ async function fetchAllRialStats() {
     } catch (error) {
         console.error('❌ Failed to fetch all Rial markets:', error.message);
         hasError = true;
+        errorDetails.push('AllRial: ' + error.message);
+        
         // Fallback به روش قدیمی (دریافت تک‌تک)
         console.log('↩️ Falling back to individual fetching...');
         const assets = [
@@ -164,6 +190,7 @@ async function fetchAllRialStats() {
             } catch (err) {
                 console.error(`❌ Failed to fetch ${asset.symbol}:`, err.message);
                 hasError = true;
+                errorDetails.push(`${asset.symbol}: ${err.message}`);
                 if (lastData && lastData.prices && lastData.prices[asset.symbol]) {
                     results[asset.symbol] = lastData.prices[asset.symbol];
                     console.log(`↩️ Using cached data for ${asset.symbol}`);
@@ -174,24 +201,30 @@ async function fetchAllRialStats() {
         }
     }
 
-    // محاسبه طلا
+    // محاسبه طلا و دلار
     const usdtPrice = results.USDT ? results.USDT.bestSell || 0 : 0;
     const xautPrice = results.XAUT ? results.XAUT.bestSell || 0 : 0;
     const gold18K = convertXautToGram18K(xautPrice, usdtPrice);
+    
+    // قیمت دلار = نرخ تتر (USDT)
+    const dollarPrice = usdtPrice;
 
-    // ساخت آبجکت نهایی
+    // ساخت آبجکت نهایی با فیلدهای اضافی
     const latestData = {
         timestamp: new Date().toISOString(),
         prices: results,
         gold18K: gold18K,
-        usdtPrice: usdtPrice
+        usdtPrice: usdtPrice,
+        dollarPrice: dollarPrice,      // قیمت دلار (همان USDT)
+        hasError: hasError,
+        errorDetails: errorDetails
     };
 
     // ذخیره latest.json
     fs.writeFileSync(latestPath, JSON.stringify(latestData, null, 2));
     console.log('✅ latest.json saved.');
 
-    // ذخیره تاریخچه روزانه
+    // ---------- ذخیره تاریخچه روزانه برای نمودار ----------
     const today = new Date().toISOString().split('T')[0];
     const historyFile = path.join(HISTORY_DIR, `${today}.json`);
     let history = [];
@@ -202,18 +235,22 @@ async function fetchAllRialStats() {
             console.warn('⚠️ Could not parse history, starting fresh.');
         }
     }
+    
+    // اضافه کردن نقطه جدید
     history.push({
         time: new Date().toISOString(),
         BTC: results.BTC ? results.BTC.lastPrice || 0 : 0,
         ETH: results.ETH ? results.ETH.lastPrice || 0 : 0,
         USDT: results.USDT ? results.USDT.bestSell || 0 : 0,
         NOT: results.NOT ? results.NOT.lastPrice || 0 : 0,
-        GOLD18K: gold18K
+        GOLD18K: gold18K,
+        DOLLAR: dollarPrice
     });
-    // فقط ۷ روز اخیر نگهداری شود
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    history = history.filter(entry => new Date(entry.time) >= sevenDaysAgo);
+    
+    // فقط ۳۰ روز اخیر نگهداری شود
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    history = history.filter(entry => new Date(entry.time) >= thirtyDaysAgo);
     fs.writeFileSync(historyFile, JSON.stringify(history, null, 2));
     console.log('📊 History updated.');
 
@@ -222,13 +259,15 @@ async function fetchAllRialStats() {
         lastUpdate: latestData.timestamp,
         gold18K: gold18K,
         usdtPrice: usdtPrice,
+        dollarPrice: dollarPrice,
         hasError: hasError,
-        errorCount: Object.values(results).filter(r => r.bestSell === 0).length
+        errorCount: errorDetails.length,
+        errors: errorDetails
     };
     fs.writeFileSync(path.join(DATA_DIR, 'meta.json'), JSON.stringify(meta, null, 2));
 
     if (hasError) {
-        console.warn('⚠️ Some errors occurred, but fallback data was used.');
+        console.warn('⚠️ Some errors occurred:', errorDetails.join('; '));
     } else {
         console.log('✅ All data fetched successfully.');
     }
