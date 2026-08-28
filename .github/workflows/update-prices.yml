@@ -2,14 +2,9 @@ name: Update Crypto Prices
 
 on:
   schedule:
-    # هر ۲ دقیقه یکبار
-    - cron: '*/2 * * * *'
-  # اجرای دستی
+    # هر ۱۰ دقیقه یکبار (بهینه برای ریپوهای عمومی)
+    - cron: '*/10 * * * *'
   workflow_dispatch:
-  # اجرا بر روی هر push به شاخه main (برای تست)
-  push:
-    branches:
-      - main
 
 jobs:
   update:
