@@ -1,273 +1,366 @@
+# ✨ ArzPulse
+
 <div align="center">
-  <img src="https://img.shields.io/badge/ArzPulse-v2.0-gold?style=for-the-badge&logo=bitcoin&logoColor=gold" alt="ArzPulse">
-  <br>
-  <img src="https://img.shields.io/github/stars/mehrdadmb2/ArzPulse?style=social" alt="Stars">
-  <img src="https://img.shields.io/github/forks/mehrdadmb2/ArzPulse?style=social" alt="Forks">
-  <img src="https://img.shields.io/github/issues/mehrdadmb2/ArzPulse" alt="Issues">
-  <img src="https://img.shields.io/github/license/mehrdadmb2/ArzPulse" alt="License">
-  <img src="https://img.shields.io/badge/Telegram-Bot-26A5E4?style=flat&logo=telegram&logoColor=white" alt="Telegram">
-  <img src="https://img.shields.io/badge/GitHub%20Pages-Deployed-success" alt="GitHub Pages">
-  <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?style=flat&logo=cloudflare&logoColor=white" alt="Cloudflare">
+
+[![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white)](https://github.com/mehrdadmb2/ArzPulse/actions)
+[![Cloudflare Workers](https://img.shields.io/badge/Deployed%20on-Cloudflare%20Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://arzpulse-bot.game-developer-mb.workers.dev)
+[![GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-222222?style=flat-square&logo=github&logoColor=white)](https://mehrdadmb2.github.io/ArzPulse)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/mehrdadmb2/ArzPulse/pulls)
+[![Telegram Bot](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ArzPulseBot)
+[![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)](https://arzpulse-bot.game-developer-mb.workers.dev)
+[![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red?style=flat-square)](https://github.com/mehrdadmb2)
+
 </div>
 
 ---
 
-# ✨ ArzPulse
+> **Professional real-time cryptocurrency, gold, and dollar price monitoring system for the Iranian market** – fetching live prices from Nobitex, storing historical data, providing a modern dashboard, and a powerful Telegram bot with advanced charting capabilities.
 
-> **ربات و سایت هوشمند مانیتورینگ قیمت‌های لحظه‌ای نوبیتکس** – دریافت لحظه‌ای قیمت رمزارزها و طلا با ذخیره‌سازی تاریخچه و نمایش حرفه‌ای
-
-<p align="center">
-  <a href="https://mehrdadmb2.github.io/ArzPulse/">🌐 مشاهده سایت</a> •
-  <a href="https://t.me/ArzPulseBot">🤖 ربات تلگرام</a> •
-  <a href="https://github.com/mehrdadmb2/ArzPulse">📦 مخزن گیت‌هاب</a>
-</p>
+**🇬🇧 English** | **🇮🇷 فارسی**
 
 ---
 
-## 📊 نمای کلی
+## 📊 Overview | نمای کلی
 
-**ArzPulse** یک پلتفرم کامل و رایگان برای مانیتورینگ قیمت‌های لحظه‌ای بازار ارزهای دیجیتال و طلا در ایران است که از **API نوبیتکس** تغذیه می‌کند. این پروژه شامل:
+**ArzPulse** is a complete, zero-cost price intelligence platform that:
 
-| بخش | توضیح |
-|------|-------|
-| 🌐 **سایت نمایش قیمت** | داشبورد حرفه‌ای با نمودارهای تعاملی و طراحی مدرن (گلس‌مورفیسم) |
-| 🤖 **ربات تلگرام** | دریافت قیمت‌ها با دستورات ساده، خروجی‌های زیبا با قالب‌بندی HTML |
-| 💾 **ذخیره‌سازی خودکار** | داده‌ها در مخزن گیت‌هاب ذخیره شده و هر ۲ دقیقه به‌روز می‌شوند |
-| 📈 **نمودارهای تاریخی** | نمایش روند ۳۰ روزه قیمت‌ها با Chart.js |
-| 🔄 **بروزرسانی خودکار** | با استفاده از GitHub Actions بدون نیاز به سرور |
-
----
-
-## ✨ ویژگی‌ها
-
-### 🌐 سایت
-- ✅ نمایش قیمت لحظه‌ای **بیت‌کوین، اتریوم، تتر، نات‌کوین**
-- 🏆 محاسبه و نمایش **قیمت طلا (هر گرم ۱۸ عیار)** از XAUT/USDT
-- 💵 نمایش **قیمت دلار** بر اساس نرخ تتر (USDT)
-- 📈 نمودار تعاملی **۳۰ روزه** با قابلیت انتخاب نماد
-- 🎨 طراحی مدرن **گلس‌مورفیسم** با بک‌گراند متحرک
-- 🔄 بروزرسانی خودکار هر **۲ دقیقه**
-- 📱 **ریسپانسیو کامل** –适配 موبایل، تبلت و دسکتاپ
-
-### 🤖 ربات تلگرام
-- 📊 `/prices` – نمایش قیمت‌های لحظه‌ای همه دارایی‌ها با جزئیات کامل
-- 🏆 `/gold` – نمایش قیمت هر گرم طلای ۱۸ عیار
-- 💵 `/dollar` – نمایش قیمت دلار
-- 🪙 `/btc` – نمایش قیمت بیت‌کوین با جزئیات
-- 💎 `/eth` – نمایش قیمت اتریوم با جزئیات
-- 💵 `/usdt` – نمایش قیمت تتر با جزئیات
-- 📈 `/not` – نمایش قیمت نات‌کوین با جزئیات
-- 📖 `/help` – راهنمای کامل دستورات
-- 🎨 **قالب‌بندی HTML** – پشتیبانی از پررنگ، مورب، کد، زیرخط و لینک
-- 🌐 نمایش قیمت‌ها به **ریال و دلار**
+- 📊 Fetches real-time prices for **BTC**, **ETH**, **USDT**, **NOT**, and **Gold (18K)** from **Nobitex**
+- 🏆 Calculates Gold price per gram using **XAUT/USDT** and **USDT/IRR** exchange rates
+- 💵 Displays **Dollar (USD)** price based on USDT/IRR rate
+- 💾 Stores historical data **inside the GitHub repository** (no external database needed)
+- 🤖 Provides a **Telegram bot** with multiple commands, professional charts, and auto-send to channels
+- 🌐 Serves a **modern, glassmorphism UI dashboard** with animated background and interactive charts
+- ⏱️ Auto-updates every **10 minutes** via GitHub Actions
+- 📈 **24-hour, weekly, and monthly charts** for all assets
+- 🔄 **Automatic channel updates** – send price reports to Telegram channels every hour
 
 ---
 
-## 🛠️ تکنولوژی‌ها
+## ✨ Features | ویژگی‌ها
 
-| بخش | فناوری |
-|-----|--------|
-| **سایت** | HTML5 + CSS3 + JavaScript (Vanilla) + Chart.js |
-| **هاست سایت** | GitHub Pages (پوشه `docs/`) |
-| **داده‌ها** | فایل‌های JSON در مخزن (`docs/data/`) |
-| **بروزرسانی خودکار** | GitHub Actions (Cron: هر ۲ دقیقه) |
-| **ربات تلگرام** | Cloudflare Workers (JavaScript) |
-| **منبع داده** | Nobitex REST API |
-| **نمودار** | Chart.js 4.4.0 |
-| **قالب‌بندی** | HTML + CSS (Glassmorphism, Particles) |
+### 🌐 Website (Dashboard)
+- Real-time price cards with buy/sell/last prices, 24h change, volume, high/low
+- **Gold price** (18K per gram) with USDT reference
+- **Dollar price** (USD/IRR) based on USDT rate
+- **Interactive charts** (24h, 7d, 30d) with Chart.js
+- **Currency toggle** – switch between IRR (Rial) and USD
+- **Glassmorphism UI** with animated particle background
+- **Fully responsive** – works on mobile, tablet, and desktop
+- **Fallback mechanism** – if Nobitex API fails, uses cached data
+
+### 🤖 Telegram Bot
+**Core Commands:**
+- `/prices` – Show all current prices with full details
+- `/gold` – Show gold price per gram (18K)
+- `/dollar` – Show dollar price (USDT/IRR)
+- `/btc`, `/eth`, `/usdt`, `/not` – Individual asset prices
+- `/start` – Welcome message with command list
+- `/help` – Full help guide
+- `/status` – Show last update status
+
+**Advanced Charting:**
+- `/chart [SYMBOL] [PERIOD]` – Get professional chart
+  - Example: `/chart BTC 24h`, `/chart ETH 7d`, `/chart NOT 30d`
+  - Supports: `BTC`, `ETH`, `USDT`, `NOT`, `GOLD`, `DOLLAR`
+  - Periods: `24h`, `7d`, `30d`
+- `/chartall` – Get 4 separate charts (BTC, ETH, USDT, NOT) for 24h
+
+**Channel & Group Support:**
+- `/setchannel` – Set current channel/group for auto-updates
+- `/stopchannel` – Stop auto-updates to current channel/group
+- **Auto-send** – Every hour, prices are automatically sent to configured channels
+
+**Smart Features:**
+- **Countdown timer** – When data is stale, the bot triggers GitHub Action and shows a live countdown (45 seconds)
+- **HTML formatting** – Bold, italic, code blocks, strikethrough, underline, and links
+- **Multi-currency display** – Prices shown in both IRR and USD
+
+### 📦 Data Storage
+- All price data stored as JSON files inside the repository (`docs/data/`)
+- **Daily history** files (keeps last 30 days)
+- **Auto-updated** via GitHub Actions every 10 minutes
+- No external database required – fully self-contained
+
+### ⚙️ Automation
+- **GitHub Actions** fetch prices and commit changes automatically
+- **Cron schedule** runs every 10 minutes (respects Nobitex rate limits)
+- **Keep-alive workflow** prevents cron deactivation after 60 days of inactivity
+- **Cloudflare Workers** with Cron Triggers for periodic checks and auto-sending
 
 ---
 
-## 📁 ساختار پروژه
+## 🛠️ Tech Stack | تکنولوژی‌ها
+
+| Component | Technology |
+|-----------|------------|
+| **Frontend** | HTML5 + CSS3 + JavaScript (Vanilla) + Chart.js + Font Awesome |
+| **Hosting** | GitHub Pages (docs/ folder) |
+| **Data Storage** | GitHub repository (JSON files) |
+| **CI/CD** | GitHub Actions (cron + workflow_dispatch) |
+| **Telegram Bot** | Cloudflare Workers (JavaScript) |
+| **State Storage** | Cloudflare KV (for channel settings) |
+| **Price Source** | Nobitex REST API |
+| **Chart Generation** | QuickChart.io API |
+| **Typography** | Vazirmatn (Persian) + System UI (English) |
+
+---
+
+## 📁 Project Structure | ساختار پروژه
 
 ```
 ArzPulse/
 ├── .github/
 │   └── workflows/
-│       ├── update-prices.yml     # بروزرسانی خودکار قیمت‌ها (هر ۲ دقیقه)
-│       └── keep-alive.yml        # فعال نگه‌داشتن Cron Jobs (هفتگی)
-├── docs/
-│   ├── index.html                # سایت اصلی (داشبورد)
+│       ├── update-prices.yml      # Auto-update prices (every 10 min)
+│       └── keep-alive.yml         # Prevent cron deactivation (weekly)
+├── docs/                          # 📦 GitHub Pages root
+│   ├── index.html                 # Main dashboard
 │   └── data/
-│       ├── latest.json           # آخرین قیمت‌ها + طلا + دلار
-│       ├── meta.json             # متادیتا (آخرین بروزرسانی، خطاها)
+│       ├── latest.json            # Current prices + gold + dollar
+│       ├── meta.json              # Metadata (last update, errors)
 │       └── history/
-│           └── YYYY-MM-DD.json   # تاریخچه روزانه (۳۰ روز)
+│           └── YYYY-MM-DD.json    # Daily historical records (30 days)
 ├── scripts/
-│   └── fetch-and-save.js         # اسکریپت دریافت قیمت از نوبیتکس
-└── README.md                     # مستندات پروژه
+│   └── fetch-and-save.js          # Price fetcher script
+└── README.md                      # Documentation
 ```
 
 ---
 
-## 🧮 محاسبه قیمت طلا
+## 🧮 Gold Price Calculation | محاسبه قیمت طلا
 
-**ArzPulse** قیمت هر گرم طلای ۱۸ عیار را با استفاده از دو داده از نوبیتکس محاسبه می‌کند:
+**ArzPulse** calculates the price of 1 gram of 18-karat gold using two prices from Nobitex:
 
-1. **XAUT/USDT** – قیمت هر اونس طلای دیجیتال (Tether Gold) به تتر
-2. **USDT/IRR** – قیمت هر تتر به ریال
+1. **XAUT/USDT** – Price of 1 ounce of Tether Gold in USDT
+2. **USDT/IRR** – Price of 1 USDT in Iranian Rials
 
-**فرمول:**
+**Formula:**
 ```
-قیمت هر اونس (ریال) = XAUT/USDT × USDT/IRR
-قیمت هر گرم (ریال) = (قیمت هر اونس / ۳۱.۱۰۳۴۷۶۸) × ۰.۷۵۰
+Price per ounce (IRR) = XAUT/USDT × USDT/IRR
+Price per gram (IRR)  = (Price per ounce / 31.1034768) × 0.750
 ```
 
-> **توضیح:**  
-> - `۳۱.۱۰۳۴۷۶۸` = هر اونس چند گرم است  
-> - `۰.۷۵۰` = ضریب خلوص طلای ۱۸ عیار (۱۸/۲۴)
+Where:
+- `31.1034768` = grams per troy ounce
+- `0.750` = purity factor for 18K gold (18/24)
 
 ---
 
-## 🚀 راه‌اندازی و اجرا
+## 🚀 Getting Started | راه‌اندازی
 
-### ۱. کلون کردن مخزن
+### Prerequisites | پیش‌نیازها
+- Node.js 18+ and npm
+- Git
+- Cloudflare account (for Worker deployment)
+- Telegram account (for bot creation)
+
+### 1️⃣ Clone the Repository | کلون کردن مخزن
 
 ```bash
 git clone https://github.com/mehrdadmb2/ArzPulse.git
 cd ArzPulse
 ```
 
-### ۲. اجرای محلی سایت
-
-سایت به‌صورت **استاتیک** است و نیازی به سرور ندارد. فقط کافی است فایل `docs/index.html` را در مرورگر باز کنید:
+### 2️⃣ Run the Website Locally | اجرای محلی سایت
 
 ```bash
-# با استفاده از Live Server (VS Code Extension)
-# یا استفاده از Python
-python3 -m http.server 8000 --directory docs
-# یا استفاده از Node.js
+# Using any static server
 npx serve docs
+# or
+python3 -m http.server 8000 --directory docs
 ```
 
-سپس در مرورگر آدرس `http://localhost:8000` را باز کنید.
+Open `http://localhost:8000` in your browser.
 
-### ۳. اجرای اسکریپت دریافت قیمت (برای تست)
+### 3️⃣ Setup Telegram Bot | راه‌اندازی ربات تلگرام
+
+#### A. Create Bot via BotFather
+
+1. Go to **@BotFather** on Telegram.
+2. Send `/newbot` and follow the instructions.
+3. Copy the **API token**.
+4. Set bot commands using `/setcommands`:
+
+```
+start - نمایش پیام خوش‌آمدگویی و راهنما
+help - نمایش راهنمای کامل دستورات
+prices - نمایش قیمت‌های لحظه‌ای همه دارایی‌ها
+gold - نمایش قیمت هر گرم طلای ۱۸ عیار
+dollar - نمایش قیمت دلار (نرخ تتر)
+btc - نمایش قیمت بیت‌کوین با جزئیات کامل
+eth - نمایش قیمت اتریوم با جزئیات کامل
+usdt - نمایش قیمت تتر با جزئیات کامل
+not - نمایش قیمت نات‌کوین با جزئیات کامل
+chart - نمایش راهنمای دستورات نمودار
+chartall - نمایش نمودار ۲۴ ساعته هر نماد به صورت جداگانه
+status - نمایش وضعیت آخرین بروزرسانی داده‌ها
+setchannel - تنظیم کانال فعلی برای ارسال خودکار قیمت‌ها
+stopchannel - توقف ارسال خودکار قیمت‌ها به کانال
+```
+
+5. Disable privacy mode: `/setprivacy` → select bot → **Disable**
+
+#### B. Deploy on Cloudflare Workers
+
+1. Go to **Cloudflare Dashboard** → **Workers & Pages** → **Create Worker**.
+2. Name it (e.g., `arzpulse-bot`).
+3. Copy the worker code from this repository into the editor.
+4. Set environment variables in **Settings** → **Variables**:
+
+| Name | Value | Type |
+|------|-------|------|
+| `TELEGRAM_BOT_TOKEN` | Your bot token from BotFather | Secret |
+| `GITHUB_TOKEN` | GitHub Personal Access Token with `workflow` scope | Secret |
+| `GITHUB_REPO` | `mehrdadmb2/ArzPulse` | Text |
+
+5. Create a **KV Namespace** called `ARZPULSE_SETTINGS` and bind it as `SETTINGS_KV`.
+6. Deploy and set the Webhook:
 
 ```bash
-node scripts/fetch-and-save.js
+curl -X POST "https://api.telegram.org/bot<YOUR_TOKEN>/setWebhook" \
+  -d "url=https://<YOUR_WORKER>.workers.dev/webhook"
 ```
 
-این اسکریپت قیمت‌ها را از نوبیتکس دریافت کرده و در `docs/data/latest.json` ذخیره می‌کند.
+7. Add a **Cron Trigger** in Cloudflare with `0 * * * *` (every hour) for auto-sending to channels.
+
+### 4️⃣ Setup GitHub Pages | تنظیم GitHub Pages
+
+1. Go to repository **Settings** → **Pages**.
+2. Set **Source** to `Deploy from a branch`.
+3. Select `main` branch and `/docs` folder.
+4. Save – your site will be live at `https://<username>.github.io/ArzPulse/`.
 
 ---
 
-## 🤖 راه‌اندازی ربات تلگرام
+## 🤖 Telegram Bot Commands | دستورات ربات تلگرام
 
-### ۱. ساخت ربات در BotFather
+### Price Commands | دستورات قیمت
+| Command | Description |
+|---------|-------------|
+| `/start` | Welcome message |
+| `/help` | Full help guide |
+| `/prices` | Show all current prices (BTC, ETH, USDT, NOT, Gold, Dollar) |
+| `/gold` | Show gold price per gram (18K) |
+| `/dollar` | Show dollar price (USDT/IRR) |
+| `/btc` | Bitcoin price with full details |
+| `/eth` | Ethereum price with full details |
+| `/usdt` | Tether price with full details |
+| `/not` | Notcoin price with full details |
+| `/status` | Show last update status and data freshness |
 
-1. در تلگرام به **@BotFather** بروید.
-2. دستور `/newbot` را بفرستید.
-3. نام و نام کاربری ربات را انتخاب کنید.
-4. **توکن** دریافتی را کپی کنید.
+### Chart Commands | دستورات نمودار
+| Command | Description |
+|---------|-------------|
+| `/chart BTC 24h` | Bitcoin 24-hour chart |
+| `/chart ETH 7d` | Ethereum weekly chart |
+| `/chart NOT 30d` | Notcoin monthly chart |
+| `/chart GOLD 7d` | Gold weekly chart |
+| `/chartall` | All symbols (BTC, ETH, USDT, NOT) – 24h separate charts |
 
-### ۲. دیپلوی روی Cloudflare Workers
+### Channel Management | مدیریت کانال
+| Command | Description |
+|---------|-------------|
+| `/setchannel` | Set current channel/group for hourly auto-updates |
+| `/stopchannel` | Stop auto-updates to current channel/group |
 
-1. وارد [Cloudflare Dashboard](https://dash.cloudflare.com/) شوید.
-2. به **Workers & Pages** > **Create Worker** بروید.
-3. کد ربات (موجود در این مخزن) را جایگذاری کنید.
-4. متغیر محیطی `TELEGRAM_BOT_TOKEN` را با توکن خود تنظیم کنید.
-5. روی **Save and Deploy** کلیک کنید.
-
-### ۳. تنظیم Webhook
-
-لینک زیر را در مرورگر باز کنید (جایگزین `<TOKEN>` و `<WORKER_URL>`):
-
-```
-https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://<WORKER_URL>.workers.dev/webhook
-```
-
-مثال با اطلاعات شما:
-```
-https://api.telegram.org/bot7944296536:AAFLeWCSrdeCY8cxecuFySMgUqPFtcGLGCE/setWebhook?url=https://arzpulse-bot.game-developer-mb.workers.dev/webhook
-```
-
----
-
-## 📊 API نوبیتکس – اندپوینت‌های استفاده‌شده
-
-| اندپوینت | توضیح |
-|----------|-------|
-| `GET /market/stats?srcCurrency=btc&dstCurrency=rls` | قیمت بیت‌کوین به ریال |
-| `GET /market/stats?srcCurrency=eth&dstCurrency=rls` | قیمت اتریوم به ریال |
-| `GET /market/stats?srcCurrency=usdt&dstCurrency=rls` | قیمت تتر به ریال |
-| `GET /market/stats?srcCurrency=not&dstCurrency=rls` | قیمت نات‌کوین به ریال |
-| `GET /market/stats?srcCurrency=xaut&dstCurrency=usdt` | قیمت XAUT به تتر (برای محاسبه طلا) |
-
-**محدودیت:** ۲۰ درخواست در دقیقه
-
-> **مستندات کامل:** [apidocs.nobitex.ir](https://apidocs.nobitex.ir/)
+**Supported Symbols:** `BTC`, `ETH`, `USDT`, `NOT`, `GOLD`, `DOLLAR`
+**Supported Periods:** `24h`, `7d`, `30d`
 
 ---
 
-## 🔄 بروزرسانی خودکار (GitHub Actions)
+## 📊 API Endpoints (Nobitex)
 
-پروژه از دو اکشن استفاده می‌کند:
+| Endpoint | Description |
+|----------|-------------|
+| `GET /market/stats?srcCurrency=btc&dstCurrency=rls` | BTC/IRR stats |
+| `GET /market/stats?srcCurrency=eth&dstCurrency=rls` | ETH/IRR stats |
+| `GET /market/stats?srcCurrency=usdt&dstCurrency=rls` | USDT/IRR stats |
+| `GET /market/stats?srcCurrency=not&dstCurrency=rls` | NOT/IRR stats |
+| `GET /market/stats?srcCurrency=xaut&dstCurrency=usdt` | XAUT/USDT stats |
 
-### ۱. `update-prices.yml` – بروزرسانی قیمت‌ها
-- **زمان:** هر ۲ دقیقه (`*/2 * * * *`)
-- **کاری که می‌کند:**
-  1. اجرای `scripts/fetch-and-save.js`
-  2. ذخیره داده‌ها در `docs/data/`
-  3. Commit و Push خودکار
-
-### ۲. `keep-alive.yml` – جلوگیری از غیرفعال شدن Cron
-- **زمان:** هر هفته یکشنبه ساعت ۰۰:۰۰ UTC
-- **کاری که می‌کند:** یک Commit خالی انجام می‌دهد تا مخزن همیشه فعال بماند و Cron Jobs غیرفعال نشوند.
+**Rate Limits:** 20 requests per minute for market stats.
 
 ---
 
-## 🐛 مدیریت خطاها
+## 🔄 Automation Workflows | اکشن‌های خودکار
 
-| سناریو | رفتار |
-|--------|-------|
-| **نوبیتکس در دسترس نیست** | اسکریپت از آخرین داده‌های کش (`lastData`) استفاده می‌کند. |
-| **محدودیت نرخ API** | اسکریپت با `Promise.allSettled` و Retry Logic از خطا جلوگیری می‌کند. |
-| **داده‌های نامعتبر** | مقادیر `null` به `۰` تبدیل می‌شوند. |
-| **خطا در Worker** | لاگ ثبت شده و پیام خطا به کاربر ارسال می‌شود. |
+### `update-prices.yml` (Every 10 minutes)
+- Fetches all prices from Nobitex.
+- Computes gold price (18K/gram) and dollar price.
+- Saves data to `docs/data/latest.json` and daily history.
+- Commits and pushes changes automatically.
 
----
+### `keep-alive.yml` (Weekly)
+- Creates an empty commit every week to prevent cron deactivation after 60 days of inactivity.
 
-## 🤝 مشارکت
-
-از مشارکت شما استقبال می‌شود! برای همکاری:
-
-1. **Fork** مخزن را انجام دهید.
-2. یک **Branch** جدید ایجاد کنید (`git checkout -b feature/amazing-feature`).
-3. تغییرات خود را **Commit** کنید (`git commit -m 'Add some amazing feature'`).
-4. **Push** به Branch خود (`git push origin feature/amazing-feature`).
-5. یک **Pull Request** باز کنید.
+### Cloudflare Worker Cron Trigger (Hourly)
+- Checks if data is stale and triggers GitHub Action if needed.
+- Sends price updates to all configured channels automatically.
 
 ---
 
-## 📄 مجوز (License)
+## 🐛 Error Handling & Fallbacks | مدیریت خطاها
 
-این پروژه تحت مجوز **MIT License** منتشر شده است – برای جزئیات بیشتر فایل [LICENSE](LICENSE) را ببینید.
+| Scenario | Behavior |
+|----------|----------|
+| **Nobitex API unavailable** | Script uses last cached data (`lastData`). |
+| **Rate limiting** | Script uses `Promise.allSettled` and retry logic. |
+| **Invalid data** | Null values are converted to `0`. |
+| **Worker error** | Error logged and user receives a friendly error message. |
+| **Missing data for charts** | User receives a warning with the number of available data points. |
+| **GitHub Action failure** | Bot informs the user and suggests waiting a few minutes. |
 
 ---
 
-## 📞 ارتباط با توسعه‌دهنده
+## 🤝 Contributing | مشارکت
 
-- **گیت‌هاب:** [@mehrdadmb2](https://github.com/mehrdadmb2)
-- **ربات تلگرام:** [@ArzPulseBot](https://t.me/ArzPulseBot)
-- **ایمیل:** (در صورت نیاز)
+Contributions are welcome! Here's how you can help:
+
+1. **Fork** the repository.
+2. Create a new branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m 'Add some amazing feature'`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a **Pull Request**.
+
+Please ensure your code follows the existing style and includes appropriate tests.
 
 ---
 
-## 🙏 تشکر و قدردانی
+## 📄 License | مجوز
 
-- **نوبیتکس** – برای ارائه API رایگان
-- **Cloudflare** – برای سرویس Workers رایگان
-- **GitHub** – برای Actions و Pages رایگان
-- **تمامی کاربران و مشارکت‌کنندگان** – برای حمایت و بازخورد
+This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📞 Contact & Support | تماس و پشتیبانی
+
+- **GitHub Issues:** [Report a bug or request a feature](https://github.com/mehrdadmb2/ArzPulse/issues)
+- **Telegram Bot:** [@ArzPulseBot](https://t.me/ArzPulseBot)
+- **Website:** [https://mehrdadmb2.github.io/ArzPulse/](https://mehrdadmb2.github.io/ArzPulse/)
+
+---
+
+## ⭐ Show Your Support
+
+If you find this project useful, please give it a ⭐ on GitHub!
+
+---
+
+## 🙏 Acknowledgments | تقدیر
+
+- **Nobitex** – For providing the API.
+- **Cloudflare** – For the free Workers tier and KV storage.
+- **GitHub** – For Actions and Pages hosting.
+- **All users and contributors** – For their support and feedback.
 
 ---
 
 <div align="center">
-  <sub>ساخته شده با ❤️ توسط <a href="https://github.com/mehrdadmb2">Mehrdad</a></sub>
+  <sub>Built with ❤️ by <a href="https://github.com/mehrdadmb2">Mehrdad</a></sub>
   <br>
-  <sub>© ۲۰۲۶ ArzPulse – تمامی حقوق محفوظ است.</sub>
+  <sub>© 2026 ArzPulse – All rights reserved.</sub>
 </div>
-```
-
-پروژه شما اکنون یک `README.md` کامل و حرفه‌ای دارد که همه جزئیات را پوشش می‌دهد. 🎉
