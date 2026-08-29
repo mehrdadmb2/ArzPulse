@@ -1,227 +1,80 @@
-// scripts/fetch-and-save.js
+// ArzPulse — market data collector
+// Node 20+, no external dependencies.
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-// ---------- تنظیمات ----------
 const BASE_URL = 'https://apiv2.nobitex.ir';
-// ⭐ تغییر مسیر به docs/data
+const YAHOO = 'https://query1.finance.yahoo.com';
 const DATA_DIR = path.join(__dirname, '..', 'docs', 'data');
 const HISTORY_DIR = path.join(DATA_DIR, 'history');
+const LATEST_PATH = path.join(DATA_DIR, 'latest.json');
+const HISTORY_KEEP_DAYS = 30;
 
-console.log(`📁 مسیر پوشه داده: ${DATA_DIR}`);
+fs.mkdirSync(HISTORY_DIR, { recursive: true });
 
-// ---------- ایجاد پوشه‌ها ----------
-if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    console.log('📁 پوشه docs/data ایجاد شد.');
-}
-if (!fs.existsSync(HISTORY_DIR)) {
-    fs.mkdirSync(HISTORY_DIR, { recursive: true });
-    console.log('📁 پوشه docs/data/history ایجاد شد.');
-}
-
-// ---------- تبدیل XAUT به گرم ۱۸ عیار ----------
-function convertXautToGram18K(xautPriceInUSDT, usdtPriceInIRR) {
-    if (!xautPriceInUSDT || !usdtPriceInIRR) return 0;
-    const OUNCE_TO_GRAM = 31.1034768;
-    const PURITY_18K = 0.750;
-    return Math.round((xautPriceInUSDT * usdtPriceInIRR / OUNCE_TO_GRAM) * PURITY_18K);
-}
-
-// ---------- دریافت JSON با timeout و retry ----------
-function fetchJson(url, timeout = 10000, retries = 2) {
-    return new Promise((resolve, reject) => {
-        const attempt = (retryCount) => {
-            console.log(`  🌐 درخواست به: ${url}`);
-            const req = https.get(url, {
-                headers: {
-                    'User-Agent': 'ArzPulse/1.0.0',
-                    'Accept': 'application/json'
-                }
-            }, (res) => {
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => {
-                    try {
-                        const json = JSON.parse(data);
-                        resolve(json);
-                    } catch (e) {
-                        if (retryCount < retries) {
-                            console.log(`  🔄 تلاش مجدد ${retryCount + 1}/${retries}`);
-                            setTimeout(() => attempt(retryCount + 1), 1000);
-                        } else {
-                            reject(new Error('JSON parse error: ' + e.message));
-                        }
-                    }
-                });
-            });
-            req.on('error', (err) => {
-                if (retryCount < retries) {
-                    console.log(`  🔄 خطا، تلاش مجدد ${retryCount + 1}/${retries}`);
-                    setTimeout(() => attempt(retryCount + 1), 1000);
-                } else {
-                    reject(err);
-                }
-            });
-            req.setTimeout(timeout, () => {
-                req.destroy();
-                if (retryCount < retries) {
-                    console.log(`  🔄 Timeout، تلاش مجدد ${retryCount + 1}/${retries}`);
-                    setTimeout(() => attempt(retryCount + 1), 1000);
-                } else {
-                    reject(new Error('Request timeout'));
-                }
-            });
-        };
-        attempt(0);
-    });
-}
-
-// ---------- دریافت قیمت از نوبیتکس (با ساختار صحیح) ----------
-async function fetchPrice(src, dst) {
-    const url = `${BASE_URL}/market/stats?srcCurrency=${src}&dstCurrency=${dst}`;
-    const json = await fetchJson(url);
-
-    if (!json || json.status !== 'ok' || !json.stats) {
-        throw new Error('پاسخ نامعتبر از نوبیتکس');
-    }
-
-    const key = Object.keys(json.stats).find(k => k === `${src}-${dst}`);
-    if (!key) {
-        throw new Error(`کلید ${src}-${dst} در پاسخ وجود ندارد`);
-    }
-
-    const data = json.stats[key];
-    return {
-        bestBuy: parseFloat(data.bestBuy) || 0,
-        bestSell: parseFloat(data.bestSell) || 0,
-        lastPrice: parseFloat(data.latest) || 0,
-        volume: parseFloat(data.volumeSrc) || 0,
-        high: parseFloat(data.dayHigh) || 0,
-        low: parseFloat(data.dayLow) || 0,
-        change: parseFloat(data.dayChange) || 0
+function fetchText(url, timeout=12000, retries=2) {
+  return new Promise((resolve,reject)=>{
+    let attempt=0;
+    const run=()=>{
+      attempt++;
+      const req=https.get(url,{headers:{'User-Agent':'ArzPulse/4.0','Accept':'application/json,text/plain,*/*'}},res=>{
+        let body='';
+        res.setEncoding('utf8');
+        res.on('data',chunk=>body+=chunk);
+        res.on('end',()=>{
+          if(res.statusCode && res.statusCode>=200 && res.statusCode<300) return resolve(body);
+          const err=new Error(`HTTP ${res.statusCode || 'unknown'}`);
+          if(attempt<=retries){ setTimeout(run, 900*attempt); } else reject(err);
+        });
+      });
+      req.setTimeout(timeout,()=>req.destroy(new Error('Request timeout')));
+      req.on('error',err=>{ if(attempt<=retries) setTimeout(run,900*attempt); else reject(err); });
     };
+    run();
+  });
+}
+async function fetchJSON(url){return JSON.parse(await fetchText(url));}
+function readJSON(file,fallback=null){try{return JSON.parse(fs.readFileSync(file,'utf8'));}catch{return fallback;}}
+function writeJSON(file,data){fs.writeFileSync(file,JSON.stringify(data,null,2)+'\n');}
+function num(v){const n=Number(v);return Number.isFinite(n)?n:0;}
+function convertXautToGram18K(xautPriceInUSDT, usdtPriceInIRR){ if(!xautPriceInUSDT||!usdtPriceInIRR)return 0;return Math.round((xautPriceInUSDT*usdtPriceInIRR/31.1034768)*0.75); }
+async function fetchNobitex(src,dst){
+  const json=await fetchJSON(`${BASE_URL}/market/stats?srcCurrency=${src}&dstCurrency=${dst}`);
+  if(json?.status!=='ok'||!json.stats)throw new Error(`Nobitex invalid response ${src}-${dst}`);
+  const key=`${src}-${dst}`; const d=json.stats[key]; if(!d)throw new Error(`Nobitex missing ${key}`);
+  return {bestBuy:num(d.bestBuy),bestSell:num(d.bestSell),lastPrice:num(d.latest),volume:num(d.volumeSrc),high:num(d.dayHigh),low:num(d.dayLow),change:num(d.dayChange)};
+}
+async function fetchYahoo(symbol){
+  const url=`${YAHOO}/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d&events=div%2Csplits`;
+  const json=await fetchJSON(url); const r=json?.chart?.result?.[0]; if(!r)throw new Error(`Yahoo missing ${symbol}`);
+  const q=r.indicators?.quote?.[0] || {}; const close=(q.close||[]).filter(v=>v!=null); const high=(q.high||[]).filter(v=>v!=null); const low=(q.low||[]).filter(v=>v!=null); const volume=(q.volume||[]).filter(v=>v!=null);
+  const last=num(close.at(-1)); const prev=num(close.at(-2)||last); const change=prev?((last-prev)/prev)*100:0; const ts=(r.timestamp||[]).at(-1);
+  return {last,change,high:num(high.at(-1)),low:num(low.at(-1)),volume:num(volume.at(-1)),timestamp:ts?new Date(ts*1000).toISOString():new Date().toISOString(),delayed:true,symbol};
 }
 
-// ---------- تابع اصلی ----------
-(async () => {
-    console.log('🚀 ArzPulse Price Fetcher شروع شد');
-    console.log(`📅 ${new Date().toISOString()}`);
-
-    let lastData = null;
-    const latestPath = path.join(DATA_DIR, 'latest.json');
-    if (fs.existsSync(latestPath)) {
-        try {
-            const raw = fs.readFileSync(latestPath, 'utf8');
-            lastData = JSON.parse(raw);
-            console.log('📂 داده‌های قبلی برای fallback بارگذاری شد.');
-        } catch (e) {
-            console.warn('⚠️ نتوانستیم داده‌های قبلی را بخوانیم:', e.message);
-        }
-    }
-
-    const assets = [
-        { src: 'btc', dst: 'rls', symbol: 'BTC' },
-        { src: 'eth', dst: 'rls', symbol: 'ETH' },
-        { src: 'usdt', dst: 'rls', symbol: 'USDT' },
-        { src: 'not', dst: 'rls', symbol: 'NOT' },
-        { src: 'xaut', dst: 'usdt', symbol: 'XAUT' }
-    ];
-
-    let results = {};
-    let hasError = false;
-    let errorDetails = [];
-
-    for (const asset of assets) {
-        try {
-            console.log(`📡 دریافت ${asset.symbol} (${asset.src}/${asset.dst})...`);
-            results[asset.symbol] = await fetchPrice(asset.src, asset.dst);
-            console.log(`✅ ${asset.symbol} دریافت شد.`);
-        } catch (error) {
-            console.error(`❌ خطا در دریافت ${asset.symbol}:`, error.message);
-            hasError = true;
-            errorDetails.push(`${asset.symbol}: ${error.message}`);
-            if (lastData && lastData.prices && lastData.prices[asset.symbol]) {
-                results[asset.symbol] = lastData.prices[asset.symbol];
-                console.log(`↩️ استفاده از داده‌های کش برای ${asset.symbol}`);
-            } else {
-                results[asset.symbol] = { bestBuy: 0, bestSell: 0, lastPrice: 0, volume: 0, high: 0, low: 0, change: 0 };
-                console.log(`⚠️ مقدار ۰ برای ${asset.symbol} استفاده شد.`);
-            }
-        }
-    }
-
-    const usdtPrice = results.USDT ? results.USDT.bestSell || 0 : 0;
-    const xautPrice = results.XAUT ? results.XAUT.bestSell || 0 : 0;
-    const gold18K = convertXautToGram18K(xautPrice, usdtPrice);
-    const dollarPrice = usdtPrice;
-
-    const latestData = {
-        timestamp: new Date().toISOString(),
-        prices: results,
-        gold18K: gold18K,
-        usdtPrice: usdtPrice,
-        dollarPrice: dollarPrice,
-        hasError: hasError,
-        errorDetails: errorDetails
-    };
-
-    fs.writeFileSync(latestPath, JSON.stringify(latestData, null, 2));
-    console.log(`✅ latest.json ذخیره شد: ${latestPath}`);
-
-    // تاریخچه
-    const today = new Date().toISOString().split('T')[0];
-    const historyFile = path.join(HISTORY_DIR, `${today}.json`);
-    let history = [];
-    if (fs.existsSync(historyFile)) {
-        try {
-            history = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
-        } catch (e) {
-            console.warn('⚠️ نتوانستیم تاریخچه را بخوانیم، از نو شروع می‌کنیم.');
-        }
-    }
-    history.push({
-        time: new Date().toISOString(),
-        BTC: results.BTC ? results.BTC.lastPrice || 0 : 0,
-        ETH: results.ETH ? results.ETH.lastPrice || 0 : 0,
-        USDT: results.USDT ? results.USDT.bestSell || 0 : 0,
-        NOT: results.NOT ? results.NOT.lastPrice || 0 : 0,
-        GOLD18K: gold18K,
-        DOLLAR: dollarPrice
-    });
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    history = history.filter(entry => new Date(entry.time) >= thirtyDaysAgo);
-    fs.writeFileSync(historyFile, JSON.stringify(history, null, 2));
-    console.log(`📊 تاریخچه روزانه ذخیره شد: ${historyFile}`);
-
-    // متا
-    const meta = {
-        lastUpdate: latestData.timestamp,
-        gold18K: gold18K,
-        usdtPrice: usdtPrice,
-        dollarPrice: dollarPrice,
-        hasError: hasError,
-        errorCount: errorDetails.length,
-        errors: errorDetails
-    };
-    const metaPath = path.join(DATA_DIR, 'meta.json');
-    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
-    console.log(`📄 meta.json ذخیره شد: ${metaPath}`);
-
-    console.log('📊 خلاصه قیمت‌های دریافت‌شده:');
-    for (const [symbol, data] of Object.entries(results)) {
-        console.log(`   ${symbol}: خرید ${data.bestBuy || 0} | فروش ${data.bestSell || 0} | آخرین ${data.lastPrice || 0}`);
-    }
-    console.log(`   طلا (۱۸ عیار): ${gold18K} ریال`);
-    console.log(`   دلار (USDT): ${dollarPrice} ریال`);
-
-    if (hasError) {
-        console.warn('⚠️ برخی خطاها رخ داد:', errorDetails.join('; '));
-    } else {
-        console.log('✅ تمام داده‌ها با موفقیت دریافت شدند.');
-    }
-
-    console.log('🏁 ArzPulse Price Fetcher پایان یافت.');
-})();
+(async()=>{
+  console.log('🚀 ArzPulse collector v4');
+  const previous=readJSON(LATEST_PATH,null);
+  const errors=[]; const prices={};
+  const localAssets=[['btc','rls','BTC'],['eth','rls','ETH'],['usdt','rls','USDT'],['not','rls','NOT'],['xaut','usdt','XAUT']];
+  for(const [src,dst,key] of localAssets){
+    try{prices[key]=await fetchNobitex(src,dst);console.log('✅',key);}
+    catch(e){errors.push(`${key}: ${e.message}`);prices[key]=previous?.prices?.[key] || {bestBuy:0,bestSell:0,lastPrice:0,volume:0,high:0,low:0,change:0};console.log('↩️',key,e.message);}
+  }
+  const usdt=num(prices.USDT?.bestSell); const xaut=num(prices.XAUT?.bestSell); const gold18K=convertXautToGram18K(xaut,usdt); const dollarPrice=usdt;
+  const market={};
+  const globalSymbols={BRENT:'BZ=F',WTI:'CL=F',XAUUSD:'GC=F',SILVER:'SI=F',SP500:'^GSPC',NASDAQ:'^IXIC',DXY:'DX-Y.NYB'};
+  for(const [key,symbol] of Object.entries(globalSymbols)){
+    try{market[key]=await fetchYahoo(symbol);console.log('✅',key,symbol);}
+    catch(e){errors.push(`${key}: ${e.message}`);market[key]=previous?.market?.[key] || {last:0,change:0,high:0,low:0,volume:0,timestamp:null,delayed:true,symbol};console.log('↩️',key,e.message);}
+  }
+  const now=new Date().toISOString(); const goldChange=prices.XAUT?.change || 0; const dollarChange=prices.USDT?.change || 0;
+  const latest={version:4,timestamp:now,prices,gold18K,usdtPrice:usdt,dollarPrice,goldChange,dollarChange,market,hasError:errors.length>0,errorDetails:errors};
+  writeJSON(LATEST_PATH,latest);
+  const today=now.slice(0,10); const file=path.join(HISTORY_DIR,`${today}.json`); const history=readJSON(file,[]);
+  history.push({time:now,BTC:num(prices.BTC?.lastPrice),ETH:num(prices.ETH?.lastPrice),USDT:num(prices.USDT?.bestSell),NOT:num(prices.NOT?.lastPrice),GOLD18K:gold18K,DOLLAR:dollarPrice,...Object.fromEntries(Object.entries(market).map(([k,v])=>[k,num(v.last)]))});
+  const cutoff=Date.now()-HISTORY_KEEP_DAYS*86400000; const trimmed=history.filter(x=>new Date(x.time).getTime()>=cutoff); writeJSON(file,trimmed);
+  const meta={version:4,lastUpdate:now,gold18K,usdtPrice:usdt,dollarPrice,marketSummary:Object.fromEntries(Object.entries(market).map(([k,v])=>[k,{last:v.last,change:v.change,delayed:v.delayed}])),hasError:errors.length>0,errorCount:errors.length,errors}; writeJSON(path.join(DATA_DIR,'meta.json'),meta);
+  console.log(`✅ Saved ${LATEST_PATH} and ${file}`);
+})().catch(e=>{console.error('❌ Collector failed:',e);process.exitCode=1;});

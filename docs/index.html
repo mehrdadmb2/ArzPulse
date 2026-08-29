@@ -1,1168 +1,187 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArzPulse – قیمت‌های لحظه‌ای نوبیتکس</title>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Google Font: Vazirmatn (فارسی) -->
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
-    <style>
-        /* ============================================================
-           RESET & BASE
-           ============================================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            color: #fff;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            position: relative;
-            background: #0f0c29;
-        }
-
-        /* ============================================================
-           BACKGROUND: PARTICLES + GRADIENT
-           ============================================================ */
-        #particles-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .bg-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #24243e 70%, #1a1a2e 100%);
-        }
-
-        .bg-gradient::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(251, 191, 36, 0.10) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 30%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-                radial-gradient(ellipse at 70% 70%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
-            animation: gradientOrbit 25s ease-in-out infinite alternate;
-        }
-
-        @keyframes gradientOrbit {
-            0% {
-                transform: translate(0, 0) scale(1) rotate(0deg);
-            }
-            100% {
-                transform: translate(3%, 2%) scale(1.1) rotate(3deg);
-            }
-        }
-
-        /* ============================================================
-           GLASS CONTAINER
-           ============================================================ */
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1400px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 56px;
-            padding: 28px 26px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 40px 80px -16px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(255, 255, 255, 0.02);
-            transition: all 0.3s ease;
-        }
-
-        /* ============================================================
-           HEADER
-           ============================================================ */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-        .logo {
-            font-size: 2.2rem;
-            font-weight: 900;
-            background: linear-gradient(to right, #f6d365, #fda085);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.5px;
-            text-shadow: 0 0 60px rgba(253, 160, 133, 0.15);
-        }
-        .logo i {
-            font-size: 2rem;
-            background: linear-gradient(to right, #f6d365, #fda085);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .currency-toggle {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 100px;
-            padding: 4px;
-            display: flex;
-            gap: 4px;
-            backdrop-filter: blur(8px);
-        }
-        .currency-toggle button {
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.4);
-            padding: 6px 20px;
-            border-radius: 100px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Vazirmatn', sans-serif;
-        }
-        .currency-toggle button.active {
-            background: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-            box-shadow: 0 0 30px rgba(251, 191, 36, 0.08);
-        }
-        .currency-toggle button:hover:not(.active) {
-            color: rgba(255, 255, 255, 0.7);
-        }
-        .badge {
-            background: rgba(16, 185, 129, 0.12);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            color: #6ee7b7;
-            padding: 6px 18px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: pulse-badge 2s infinite;
-            backdrop-filter: blur(8px);
-        }
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            background: #34d399;
-            border-radius: 50%;
-            display: inline-block;
-            animation: blink 1.2s infinite;
-        }
-        @keyframes pulse-badge {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.6;
-            }
-        }
-        @keyframes blink {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.2;
-            }
-        }
-
-        /* ============================================================
-           TOP CARDS (Gold & Dollar)
-           ============================================================ */
-        .top-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-        .top-card {
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 24px;
-            padding: 18px 22px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .top-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
-        }
-        .top-card.gold {
-            background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(245, 158, 11, 0.04));
-            border-color: rgba(251, 191, 36, 0.2);
-        }
-        .top-card.dollar {
-            background: linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(16, 185, 129, 0.03));
-            border-color: rgba(52, 211, 153, 0.15);
-        }
-        .top-card .info {
-            display: flex;
-            flex-direction: column;
-        }
-        .top-card .label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 600;
-        }
-        .top-card .label i {
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-        .top-card .value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-top: 2px;
-            letter-spacing: 0.5px;
-        }
-        .top-card.gold .value {
-            color: #fbbf24;
-            text-shadow: 0 0 40px rgba(251, 191, 36, 0.12);
-        }
-        .top-card.dollar .value {
-            color: #6ee7b7;
-            text-shadow: 0 0 40px rgba(52, 211, 153, 0.12);
-        }
-        .top-card .sub {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.3);
-            margin-top: 2px;
-        }
-        .top-card .icon-big {
-            font-size: 2.8rem;
-            opacity: 0.3;
-        }
-
-        /* ============================================================
-           PRICE GRID
-           ============================================================ */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-        .price-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px;
-            padding: 18px 16px 16px;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(8px);
-            position: relative;
-            overflow: hidden;
-            cursor: default;
-        }
-        .price-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
-            pointer-events: none;
-        }
-        .price-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.6);
-        }
-        .price-card .symbol-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .price-card .symbol {
-            font-size: 1.15rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .price-card .symbol i {
-            font-size: 1.4rem;
-            width: 28px;
-            text-align: center;
-        }
-        .price-card .change {
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 3px 14px;
-            border-radius: 100px;
-            backdrop-filter: blur(4px);
-        }
-        .change.up {
-            background: rgba(16, 185, 129, 0.18);
-            color: #34d399;
-        }
-        .change.down {
-            background: rgba(239, 68, 68, 0.18);
-            color: #f87171;
-        }
-        .change.neutral {
-            background: rgba(255, 255, 255, 0.06);
-            color: #9ca3af;
-        }
-
-        .price-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px 12px;
-            margin-top: 6px;
-        }
-        .price-details .row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-        }
-        .price-details .row .label {
-            color: rgba(255, 255, 255, 0.35);
-            font-weight: 400;
-        }
-        .price-details .row .value {
-            font-weight: 600;
-        }
-        .price-details .row .value.buy {
-            color: #6ee7b7;
-        }
-        .price-details .row .value.sell {
-            color: #fca5a5;
-        }
-        .price-details .row .value.high {
-            color: #34d399;
-        }
-        .price-details .row .value.low {
-            color: #f87171;
-        }
-        .price-details .row .value.volume {
-            color: #93c5fd;
-        }
-
-        .last-price {
-            margin-top: 12px;
-            text-align: left;
-            font-size: 1.25rem;
-            font-weight: 800;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-        .last-price .unit {
-            font-size: 0.65rem;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.3);
-            margin-right: 4px;
-        }
-        .last-price .usd-hint {
-            font-size: 0.7rem;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.25);
-        }
-
-        /* ============================================================
-           CHART SECTION
-           ============================================================ */
-        .chart-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px;
-            padding: 18px 18px 8px 18px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(8px);
-            transition: all 0.3s ease;
-        }
-        .chart-section:hover {
-            border-color: rgba(255, 255, 255, 0.08);
-        }
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-            gap: 10px;
-        }
-        .chart-title {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-        }
-        .chart-title i {
-            font-size: 1rem;
-            opacity: 0.6;
-        }
-        .chart-controls {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-        .chart-controls button {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.4);
-            padding: 4px 16px;
-            border-radius: 100px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            font-family: 'Vazirmatn', sans-serif;
-            backdrop-filter: blur(4px);
-        }
-        .chart-controls button:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.12);
-        }
-        .chart-controls button.active {
-            background: rgba(251, 191, 36, 0.15);
-            border-color: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.05);
-        }
-        .chart-wrapper {
-            position: relative;
-            height: 260px;
-            width: 100%;
-        }
-        .chart-wrapper canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* ============================================================
-           STATUS & FOOTER
-           ============================================================ */
-        .status {
-            margin-top: 10px;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.25);
-            text-align: center;
-            font-weight: 400;
-        }
-        .status.error {
-            color: #f87171;
-        }
-        .status.warning {
-            color: #fbbf24;
-        }
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.15);
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            padding-top: 16px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .footer a {
-            color: rgba(255, 255, 255, 0.25);
-            text-decoration: none;
-            transition: color 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .footer a:hover {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        .footer a i {
-            font-size: 0.8rem;
-        }
-
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
-        @media (max-width: 768px) {
-            .container {
-                padding: 16px;
-                border-radius: 32px;
-            }
-            .logo {
-                font-size: 1.6rem;
-            }
-            .logo i {
-                font-size: 1.5rem;
-            }
-            .top-cards {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .top-card .value {
-                font-size: 1.4rem;
-            }
-            .top-card .icon-big {
-                font-size: 2rem;
-            }
-            .grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-            .price-details {
-                grid-template-columns: 1fr;
-                gap: 2px;
-            }
-            .chart-wrapper {
-                height: 180px;
-            }
-            .chart-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .chart-controls {
-                justify-content: center;
-            }
-            .currency-toggle button {
-                padding: 4px 14px;
-                font-size: 0.7rem;
-            }
-            .last-price {
-                font-size: 1rem;
-            }
-        }
-        @media (max-width: 480px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .header-controls {
-                justify-content: space-between;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07111d" />
+  <meta name="description" content="ArzPulse — داشبورد حرفه‌ای رصد ارز، کریپتو، طلا و بازارهای جهانی" />
+  <title>ArzPulse | داشبورد هوشمند بازار</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js" defer></script>
+  <link rel="stylesheet" href="assets/app.css?v=4">
+  <script src="assets/app.js?v=4" defer></script>
 </head>
 <body>
+  <div class="bg-mesh"></div>
+  <canvas id="ambientCanvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
 
-    <!-- ===== BACKGROUND ===== -->
-    <div class="bg-gradient"></div>
-    <canvas id="particles-canvas"></canvas>
+  <main class="shell" id="appShell">
+    <header class="topbar glass interactive">
+      <a class="brand" href="#top" aria-label="ArzPulse">
+        <span class="brand-mark"><i class="fa-solid fa-wave-square"></i></span>
+        <span>
+          <strong>ArzPulse</strong>
+          <small>Market Intelligence</small>
+        </span>
+      </a>
 
-    <!-- ===== MAIN CONTAINER ===== -->
-    <div class="container" id="app">
+      <nav class="topnav" aria-label="ناوبری">
+        <a href="#overview">نمای کلی</a>
+        <a href="#markets">بازارها</a>
+        <a href="#analytics">تحلیل</a>
+        <a href="#about">درباره</a>
+      </nav>
 
-        <!-- HEADER -->
-        <div class="header">
-            <div class="logo">
-                <i class="fas fa-chart-line"></i> ArzPulse
-            </div>
-            <div class="header-controls">
-                <div class="currency-toggle" id="currencyToggle">
-                    <button class="active" data-currency="IRR"><i class="fas fa-rial"></i> ریال</button>
-                    <button data-currency="USD"><i class="fas fa-dollar-sign"></i> دلار</button>
-                </div>
-                <div class="badge">
-                    <span class="badge-dot"></span>
-                    <span id="liveStatus">زنده</span>
-                </div>
-            </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="themeBtn" type="button" title="تغییر حالت نمایش" aria-label="تغییر حالت نمایش">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="icon-btn" id="refreshBtn" type="button" title="به‌روزرسانی داده‌ها" aria-label="به‌روزرسانی داده‌ها">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+        <div class="live-pill" id="connectionPill"><span></span><b>در انتظار داده</b></div>
+      </div>
+    </header>
+
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <span class="eyebrow"><i class="fa-solid fa-sparkles"></i> داشبورد بازار ایران + بازار جهانی</span>
+        <h1>نبض بازار را <em>یک‌جا</em> ببین.</h1>
+        <p>قیمت‌های رمزارز، دلار، طلا و انرژی را همراه با روند تاریخی، نوسان، وضعیت داده و شاخص‌های منتخب بازار در یک نمای سریع و تعاملی رصد کن.</p>
+        <div class="hero-actions">
+          <a class="primary-btn" href="#analytics"><i class="fa-solid fa-chart-line"></i> مشاهده تحلیل</a>
+          <button class="ghost-btn" id="shareBtn" type="button"><i class="fa-solid fa-share-nodes"></i> اشتراک‌گذاری</button>
         </div>
+      </div>
+      <div class="hero-orbit interactive" aria-hidden="true">
+        <div class="orbit-ring ring-1"></div>
+        <div class="orbit-ring ring-2"></div>
+        <div class="orbit-core"><i class="fa-solid fa-chart-line"></i><span>Pulse</span></div>
+        <div class="orbit-dot dot-a">$</div>
+        <div class="orbit-dot dot-b">₿</div>
+        <div class="orbit-dot dot-c">Au</div>
+        <div class="orbit-dot dot-d">Oil</div>
+      </div>
+    </section>
 
-        <!-- TOP CARDS -->
-        <div class="top-cards">
-            <div class="top-card gold">
-                <div class="info">
-                    <div class="label"><i class="fas fa-crown"></i> هر گرم طلای ۱۸ عیار</div>
-                    <div class="value" id="goldPrice">–</div>
-                    <div class="sub" id="goldSub">نرخ تتر: –</div>
-                </div>
-                <div class="icon-big"><i class="fas fa-coins"></i></div>
-            </div>
-            <div class="top-card dollar">
-                <div class="info">
-                    <div class="label"><i class="fas fa-dollar-sign"></i> قیمت دلار</div>
-                    <div class="value" id="dollarPrice">–</div>
-                    <div class="sub" id="dollarSub">نرخ بازار (USDT)</div>
-                </div>
-                <div class="icon-big"><i class="fas fa-globe-americas"></i></div>
-            </div>
+    <section class="toolbar glass interactive" id="overview">
+      <div class="toolbar-left">
+        <div class="segmented" id="currencyToggle" role="group" aria-label="واحد نمایش">
+          <button type="button" class="active" data-currency="IRR">ریال</button>
+          <button type="button" data-currency="USD">دلار</button>
         </div>
-
-        <!-- PRICE GRID -->
-        <div class="grid" id="priceGrid"></div>
-
-        <!-- CHART SECTION -->
-        <div class="chart-section">
-            <div class="chart-header">
-                <div class="chart-title"><i class="fas fa-chart-simple"></i> قیمت <span id="chartSymbol">بیت‌کوین</span> (۳۰ روز)</div>
-                <div class="chart-controls" id="chartControls">
-                    <button data-symbol="BTC" class="active"><i class="fab fa-bitcoin"></i> BTC</button>
-                    <button data-symbol="ETH"><i class="fab fa-ethereum"></i> ETH</button>
-                    <button data-symbol="USDT"><i class="fas fa-coins"></i> USDT</button>
-                    <button data-symbol="NOT"><i class="fas fa-rocket"></i> NOT</button>
-                    <button data-symbol="GOLD"><i class="fas fa-crown"></i> طلا</button>
-                    <button data-symbol="DOLLAR"><i class="fas fa-dollar-sign"></i> دلار</button>
-                </div>
-            </div>
-            <div class="chart-wrapper">
-                <canvas id="priceChart"></canvas>
-            </div>
+        <div class="segmented" id="densityToggle" role="group" aria-label="تراکم نمایش">
+          <button type="button" class="active" data-density="comfortable">راحت</button>
+          <button type="button" data-density="compact">فشرده</button>
         </div>
+      </div>
+      <div class="toolbar-right">
+        <span class="data-age"><i class="fa-regular fa-clock"></i><span id="lastUpdateText">—</span></span>
+        <span class="source-chip"><i class="fa-solid fa-database"></i> GitHub data layer</span>
+      </div>
+    </section>
 
-        <!-- STATUS -->
-        <div class="status" id="statusBar">در حال دریافت داده‌ها...</div>
+    <section class="summary-grid">
+      <article class="summary-card gold interactive" data-tilt>
+        <div class="card-top"><span class="label"><i class="fa-solid fa-coins"></i> طلای ۱۸ عیار</span><span class="tag">IR</span></div>
+        <strong class="big-number" id="goldPrice">—</strong>
+        <div class="mini-row"><span id="goldSub">تتر: —</span><span id="goldChange" class="change neutral">—</span></div>
+        <div class="sparkline"><canvas id="goldSpark"></canvas></div>
+      </article>
+      <article class="summary-card dollar interactive" data-tilt>
+        <div class="card-top"><span class="label"><i class="fa-solid fa-dollar-sign"></i> دلار مرجع تتر</span><span class="tag">USDT/IRR</span></div>
+        <strong class="big-number" id="dollarPrice">—</strong>
+        <div class="mini-row"><span>مبنای تبدیل دارایی‌ها</span><span id="dollarChange" class="change neutral">—</span></div>
+        <div class="sparkline"><canvas id="dollarSpark"></canvas></div>
+      </article>
+      <article class="summary-card oil interactive" data-tilt>
+        <div class="card-top"><span class="label"><i class="fa-solid fa-droplet"></i> نفت برنت</span><span class="tag">USD/bbl</span></div>
+        <strong class="big-number" id="brentPrice">—</strong>
+        <div class="mini-row"><span id="brentSub">بازار جهانی</span><span id="brentChange" class="change neutral">—</span></div>
+        <div class="sparkline"><canvas id="brentSpark"></canvas></div>
+      </article>
+      <article class="summary-card market interactive" data-tilt>
+        <div class="card-top"><span class="label"><i class="fa-solid fa-gauge-high"></i> وضعیت بازار</span><span class="tag">PULSE</span></div>
+        <strong class="big-number" id="marketPulse">—</strong>
+        <div class="mini-row"><span id="pulseSub">در حال محاسبه</span><span id="pulseScore" class="change neutral">—</span></div>
+        <div class="meter"><span id="pulseMeter"></span></div>
+      </article>
+    </section>
 
-        <!-- FOOTER -->
-        <div class="footer">
-            <span><i class="fas fa-database"></i> داده‌ها از <a href="https://nobitex.ir" target="_blank">نوبیتکس</a></span>
-            <span><i class="fas fa-clock"></i> بروزرسانی هر ۲ دقیقه</span>
-            <span><i class="fab fa-telegram"></i> <a href="https://t.me/ArzPulseBot" target="_blank">ربات تلگرام</a></span>
-            <span><i class="fab fa-github"></i> <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank">گیت‌هاب</a></span>
+    <section class="section-head" id="markets">
+      <div><span class="eyebrow">LIVE MARKETS</span><h2>بازارهای منتخب</h2></div>
+      <div class="filters" id="marketFilters" role="group" aria-label="فیلتر بازار">
+        <button class="active" type="button" data-filter="all">همه</button>
+        <button type="button" data-filter="crypto">کریپتو</button>
+        <button type="button" data-filter="commodity">کالا</button>
+        <button type="button" data-filter="index">شاخص</button>
+      </div>
+    </section>
+
+    <section class="ticker glass" aria-label="نوار قیمت">
+      <div class="ticker-track" id="tickerTrack"></div>
+    </section>
+
+    <section class="market-grid" id="marketGrid"></section>
+
+    <section class="analytics-layout" id="analytics">
+      <article class="chart-card glass interactive">
+        <div class="section-title-row">
+          <div><span class="eyebrow">PRICE HISTORY</span><h2 id="chartHeading">روند بیت‌کوین</h2></div>
+          <div class="chart-controls" id="chartAssetControls"></div>
         </div>
-    </div>
+        <div class="chart-range" id="chartRangeControls" role="group" aria-label="بازه نمودار">
+          <button type="button" data-range="1d">۱ روز</button>
+          <button type="button" class="active" data-range="7d">۷ روز</button>
+          <button type="button" data-range="30d">۳۰ روز</button>
+        </div>
+        <div class="chart-wrap"><canvas id="mainChart"></canvas><div class="chart-empty" id="chartEmpty">تاریخچه هنوز موجود نیست.</div></div>
+      </article>
 
-    <script>
-        (function() {
-            'use strict';
+      <aside class="insight-stack">
+        <article class="insight-card glass interactive">
+          <div class="insight-head"><span>آمار کلیدی</span><i class="fa-solid fa-bolt"></i></div>
+          <div class="stats-list" id="statsList"></div>
+        </article>
+        <article class="insight-card glass interactive">
+          <div class="insight-head"><span>واچ‌لیست</span><button class="small-link" id="resetWatchlist" type="button">بازنشانی</button></div>
+          <div class="watchlist" id="watchlist"></div>
+        </article>
+        <article class="insight-card glass interactive">
+          <div class="insight-head"><span>وضعیت سرویس</span><span class="tiny-dot" id="healthDot"></span></div>
+          <p class="health-text" id="healthText">در حال بررسی آخرین داده...</p>
+          <div class="health-row"><span>آخرین بروزرسانی</span><strong id="healthAge">—</strong></div>
+          <div class="health-row"><span>منبع محلی</span><strong>GitHub Actions</strong></div>
+        </article>
+      </aside>
+    </section>
 
-            // ==========================================================
-            // SETTINGS
-            // ==========================================================
-            const basePath = window.location.pathname.includes('/ArzPulse/') ? '/ArzPulse' : '';
-            const DATA_URL = `${basePath}/data/latest.json`;
-            const HISTORY_BASE = `${basePath}/data/history/`;
+    <section class="comparison glass interactive">
+      <div class="section-title-row">
+        <div><span class="eyebrow">RELATIVE MOVEMENT</span><h2>مقایسه بازدهی</h2></div>
+        <span class="muted">مبنای مقایسه: شروع بازه انتخاب‌شده</span>
+      </div>
+      <div class="comparison-grid" id="comparisonGrid"></div>
+    </section>
 
-            const ASSETS = [
-                { symbol: 'BTC', name: 'بیت‌کوین', icon: 'fab fa-bitcoin', color: '#f7931a' },
-                { symbol: 'ETH', name: 'اتریوم', icon: 'fab fa-ethereum', color: '#627eea' },
-                { symbol: 'USDT', name: 'تتر', icon: 'fas fa-coins', color: '#26a17b' },
-                { symbol: 'NOT', name: 'نات‌کوین', icon: 'fas fa-rocket', color: '#a855f7' }
-            ];
+    <section class="notice glass" id="about">
+      <div class="notice-icon"><i class="fa-solid fa-circle-info"></i></div>
+      <div><strong>درباره داده‌ها</strong><p>قیمت‌های بازار ایران از لایه داده ArzPulse می‌آیند. بازارهای جهانی از Yahoo Finance در GitHub Actions نمونه‌برداری و در JSON ذخیره می‌شوند؛ داده‌های جهانی ممکن است با تأخیر بازار همراه باشند.</p></div>
+      <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener">مشاهده مخزن <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+    </section>
 
-            let currentCurrency = 'IRR';
-            let latestData = null;
-            let chartInstance = null;
-            let currentChartSymbol = 'BTC';
-            let fullHistory = [];
+    <footer class="footer">
+      <span>ArzPulse © <span id="year"></span></span>
+      <span>ساخته‌شده برای پایش سریع بازار</span>
+      <span><a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> GitHub</a></span>
+    </footer>
+  </main>
 
-            // ==========================================================
-            // HELPERS
-            // ==========================================================
-            function formatNumber(num) {
-                if (num === undefined || num === null || isNaN(num)) return '۰';
-                return Math.round(num).toLocaleString('fa-IR').replace(/,/g, '،');
-            }
-
-            function formatCurrency(num, currency = 'IRR') {
-                if (num === undefined || num === null || isNaN(num)) return '–';
-                const formatted = formatNumber(num);
-                if (currency === 'USD') {
-                    if (formatted === '۰') return '–';
-                    return `$${formatted}`;
-                }
-                return formatted === '۰' ? '–' : `${formatted} ریال`;
-            }
-
-            function getChangeEmoji(change) {
-                if (change > 0) return '🟢';
-                if (change < 0) return '🔴';
-                return '⚪';
-            }
-
-            function getChangeClass(change) {
-                if (change > 0) return 'up';
-                if (change < 0) return 'down';
-                return 'neutral';
-            }
-
-            function getChangeArrow(change) {
-                if (change > 0) return '▲';
-                if (change < 0) return '▼';
-                return '–';
-            }
-
-            // ==========================================================
-            // PARTICLES BACKGROUND
-            // ==========================================================
-            function initParticles() {
-                const canvas = document.getElementById('particles-canvas');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                let w, h;
-                const particles = [];
-                const COUNT = 80;
-
-                function resize() {
-                    w = canvas.width = window.innerWidth;
-                    h = canvas.height = window.innerHeight;
-                }
-                window.addEventListener('resize', resize);
-                resize();
-
-                class Particle {
-                    constructor() {
-                        this.x = Math.random() * w;
-                        this.y = Math.random() * h;
-                        this.size = Math.random() * 2.5 + 0.5;
-                        this.speedX = (Math.random() - 0.5) * 0.35;
-                        this.speedY = (Math.random() - 0.5) * 0.35;
-                        this.opacity = Math.random() * 0.5 + 0.15;
-                        this.color = `hsl(${40 + Math.random() * 20}, 80%, ${60 + Math.random() * 30}%)`;
-                    }
-                    update() {
-                        this.x += this.speedX;
-                        this.y += this.speedY;
-                        if (this.x < 0 || this.x > w) this.speedX *= -1;
-                        if (this.y < 0 || this.y > h) this.speedY *= -1;
-                    }
-                    draw() {
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                        ctx.fillStyle = this.color;
-                        ctx.globalAlpha = this.opacity;
-                        ctx.fill();
-                        ctx.globalAlpha = 1;
-                    }
-                }
-
-                for (let i = 0; i < COUNT; i++) {
-                    particles.push(new Particle());
-                }
-
-                function animate() {
-                    ctx.clearRect(0, 0, w, h);
-                    particles.forEach(p => { p.update();
-                        p.draw(); });
-                    // Connect nearby particles
-                    for (let i = 0; i < particles.length; i++) {
-                        for (let j = i + 1; j < particles.length; j++) {
-                            const dx = particles[i].x - particles[j].x;
-                            const dy = particles[i].y - particles[j].y;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            if (dist < 130) {
-                                ctx.beginPath();
-                                ctx.moveTo(particles[i].x, particles[i].y);
-                                ctx.lineTo(particles[j].x, particles[j].y);
-                                ctx.strokeStyle = `rgba(255, 215, 100, ${0.06 * (1 - dist / 130)})`;
-                                ctx.lineWidth = 0.6;
-                                ctx.stroke();
-                            }
-                        }
-                    }
-                    requestAnimationFrame(animate);
-                }
-                animate();
-            }
-
-            // ==========================================================
-            // DATA FETCHING
-            // ==========================================================
-            async function fetchLatestData() {
-                try {
-                    const res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return await res.json();
-                } catch (e) {
-                    console.error('❌ خطا در دریافت داده‌ها:', e);
-                    return null;
-                }
-            }
-
-            async function fetchAllHistory() {
-                try {
-                    const today = new Date().toISOString().split('T')[0];
-                    const promises = [];
-                    for (let i = 0; i < 30; i++) {
-                        const d = new Date();
-                        d.setDate(d.getDate() - i);
-                        const dateStr = d.toISOString().split('T')[0];
-                        const url = `${HISTORY_BASE}${dateStr}.json`;
-                        promises.push(
-                            fetch(url + '?t=' + Date.now(), { cache: 'no-store' })
-                            .then(r => r.ok ? r.json() : null)
-                            .catch(() => null)
-                        );
-                    }
-                    const results = await Promise.all(promises);
-                    let all = [];
-                    results.forEach(arr => {
-                        if (arr && Array.isArray(arr)) {
-                            all = all.concat(arr);
-                        }
-                    });
-                    all.sort((a, b) => new Date(a.time) - new Date(b.time));
-                    return all;
-                } catch (e) {
-                    console.warn('خطا در دریافت تاریخچه:', e);
-                    return [];
-                }
-            }
-
-            // ==========================================================
-            // RENDER PRICES
-            // ==========================================================
-            function renderPrices(data) {
-                if (!data || !data.prices) {
-                    const status = document.getElementById('statusBar');
-                    status.textContent = '⚠️ داده‌ای در دسترس نیست';
-                    status.className = 'status error';
-                    return;
-                }
-
-                latestData = data;
-                const currency = currentCurrency;
-                const usdtPrice = data.usdtPrice || 0;
-                const dollarPrice = data.dollarPrice || usdtPrice;
-
-                // Gold & Dollar
-                const gold = data.gold18K || 0;
-                document.getElementById('goldPrice').textContent = formatCurrency(gold, currency);
-                document.getElementById('goldSub').textContent = `نرخ تتر: ${formatCurrency(usdtPrice, currency)}`;
-                document.getElementById('dollarPrice').textContent = formatCurrency(dollarPrice, currency);
-                document.getElementById('dollarSub').textContent = 'نرخ بازار (USDT)';
-
-                // Price cards
-                const grid = document.getElementById('priceGrid');
-                let html = '';
-                ASSETS.forEach(a => {
-                    const p = data.prices[a.symbol];
-                    if (p && p.bestSell > 0) {
-                        const change = p.change || 0;
-                        const cls = getChangeClass(change);
-                        const arrow = getChangeArrow(change);
-                        const emoji = getChangeEmoji(change);
-                        const usdPrice = dollarPrice > 0 ? (p.lastPrice / dollarPrice).toFixed(2) : '۰';
-                        html += `
-                            <div class="price-card">
-                                <div class="symbol-row">
-                                    <span class="symbol"><i class="${a.icon}" style="color:${a.color};"></i> ${a.symbol}</span>
-                                    <span class="change ${cls}">${emoji} ${arrow} ${Math.abs(change).toFixed(2)}%</span>
-                                </div>
-                                <div class="price-details">
-                                    <div class="row"><span class="label">خرید</span><span class="value buy">${formatCurrency(p.bestBuy, currency)}</span></div>
-                                    <div class="row"><span class="label">فروش</span><span class="value sell">${formatCurrency(p.bestSell, currency)}</span></div>
-                                    <div class="row"><span class="label">بالاترین</span><span class="value high">${formatCurrency(p.high, currency)}</span></div>
-                                    <div class="row"><span class="label">پایین‌ترین</span><span class="value low">${formatCurrency(p.low, currency)}</span></div>
-                                    <div class="row" style="grid-column: 1 / -1;"><span class="label">حجم (۲۴h)</span><span class="value volume">${p.volume ? p.volume.toFixed(2) : '۰'}</span></div>
-                                </div>
-                                <div class="last-price">
-                                    <span>${formatNumber(p.lastPrice, currency)} <span class="unit">${currency === 'USD' ? 'USD' : 'ریال'}</span></span>
-                                    <span class="usd-hint"><i class="fas fa-dollar-sign"></i> ${usdPrice}</span>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="price-card" style="opacity:0.4;">
-                                <div class="symbol-row">
-                                    <span class="symbol"><i class="${a.icon}" style="color:${a.color};"></i> ${a.symbol}</span>
-                                    <span class="change neutral">⏳</span>
-                                </div>
-                                <div style="text-align:center;padding:20px 0;color:rgba(255,255,255,0.25);font-size:0.8rem;">
-                                    داده در دسترس نیست
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-                grid.innerHTML = html;
-
-                // Status
-                const time = data.timestamp ? new Date(data.timestamp).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran' }) :
-                    'نامشخص';
-                const status = document.getElementById('statusBar');
-                status.textContent = `✅ آخرین بروزرسانی: ${time}`;
-                status.className = 'status';
-                document.getElementById('liveStatus').textContent = 'زنده';
-                document.querySelector('.badge-dot').style.background = '#34d399';
-            }
-
-            // ==========================================================
-            // CHART
-            // ==========================================================
-            function updateChart(history, symbol) {
-                const canvas = document.getElementById('priceChart');
-                if (!canvas) return;
-
-                if (!history || history.length === 0) {
-                    history = generateMockHistory(symbol);
-                }
-
-                let prices, labels;
-                if (symbol === 'GOLD') {
-                    prices = history.map(h => h.GOLD18K || 0).filter(p => p > 0);
-                    labels = history.map(h => new Date(h.time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }));
-                } else if (symbol === 'DOLLAR') {
-                    prices = history.map(h => h.DOLLAR || h.USDT || 0).filter(p => p > 0);
-                    labels = history.map(h => new Date(h.time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }));
-                } else {
-                    prices = history.map(h => h[symbol] || 0).filter(p => p > 0);
-                    labels = history.map(h => new Date(h.time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }));
-                }
-
-                if (prices.length === 0) {
-                    prices = [0];
-                    labels = ['داده در دسترس نیست'];
-                }
-
-                const symbolNames = {
-                    BTC: 'بیت‌کوین',
-                    ETH: 'اتریوم',
-                    USDT: 'تتر',
-                    NOT: 'نات‌کوین',
-                    GOLD: 'طلا (۱۸ عیار)',
-                    DOLLAR: 'دلار'
-                };
-                document.getElementById('chartSymbol').textContent = symbolNames[symbol] || symbol;
-
-                const colors = {
-                    BTC: '#f7931a',
-                    ETH: '#627eea',
-                    USDT: '#26a17b',
-                    NOT: '#a855f7',
-                    GOLD: '#fbbf24',
-                    DOLLAR: '#34d399'
-                };
-                const color = colors[symbol] || '#fbbf24';
-
-                if (chartInstance) chartInstance.destroy();
-
-                const ctx = canvas.getContext('2d');
-                chartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: symbol,
-                            data: prices,
-                            borderColor: color,
-                            backgroundColor: color + '18',
-                            fill: true,
-                            tension: 0.35,
-                            pointRadius: 1.8,
-                            pointBackgroundColor: color,
-                            borderWidth: 2.5
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const val = context.parsed.y;
-                                        if (currentCurrency === 'USD' && latestData?.dollarPrice) {
-                                            return `$${(val / latestData.dollarPrice).toFixed(2)}`;
-                                        }
-                                        return `${Math.round(val).toLocaleString('fa-IR').replace(/,/g, '،')} ریال`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { color: 'rgba(255,255,255,0.04)' },
-                                ticks: {
-                                    color: 'rgba(255,255,255,0.25)',
-                                    font: { size: 9, family: 'Vazirmatn' },
-                                    maxTicksLimit: 15
-                                }
-                            },
-                            y: {
-                                grid: { color: 'rgba(255,255,255,0.04)' },
-                                ticks: {
-                                    color: 'rgba(255,255,255,0.25)',
-                                    font: { size: 9, family: 'Vazirmatn' },
-                                    callback: function(value) {
-                                        if (currentCurrency === 'USD' && latestData?.dollarPrice) {
-                                            return `$${(value / latestData.dollarPrice).toFixed(1)}`;
-                                        }
-                                        return Math.round(value).toLocaleString('fa-IR').replace(/,/g, '،');
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            function generateMockHistory(symbol) {
-                const data = [];
-                const now = Date.now();
-                let basePrice = 0;
-                switch (symbol) {
-                    case 'BTC':
-                        basePrice = 6400000000;
-                        break;
-                    case 'ETH':
-                        basePrice = 425000000;
-                        break;
-                    case 'USDT':
-                        basePrice = 58600;
-                        break;
-                    case 'NOT':
-                        basePrice = 855;
-                        break;
-                    case 'GOLD':
-                        basePrice = 12345000;
-                        break;
-                    case 'DOLLAR':
-                        basePrice = 58600;
-                        break;
-                    default:
-                        basePrice = 1000000;
-                }
-                for (let i = 0; i < 30; i++) {
-                    const time = new Date(now - (29 - i) * 24 * 60 * 60 * 1000);
-                    const variation = (Math.random() - 0.5) * 0.08;
-                    const price = Math.round(basePrice * (1 + variation));
-                    const entry = { time: time.toISOString() };
-                    if (symbol === 'GOLD') entry.GOLD18K = price;
-                    else if (symbol === 'DOLLAR') entry.DOLLAR = price;
-                    else entry[symbol] = price;
-                    data.push(entry);
-                }
-                return data;
-            }
-
-            // ==========================================================
-            // LOAD DATA
-            // ==========================================================
-            async function loadData() {
-                const status = document.getElementById('statusBar');
-                status.textContent = '⏳ در حال دریافت داده‌ها...';
-                status.className = 'status';
-
-                try {
-                    const latest = await fetchLatestData();
-                    if (latest && latest.prices) {
-                        const hasValid = Object.values(latest.prices).some(p => p && p.bestSell > 0);
-                        if (hasValid) {
-                            renderPrices(latest);
-                        } else {
-                            status.textContent = '⚠️ داده‌های قیمت نامعتبر (مقادیر صفر)';
-                            status.className = 'status warning';
-                        }
-                    } else {
-                        status.textContent = '⚠️ داده‌ای دریافت نشد. لطفاً بعداً تلاش کنید.';
-                        status.className = 'status error';
-                    }
-
-                    const history = await fetchAllHistory();
-                    if (history && history.length > 0) {
-                        fullHistory = history;
-                        updateChart(history, currentChartSymbol);
-                    } else {
-                        const mock = generateMockHistory(currentChartSymbol);
-                        fullHistory = mock;
-                        updateChart(mock, currentChartSymbol);
-                    }
-                } catch (error) {
-                    console.error('خطا در بارگذاری:', error);
-                    status.textContent = '❌ خطا در دریافت داده‌ها. صفحه را مجدداً بارگذاری کنید.';
-                    status.className = 'status error';
-                }
-            }
-
-            // ==========================================================
-            // CONTROLS
-            // ==========================================================
-            function setupCurrencyToggle() {
-                const buttons = document.querySelectorAll('#currencyToggle button');
-                buttons.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        buttons.forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        currentCurrency = this.dataset.currency;
-                        if (latestData) renderPrices(latestData);
-                        if (fullHistory.length > 0) updateChart(fullHistory, currentChartSymbol);
-                        else updateChart(generateMockHistory(currentChartSymbol), currentChartSymbol);
-                    });
-                });
-            }
-
-            function setupChartControls() {
-                document.querySelectorAll('#chartControls button').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('#chartControls button').forEach(b => b.classList.remove(
-                        'active'));
-                        this.classList.add('active');
-                        currentChartSymbol = this.dataset.symbol;
-                        if (fullHistory.length > 0) {
-                            updateChart(fullHistory, currentChartSymbol);
-                        } else {
-                            updateChart(generateMockHistory(currentChartSymbol), currentChartSymbol);
-                        }
-                    });
-                });
-            }
-
-            // ==========================================================
-            // INIT
-            // ==========================================================
-            initParticles();
-
-            setTimeout(() => {
-                loadData();
-            }, 100);
-
-            setupCurrencyToggle();
-            setupChartControls();
-            setInterval(loadData, 2 * 60 * 1000);
-
-            console.log('🚀 ArzPulse Dashboard v3 loaded');
-        })();
-    </script>
-
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <button class="scroll-top" id="scrollTopBtn" type="button" aria-label="بازگشت به بالا"><i class="fa-solid fa-arrow-up"></i></button>
 </body>
 </html>
