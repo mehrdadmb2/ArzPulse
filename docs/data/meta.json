@@ -1,8 +1,46 @@
 {
-  "lastUpdate": "2026-08-29T19:50:51.881Z",
-  "gold18K": 222141293,
-  "usdtPrice": 2048130,
-  "dollarPrice": 2048130,
+  "version": 4,
+  "lastUpdate": "2026-08-29T19:55:46.367Z",
+  "gold18K": 221682056,
+  "usdtPrice": 2048450,
+  "dollarPrice": 2048450,
+  "marketSummary": {
+    "BRENT": {
+      "last": 89.30999755859375,
+      "change": -0.4347819430512033,
+      "delayed": true
+    },
+    "WTI": {
+      "last": 83.4000015258789,
+      "change": -0.1556294209478534,
+      "delayed": true
+    },
+    "XAUUSD": {
+      "last": 4478.10009765625,
+      "change": -2.8548515539052013,
+      "delayed": true
+    },
+    "SILVER": {
+      "last": 66.99500274658203,
+      "change": -3.5057369081419987,
+      "delayed": true
+    },
+    "SP500": {
+      "last": 7711.759765625,
+      "change": -0.24874522107781005,
+      "delayed": true
+    },
+    "NASDAQ": {
+      "last": 26402.419921875,
+      "change": -0.5234462058060789,
+      "delayed": true
+    },
+    "DXY": {
+      "last": 99.69999694824219,
+      "change": 0.5445676343184248,
+      "delayed": true
+    }
+  },
   "hasError": false,
   "errorCount": 0,
   "errors": []
