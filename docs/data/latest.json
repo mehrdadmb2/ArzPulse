@@ -1,12 +1,12 @@
 {
   "version": 4,
-  "timestamp": "2026-08-30T04:00:44.638Z",
+  "timestamp": "2026-08-30T04:05:45.080Z",
   "prices": {
     "BTC": {
-      "bestBuy": 159556000010,
-      "bestSell": 159799799990,
+      "bestBuy": 159799799990,
+      "bestSell": 159799999890,
       "lastPrice": 159799799990,
-      "volume": 6.7902415213,
+      "volume": 6.7990740301,
       "high": 160000000000,
       "low": 156500000000,
       "change": 1.54
@@ -14,24 +14,24 @@
     "ETH": {
       "bestBuy": 5012227480,
       "bestSell": 5023328470,
-      "lastPrice": 5011524580,
-      "volume": 108.4069493338,
+      "lastPrice": 5023328470,
+      "volume": 108.4343793338,
       "high": 5029999990,
       "low": 4926970340,
-      "change": 1.45
+      "change": 1.69
     },
     "USDT": {
-      "bestBuy": 2051000,
-      "bestSell": 2051010,
-      "lastPrice": 2051020,
-      "volume": 5048861.087681683,
+      "bestBuy": 2050030,
+      "bestSell": 2051890,
+      "lastPrice": 2050030,
+      "volume": 5055256.947681683,
       "high": 2051980,
       "low": 2026000,
-      "change": 1.1
+      "change": 1.05
     },
     "NOT": {
-      "bestBuy": 827.31,
-      "bestSell": 829.33,
+      "bestBuy": 827.54,
+      "bestSell": 829.32,
       "lastPrice": 828.9,
       "volume": 55650481.76127944,
       "high": 839,
@@ -39,20 +39,20 @@
       "change": -0.36
     },
     "XAUT": {
-      "bestBuy": 4478.5,
-      "bestSell": 4486.7,
-      "lastPrice": 4478.5,
-      "volume": 36.6151928485,
+      "bestBuy": 4478.4,
+      "bestSell": 4478.7,
+      "lastPrice": 4478.7,
+      "volume": 36.6224828485,
       "high": 4500,
       "low": 4466,
-      "change": -0.05
+      "change": -0.04
     }
   },
-  "gold18K": 221894805,
-  "usdtPrice": 2051010,
-  "dollarPrice": 2051010,
-  "goldChange": -0.05,
-  "dollarChange": 1.1,
+  "gold18K": 221594192,
+  "usdtPrice": 2051890,
+  "dollarPrice": 2051890,
+  "goldChange": -0.04,
+  "dollarChange": 1.05,
   "market": {
     "BRENT": {
       "last": 88.0999984741211,
@@ -78,7 +78,7 @@
       "last": 4529.89990234375,
       "change": -1.731138459934924,
       "high": 4688,
-      "low": 4495.5,
+      "low": 4495,
       "volume": 268759,
       "timestamp": "2026-08-28T04:00:00.000Z",
       "delayed": true,
