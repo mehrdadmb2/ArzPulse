@@ -1,183 +1,158 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#07111d" />
-  <meta name="description" content="ArzPulse — داشبورد حرفه‌ای رصد ارز، کریپتو، طلا و بازارهای جهانی" />
-  <title>ArzPulse | داشبورد هوشمند بازار</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050b12">
+  <meta name="description" content="ArzPulse — داشبورد زنده و تعاملی ارز، کریپتو، طلا، انرژی و بازارهای جهانی">
+  <meta name="color-scheme" content="dark light">
+  <title>ArzPulse | Market Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="assets/app.css?v=4">
-  <script src="assets/app.js?v=4" defer></script>
+  <link rel="stylesheet" href="assets/app.css?v=7">
+  <script src="assets/app.js?v=7" defer></script>
 </head>
 <body>
-  <div class="bg-mesh"></div>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+  <div class="ambient ambient-c"></div>
   <canvas id="ambientCanvas" aria-hidden="true"></canvas>
-  <div class="noise" aria-hidden="true"></div>
 
-  <main class="shell" id="appShell">
-    <header class="topbar glass interactive">
+  <main class="shell" id="top">
+    <header class="topbar glass" id="siteHeader">
       <a class="brand" href="#top" aria-label="ArzPulse">
-        <span class="brand-mark"><i class="fa-solid fa-wave-square"></i></span>
-        <span>
+        <span class="brand-mark" aria-hidden="true">
+          <span class="brand-mark-grid"></span>
+          <i class="fa-solid fa-wave-square"></i>
+        </span>
+        <span class="brand-copy">
           <strong>ArzPulse</strong>
-          <small>Market Intelligence</small>
+          <small>Market Terminal</small>
         </span>
       </a>
 
-      <nav class="topnav" aria-label="ناوبری">
-        <a href="#overview">نمای کلی</a>
-        <a href="#markets">بازارها</a>
-        <a href="#analytics">تحلیل</a>
-        <a href="#about">درباره</a>
+      <nav class="topnav" aria-label="بخش‌ها">
+        <a class="active" href="#markets">بازار</a>
+        <a href="#analytics">نمودار</a>
+        <a href="#watch">واچ‌لیست</a>
+        <a href="#compare">مقایسه</a>
       </nav>
 
       <div class="top-actions">
-        <button class="icon-btn" id="themeBtn" type="button" title="تغییر حالت نمایش" aria-label="تغییر حالت نمایش">
-          <i class="fa-solid fa-moon"></i>
-        </button>
-        <button class="icon-btn" id="refreshBtn" type="button" title="به‌روزرسانی داده‌ها" aria-label="به‌روزرسانی داده‌ها">
-          <i class="fa-solid fa-rotate"></i>
-        </button>
-        <div class="live-pill" id="connectionPill"><span></span><b>در انتظار داده</b></div>
+        <span class="market-clock" id="marketClock">—</span>
+        <span class="live-pill" id="connectionPill"><i></i><b>در حال بررسی</b></span>
+        <button class="icon-btn" id="refreshBtn" type="button" aria-label="بروزرسانی داده"><i class="fa-solid fa-rotate"></i></button>
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="تغییر پوسته"><i class="fa-solid fa-moon"></i></button>
       </div>
     </header>
 
-    <section class="hero" id="top">
-      <div class="hero-copy">
-        <span class="eyebrow"><i class="fa-solid fa-sparkles"></i> داشبورد بازار ایران + بازار جهانی</span>
-        <h1>نبض بازار را <em>یک‌جا</em> ببین.</h1>
-        <p>قیمت‌های رمزارز، دلار، طلا و انرژی را همراه با روند تاریخی، نوسان، وضعیت داده و شاخص‌های منتخب بازار در یک نمای سریع و تعاملی رصد کن.</p>
-        <div class="hero-actions">
-          <a class="primary-btn" href="#analytics"><i class="fa-solid fa-chart-line"></i> مشاهده تحلیل</a>
-          <button class="ghost-btn" id="shareBtn" type="button"><i class="fa-solid fa-share-nodes"></i> اشتراک‌گذاری</button>
+    <section class="market-strip glass" aria-label="نمای سریع بازار">
+      <div class="strip-label"><span class="live-dot"></span><b>بازار زنده</b></div>
+      <div class="strip-track" id="tickerTrack"></div>
+    </section>
+
+    <section class="market-overview glass" aria-label="خلاصه بازار">
+      <div class="overview-head">
+        <div>
+          <div class="eyebrow">LIVE MARKET OVERVIEW</div>
+          <h1>داشبورد بازار</h1>
+        </div>
+        <div class="overview-status">
+          <span class="pulse-ring"><i></i></span>
+          <span><b id="overviewStatus">متصل</b><small id="overviewUpdated">—</small></span>
         </div>
       </div>
-      <div class="hero-orbit interactive" aria-hidden="true">
-        <div class="orbit-ring ring-1"></div>
-        <div class="orbit-ring ring-2"></div>
-        <div class="orbit-core"><i class="fa-solid fa-chart-line"></i><span>Pulse</span></div>
-        <div class="orbit-dot dot-a">$</div>
-        <div class="orbit-dot dot-b">₿</div>
-        <div class="orbit-dot dot-c">Au</div>
-        <div class="orbit-dot dot-d">Oil</div>
-      </div>
+      <div class="overview-grid" id="overviewGrid"></div>
     </section>
 
-    <section class="toolbar glass interactive" id="overview">
-      <div class="toolbar-left">
-        <div class="segmented" id="currencyToggle" role="group" aria-label="واحد نمایش">
-          <button type="button" class="active" data-currency="IRR">ریال</button>
-          <button type="button" data-currency="USD">دلار</button>
-        </div>
-        <div class="segmented" id="densityToggle" role="group" aria-label="تراکم نمایش">
-          <button type="button" class="active" data-density="comfortable">راحت</button>
-          <button type="button" data-density="compact">فشرده</button>
+    <section class="toolbar glass" id="markets">
+      <div class="toolbar-group">
+        <span class="toolbar-title">فیلتر بازار</span>
+        <div class="segmented" id="marketFilters" role="group" aria-label="فیلتر بازار">
+          <button class="active" type="button" data-filter="all">همه</button>
+          <button type="button" data-filter="crypto">کریپتو</button>
+          <button type="button" data-filter="commodity">کالا</button>
+          <button type="button" data-filter="index">شاخص</button>
         </div>
       </div>
-      <div class="toolbar-right">
-        <span class="data-age"><i class="fa-regular fa-clock"></i><span id="lastUpdateText">—</span></span>
-        <span class="source-chip"><i class="fa-solid fa-database"></i> GitHub data layer</span>
+      <div class="toolbar-group">
+        <span class="toolbar-title">واحد</span>
+        <div class="segmented" id="currencyToggle" role="group" aria-label="واحد قیمت">
+          <button class="active" data-currency="IRR" type="button">ریال</button>
+          <button data-currency="USD" type="button">دلار</button>
+        </div>
+        <div class="segmented" id="densityToggle" role="group" aria-label="تراکم">
+          <button class="active" data-density="comfortable" type="button">راحت</button>
+          <button data-density="compact" type="button">فشرده</button>
+      </div>
+      </div>
+      <div class="data-meta">
+        <span><i class="fa-regular fa-clock"></i><b id="lastUpdateText">—</b></span>
+        <span><i class="fa-solid fa-database"></i><b id="dataCount">—</b></span>
       </div>
     </section>
 
-    <section class="summary-grid">
-      <article class="summary-card gold interactive" data-tilt>
-        <div class="card-top"><span class="label"><i class="fa-solid fa-coins"></i> طلای ۱۸ عیار</span><span class="tag">IR</span></div>
-        <strong class="big-number" id="goldPrice">—</strong>
-        <div class="mini-row"><span id="goldSub">تتر: —</span><span id="goldChange" class="change neutral">—</span></div>
-        <div class="sparkline"><canvas id="goldSpark"></canvas></div>
-      </article>
-      <article class="summary-card dollar interactive" data-tilt>
-        <div class="card-top"><span class="label"><i class="fa-solid fa-dollar-sign"></i> دلار مرجع تتر</span><span class="tag">USDT/IRR</span></div>
-        <strong class="big-number" id="dollarPrice">—</strong>
-        <div class="mini-row"><span>مبنای تبدیل دارایی‌ها</span><span id="dollarChange" class="change neutral">—</span></div>
-        <div class="sparkline"><canvas id="dollarSpark"></canvas></div>
-      </article>
-      <article class="summary-card oil interactive" data-tilt>
-        <div class="card-top"><span class="label"><i class="fa-solid fa-droplet"></i> نفت برنت</span><span class="tag">USD/bbl</span></div>
-        <strong class="big-number" id="brentPrice">—</strong>
-        <div class="mini-row"><span id="brentSub">بازار جهانی</span><span id="brentChange" class="change neutral">—</span></div>
-        <div class="sparkline"><canvas id="brentSpark"></canvas></div>
-      </article>
-      <article class="summary-card market interactive" data-tilt>
-        <div class="card-top"><span class="label"><i class="fa-solid fa-gauge-high"></i> وضعیت بازار</span><span class="tag">PULSE</span></div>
-        <strong class="big-number" id="marketPulse">—</strong>
-        <div class="mini-row"><span id="pulseSub">در حال محاسبه</span><span id="pulseScore" class="change neutral">—</span></div>
-        <div class="meter"><span id="pulseMeter"></span></div>
-      </article>
-    </section>
-
-    <section class="section-head" id="markets">
-      <div><span class="eyebrow">LIVE MARKETS</span><h2>بازارهای منتخب</h2></div>
-      <div class="filters" id="marketFilters" role="group" aria-label="فیلتر بازار">
-        <button class="active" type="button" data-filter="all">همه</button>
-        <button type="button" data-filter="crypto">کریپتو</button>
-        <button type="button" data-filter="commodity">کالا</button>
-        <button type="button" data-filter="index">شاخص</button>
-      </div>
-    </section>
-
-    <section class="ticker glass" aria-label="نوار قیمت">
-      <div class="ticker-track" id="tickerTrack"></div>
-    </section>
-
-    <section class="market-grid" id="marketGrid"></section>
+    <section class="market-grid" id="marketGrid" aria-live="polite"></section>
 
     <section class="analytics-layout" id="analytics">
-      <article class="chart-card glass interactive">
-        <div class="section-title-row">
-          <div><span class="eyebrow">PRICE HISTORY</span><h2 id="chartHeading">روند بیت‌کوین</h2></div>
-          <div class="chart-controls" id="chartAssetControls"></div>
+      <article class="chart-card glass">
+        <div class="section-row">
+          <div><div class="eyebrow">PRICE HISTORY</div><h2 id="chartHeading">روند بیت‌کوین</h2></div>
+          <div class="chart-actions" id="chartAssetControls"></div>
         </div>
-        <div class="chart-range" id="chartRangeControls" role="group" aria-label="بازه نمودار">
-          <button type="button" data-range="1d">۱ روز</button>
-          <button type="button" class="active" data-range="7d">۷ روز</button>
-          <button type="button" data-range="30d">۳۰ روز</button>
+        <div class="chart-toolbar">
+          <div class="segmented" id="chartRangeControls">
+            <button type="button" data-range="1d">۱ روز</button>
+            <button type="button" data-range="7d" class="active">۷ روز</button>
+            <button type="button" data-range="30d">۳۰ روز</button>
+          </div>
+          <span class="chart-hint" id="chartHint">برای جزئیات بیشتر روی کارت بازار کلیک کن.</span>
         </div>
-        <div class="chart-wrap"><canvas id="mainChart"></canvas><div class="chart-empty" id="chartEmpty">تاریخچه هنوز موجود نیست.</div></div>
+        <div class="chart-wrap"><canvas id="mainChart"></canvas><div class="chart-empty" id="chartEmpty">تاریخچه‌ای برای این دارایی ثبت نشده است.</div></div>
       </article>
 
-      <aside class="insight-stack">
-        <article class="insight-card glass interactive">
-          <div class="insight-head"><span>آمار کلیدی</span><i class="fa-solid fa-bolt"></i></div>
+      <aside class="side-stack" id="watch">
+        <article class="side-card glass">
+          <div class="side-head"><span>آمار بازار</span><i class="fa-solid fa-chart-simple"></i></div>
           <div class="stats-list" id="statsList"></div>
         </article>
-        <article class="insight-card glass interactive">
-          <div class="insight-head"><span>واچ‌لیست</span><button class="small-link" id="resetWatchlist" type="button">بازنشانی</button></div>
+        <article class="side-card glass">
+          <div class="side-head"><span>واچ‌لیست</span><button class="text-btn" id="resetWatchlist" type="button">پاک کردن</button></div>
           <div class="watchlist" id="watchlist"></div>
         </article>
-        <article class="insight-card glass interactive">
-          <div class="insight-head"><span>وضعیت سرویس</span><span class="tiny-dot" id="healthDot"></span></div>
-          <p class="health-text" id="healthText">در حال بررسی آخرین داده...</p>
-          <div class="health-row"><span>آخرین بروزرسانی</span><strong id="healthAge">—</strong></div>
-          <div class="health-row"><span>منبع محلی</span><strong>GitHub Actions</strong></div>
+        <article class="side-card glass">
+          <div class="side-head"><span>سلامت داده</span><span class="health-dot" id="healthDot"></span></div>
+          <p class="health-text" id="healthText">در حال بررسی...</p>
+          <div class="health-row"><span>آخرین Snapshot</span><b id="healthAge">—</b></div>
+          <div class="health-row"><span>منبع به‌روزرسانی</span><b>GitHub Actions</b></div>
+          <div class="health-row"><span>زمان‌بندی</span><b>هر ۵ دقیقه</b></div>
         </article>
       </aside>
     </section>
 
-    <section class="comparison glass interactive">
-      <div class="section-title-row">
-        <div><span class="eyebrow">RELATIVE MOVEMENT</span><h2>مقایسه بازدهی</h2></div>
-        <span class="muted">مبنای مقایسه: شروع بازه انتخاب‌شده</span>
+    <section class="detail-panel glass" id="detailPanel" hidden>
+      <div class="detail-head">
+        <div class="detail-title"><span id="detailLogo"></span><div><b id="detailName">—</b><small id="detailSymbol">—</small></div></div>
+        <div class="detail-actions"><button class="icon-btn" id="detailWatch" type="button" aria-label="واچ‌لیست"><i class="fa-regular fa-star"></i></button><button class="icon-btn" id="closeDetail" type="button" aria-label="بستن"><i class="fa-solid fa-xmark"></i></button></div>
+      </div>
+      <div class="detail-grid" id="detailGrid"></div>
+    </section>
+
+    <section class="comparison glass" id="compare">
+      <div class="section-row">
+        <div><div class="eyebrow">RELATIVE PERFORMANCE</div><h2>مقایسه عملکرد</h2></div>
+        <span class="subtle" id="comparisonCaption">آخرین ۳۰ روز موجود</span>
       </div>
       <div class="comparison-grid" id="comparisonGrid"></div>
     </section>
 
-    <section class="notice glass" id="about">
-      <div class="notice-icon"><i class="fa-solid fa-circle-info"></i></div>
-      <div><strong>درباره داده‌ها</strong><p>قیمت‌های بازار ایران از لایه داده ArzPulse می‌آیند. بازارهای جهانی از Yahoo Finance در GitHub Actions نمونه‌برداری و در JSON ذخیره می‌شوند؛ داده‌های جهانی ممکن است با تأخیر بازار همراه باشند.</p></div>
-      <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener">مشاهده مخزن <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-    </section>
-
     <footer class="footer">
-      <span>ArzPulse © <span id="year"></span></span>
-      <span>ساخته‌شده برای پایش سریع بازار</span>
+      <span>ArzPulse · رصد ارز، کالا و بازارهای جهانی</span>
       <span><a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> GitHub</a></span>
+      <span id="buildStamp">—</span>
     </footer>
   </main>
 

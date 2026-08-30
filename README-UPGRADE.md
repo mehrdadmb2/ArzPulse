@@ -1,37 +1,59 @@
-# ArzPulse — Professional GitHub Pages Upgrade
+# ArzPulse Pro Upgrade
 
-این بسته، لایه نمایش ArzPulse را از یک داشبورد ساده به یک داشبورد تعاملی بازار ارتقا می‌دهد.
+این نسخه برای GitHub Pages طراحی شده و روی دادهٔ محلی `docs/data/latest.json` اجرا می‌شود. لایهٔ نمایش بدون API مستقیم بازار کار می‌کند؛ بنابراین مرورگر کاربر فقط JSON خود ریپو را می‌خواند.
 
-## تغییرات اصلی
+## اصلاحات اصلی
 
-- بازطراحی کامل رابط با ساختار حرفه‌ای Glass / Fintech و RTL واقعی
-- ریسپانسیو برای دسکتاپ، تبلت و موبایل
-- حالت روشن/تیره با ذخیره‌سازی در مرورگر
-- تغییر واحد ریال/دلار
-- تراکم Comfortable / Compact
-- کارت‌های تعاملی با Tilt ملایم برای ماوس
-- فیلتر بازار: کریپتو / کالا / شاخص
-- نوار قیمت متحرک (Ticker)
-- واچ‌لیست محلی با LocalStorage
-- نمودار تاریخچه ۱، ۷ و ۳۰ روز
-- نمایش نفت برنت و WTI، انس طلا، نقره، S&P 500، Nasdaq و DXY
-- محاسبه Market Pulse بر اساس تغییرات اخیر دارایی‌های منتخب
-- مقایسه بازدهی نسبی دارایی‌ها
-- تشخیص سلامت و تازگی منبع داده
-- حذف Mock Data از فرانت‌اند؛ وقتی تاریخچه وجود نداشته باشد، پیام شفاف نمایش داده می‌شود
-- GitHub Action جدید، داده‌های Nobitex و Yahoo Finance را در `docs/data/latest.json` و تاریخچه روزانه ذخیره می‌کند
+- نرمال‌سازی واحد داده‌های Nobitex و Yahoo Finance برای جلوگیری از حذف شدن کارت‌های BTC/ETH/USDT/NOT.
+- نمایش کامل قیمت، تغییر روزانه، سقف، کف، حجم، بهترین خرید، بهترین فروش و اسپرد هر دارایی در صورت وجود.
+- محاسبهٔ مشتقات طلای ۱۸ عیار از XAUT با استفاده از نرخ USDT، همراه با high/low قابل محاسبه.
+- کارت‌های پیش‌فرض شامل BTC، ETH، USDT، NOT، GOLD، DOLLAR، BRENT، WTI، XAU/USD، SILVER، S&P 500، Nasdaq و DXY.
+- لوگو/نشان بصری و رنگ اختصاصی هر دارایی؛ رنگ نمودار اصلی و Sparkline با رنگ دارایی هماهنگ است.
+- پنل جزئیات با کلیک روی هر کارت، واچ‌لیست، مقایسهٔ عملکرد، ticker و وضعیت سلامت داده.
+- UI دسکتاپ/موبایل، dark/light، حالت فشرده، تعامل mouse tilt و افکت‌های ambient.
+- بدون mock data؛ اگر دادهٔ واقعی وجود نداشته باشد UI آن را `—` نشان می‌دهد.
 
-## فایل‌های این بسته
+## Cloudflare Worker → GitHub Actions هر ۵ دقیقه
 
-- `docs/index.html`
-- `docs/assets/app.css`
-- `docs/assets/app.js`
-- `scripts/fetch-and-save.js`
-- `.github/workflows/update-prices.yml`
-- `.nojekyll`
+فایل `worker/index.js` هر ۵ دقیقه workflow با نام `update-prices.yml` را با GitHub REST API dispatch می‌کند.
+
+### Secret موردنیاز Worker
+
+در Cloudflare Workers یک Secret با نام `GITHUB_TOKEN` تعریف کن. برای یک fine-grained PAT، مجوز Actions روی مخزن را در حالت Read and write قرار بده. سپس متغیرهای داخل `worker/wrangler.toml` را با owner/repository واقعی نگه دار.
+
+Deploy:
+
+```bash
+cd worker
+npx wrangler login
+npx wrangler secret put GITHUB_TOKEN
+npx wrangler deploy
+```
+
+برای تست دستی:
+
+```bash
+curl -X POST https://YOUR-WORKER.workers.dev/dispatch
+```
+
+برای health check:
+
+```bash
+curl https://YOUR-WORKER.workers.dev/health
+```
 
 ## GitHub Pages
 
-مخزن را روی Branch اصلی نگه دارید و GitHub Pages را روی `main` + `docs/` تنظیم کنید. GitHub Pages فایل `index.html` را از ریشهٔ منبع انتشار شناسایی می‌کند. همچنین می‌توانید از GitHub Actions برای انتشار استفاده کنید.
+در Settings → Pages، Source را روی `Deploy from a branch` و Branch را روی `main` و Folder را روی `/docs` قرار بده.
 
-منبع رسمی: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+## نکتهٔ داده‌های جهانی
+
+نمادهای Brent، WTI، طلا، نقره و شاخص‌ها از Yahoo Finance در GitHub Action خوانده می‌شوند. دادهٔ جهانی ممکن است نسبت به بازار لحظه‌ای با تأخیر باشد و timestamp خودش را دارد.
+
+
+## UI Revision v7
+- هدر برند و نشان ArzPulse حفظ شده و بخش معرفی بزرگ حذف شده است.
+- داشبورد به‌جای Hero تبلیغاتی، نمای فشرده و اطلاعات‌محور بازار دارد.
+- کارت‌ها، Tileها، پنل جزئیات و نمودارها با Mouse/Pointer واکنش نشان می‌دهند.
+- تمام CSS و JS در نسخهٔ فعلی جدا و قابل توسعه هستند.
+- مسیر داده برای دارایی‌های مختلف با alias و چندین نام فیلد (`last`, `lastPrice`, `latest`, `price`, `high`, `dayHigh`, `low`, `dayLow`, `volume`, `quoteVolume`, `bid`, `ask` و...) مقاوم شده است.
