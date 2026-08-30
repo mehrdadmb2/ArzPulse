@@ -1,6 +1,6 @@
-name = "arzpulse-action-dispatcher"
+name = "arzpulse-market-updater"
 main = "index.js"
-compatibility_date = "2026-08-30"
+compatibility_date = "2026-08-01"
 
 [triggers]
 crons = ["*/5 * * * *"]
@@ -8,5 +8,5 @@ crons = ["*/5 * * * *"]
 [vars]
 GITHUB_OWNER = "mehrdadmb2"
 GITHUB_REPO = "ArzPulse"
+GITHUB_WORKFLOW = "update-prices.yml"
 GITHUB_REF = "main"
-WORKFLOW_FILE = "update-prices.yml"

@@ -1,238 +1,289 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#040913">
-  <meta name="description" content="ArzPulse — داشبورد تعاملی بازار ارز، طلا، انرژی، کریپتو و شاخص‌های جهانی">
+  <meta name="theme-color" content="#050b12">
+  <meta name="description" content="ArzPulse — interactive market terminal for crypto, gold, oil and global markets.">
   <meta name="color-scheme" content="dark light">
   <title>ArzPulse | Market Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/app.css?v=8">
-  <script defer src="assets/app.js?v=8"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/app.css?v=10">
+  <script src="assets/app.js?v=10" defer></script>
 </head>
 <body>
   <div class="ambient ambient-a"></div>
   <div class="ambient ambient-b"></div>
   <div class="ambient ambient-c"></div>
   <canvas id="ambientCanvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
 
   <main class="shell" id="top">
     <header class="topbar glass" id="siteHeader">
       <a class="brand" href="#top" aria-label="ArzPulse">
-        <span class="brand-galaxy" aria-hidden="true">
-          <svg viewBox="0 0 96 96" role="img" aria-hidden="true">
-            <defs>
-              <radialGradient id="galaxyCore" cx="50%" cy="46%" r="60%">
-                <stop offset="0" stop-color="#eaffff"/>
-                <stop offset=".18" stop-color="#87edff"/>
-                <stop offset=".5" stop-color="#237da1" stop-opacity=".7"/>
-                <stop offset="1" stop-color="#08111d" stop-opacity="0"/>
-              </radialGradient>
-              <linearGradient id="orbit" x1="0" x2="1">
-                <stop offset="0" stop-color="#6de7ff" stop-opacity=".05"/>
-                <stop offset=".5" stop-color="#9a8cff" stop-opacity=".85"/>
-                <stop offset="1" stop-color="#6de7ff" stop-opacity=".05"/>
-              </linearGradient>
-            </defs>
-            <circle cx="48" cy="48" r="40" fill="#050d17"/>
-            <ellipse cx="48" cy="48" rx="34" ry="13" fill="none" stroke="url(#orbit)" stroke-width="2.2" transform="rotate(-24 48 48)"/>
-            <ellipse cx="48" cy="48" rx="31" ry="12" fill="none" stroke="#4edbff" stroke-opacity=".2" stroke-width="1.2" transform="rotate(58 48 48)"/>
-            <circle cx="48" cy="48" r="25" fill="url(#galaxyCore)"/>
-            <circle cx="22" cy="26" r="1.2" fill="#d7fbff"/><circle cx="72" cy="24" r="1" fill="#a9dbff"/>
-            <circle cx="75" cy="64" r="1.2" fill="#fff"/><circle cx="25" cy="69" r=".9" fill="#8ddaff"/>
-            <circle cx="19" cy="49" r=".8" fill="#fff"/><circle cx="81" cy="44" r=".8" fill="#a6ecff"/>
-            <path d="M30 55V40l10-8 8 6 10-11v28l-7-7-9 7-6-6z" fill="none" stroke="#e9fdff" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="67" cy="30" r="2.3" fill="#ffca58"/><circle cx="30" cy="67" r="2" fill="#59d8ff"/>
+        <span class="brand-mark" aria-hidden="true">
+          <span class="brand-mark-grid"></span>
+          <span class="brand-mark-scan"></span>
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M7 29h8l4-10 7 14 6-8h9" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="39" cy="25" r="2.6" fill="currentColor"/>
           </svg>
         </span>
         <span class="brand-copy">
           <strong>ArzPulse</strong>
-          <small>MARKET TERMINAL</small>
+          <small data-i18n="brandSubtitle">Market Terminal</small>
         </span>
       </a>
 
-      <nav class="topnav" aria-label="بخش‌های داشبورد">
-        <a class="active" href="#markets">بازار</a>
-        <a href="#analytics">نمودار</a>
-        <a href="#watch">واچ‌لیست</a>
-        <a href="#compare">مقایسه</a>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a class="active" href="#markets" data-i18n="navMarkets">Markets</a>
+        <a href="#marketStatus" data-i18n="navStatus">Status</a>
+        <a href="#analytics" data-i18n="navChart">Charts</a>
+        <a href="#watch" data-i18n="navWatch">Watchlist</a>
+        <a href="#compare" data-i18n="navCompare">Compare</a>
       </nav>
 
       <div class="top-actions">
         <span class="market-clock" id="marketClock">—</span>
-        <span class="live-pill" id="connectionPill"><i></i><b>آماده</b></span>
-        <button class="icon-btn" id="refreshBtn" type="button" aria-label="بروزرسانی داده" title="بروزرسانی داده"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4L3 9m0 0V4m0 5h5M4 13a8 8 0 0 0 14.9 4L21 15m0 0v5m0-5h-5"/></svg></button>
-        <button class="icon-btn" id="themeBtn" type="button" aria-label="تغییر پوسته" title="پوسته"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.2A8.2 8.2 0 0 1 8.8 4 8 8 0 1 0 20 15.2Z"/></svg></button>
+        <span class="live-pill" id="connectionPill"><i></i><b data-i18n="checking">Checking</b></span>
+        <button class="icon-btn" id="langBtn" type="button" aria-label="Switch language" title="Switch language">FA</button>
+        <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh data" title="Refresh"><i class="fa fa-rotate">↻</i></button>
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Theme"><span id="themeGlyph">◐</span></button>
       </div>
     </header>
 
-    <section class="pulse-stage glass" id="pulseStage" aria-label="هسته تعاملی ArzPulse">
-      <div class="pulse-art" id="pulseArt">
-        <div class="pulse-stars" aria-hidden="true">
-          <i style="--x:14%;--y:18%;--d:0s"></i><i style="--x:82%;--y:14%;--d:.8s"></i><i style="--x:10%;--y:76%;--d:1.6s"></i><i style="--x:86%;--y:78%;--d:2.1s"></i><i style="--x:52%;--y:7%;--d:2.7s"></i><i style="--x:44%;--y:90%;--d:3.2s"></i>
-        </div>
-        <div class="pulse-orbit orbit-one"></div>
-        <div class="pulse-orbit orbit-two"></div>
-        <div class="pulse-orbit orbit-three"></div>
-        <div class="pulse-center" id="pulseCenter">
-          <span class="pulse-center-glow"></span>
-          <span class="pulse-center-icon"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 43V25l11-9 10 8 14-15v31"/><path d="m22 36 7-6 7 5 13-13"/></svg></span>
-          <span class="pulse-center-word">PULSE</span>
-          <span class="pulse-center-sub">MARKET CORE</span>
-        </div>
-        <button class="orbit-node node-dollar" data-orbit-key="DOLLAR" type="button" aria-label="دلار">$<span></span></button>
-        <button class="orbit-node node-oil" data-orbit-key="BRENT" type="button" aria-label="نفت برنت">Oil<span></span></button>
-        <button class="orbit-node node-gold" data-orbit-key="GOLD" type="button" aria-label="طلا">Au<span></span></button>
-        <button class="orbit-node node-btc" data-orbit-key="BTC" type="button" aria-label="بیت‌کوین">₿<span></span></button>
-        <button class="orbit-node node-eth" data-orbit-key="ETH" type="button" aria-label="اتریوم">Ξ<span></span></button>
-        <div class="orbit-sweep" aria-hidden="true"></div>
-      </div>
-      <div class="pulse-summary">
-        <div class="pulse-summary-head">
-          <div><div class="eyebrow">ARZPULSE CORE</div><h1>مرکز بازار</h1></div>
-          <span class="pulse-live-state"><i></i><b id="pulseCoreState">LIVE</b></span>
-        </div>
-        <div class="pulse-kpis" id="pulseKpis">
-          <button class="pulse-kpi" data-orbit-key="DOLLAR" type="button"><span>دلار</span><strong id="pulseDollar">—</strong><em id="pulseDollarChange">—</em></button>
-          <button class="pulse-kpi" data-orbit-key="GOLD" type="button"><span>طلا</span><strong id="pulseGold">—</strong><em id="pulseGoldChange">—</em></button>
-          <button class="pulse-kpi" data-orbit-key="BRENT" type="button"><span>Brent</span><strong id="pulseBrent">—</strong><em id="pulseBrentChange">—</em></button>
-          <button class="pulse-kpi" data-orbit-key="BTC" type="button"><span>BTC</span><strong id="pulseBtc">—</strong><em id="pulseBtcChange">—</em></button>
-        </div>
-        <div class="pulse-note"><span class="pulse-note-dot"></span><span id="pulseNoteText">هستهٔ بازار با آخرین Snapshot هماهنگ می‌شود.</span></div>
-        <div class="pulse-microgrid">
-          <span><small>دارایی فعال</small><b id="pulseAssetCount">—</b></span>
-          <span><small>به‌روزرسانی</small><b id="pulseUpdateAge">—</b></span>
-          <span><small>منبع</small><b>GitHub Actions</b></span>
-        </div>
-      </div>
-    </section>
-
-    <section class="market-strip glass" aria-label="بازار زنده">
-      <div class="strip-label"><span class="live-dot"></span><b>بازار زنده</b><small>LIVE</small></div>
-      <div class="strip-viewport" id="tickerViewport">
+    <section class="market-strip glass" aria-label="Live market ticker">
+      <div class="strip-label"><span class="live-dot"></span><b data-i18n="liveMarket">LIVE MARKET</b></div>
+      <div class="strip-viewport">
         <div class="strip-track" id="tickerTrack"></div>
       </div>
     </section>
 
-    <section class="market-overview glass" aria-label="نمای سریع بازار">
+    <section class="hero-grid" id="overview">
+      <section class="hero-info glass interactive">
+        <div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="eyebrow">LIVE MARKET INTELLIGENCE</span></div>
+        <div class="hero-title-row">
+          <div>
+            <h1 data-i18n="heroTitle">Market intelligence, built to move.</h1>
+            <p data-i18n="heroText">A dense, responsive terminal for crypto, local rates, commodities and global indices — with clear context, live status and a high-signal visual system.</p>
+          </div>
+          <div class="hero-kpi">
+            <span data-i18n="coverage">Coverage</span>
+            <strong id="coverageCount">—</strong>
+            <small data-i18n="trackedAssets">tracked assets</small>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <a class="primary-btn" href="#markets" data-i18n="exploreMarkets">Explore markets</a>
+          <button class="ghost-btn" id="shareBtn" type="button" data-i18n="share">Share</button>
+        </div>
+        <div class="hero-meta-row">
+          <span><i>●</i> <b data-i18n="dataLayer">GitHub data layer</b></span>
+          <span><i>↻</i> <b data-i18n="updateSchedule">Updated by automation</b></span>
+          <span><i>◷</i> <b id="lastUpdateText">—</b></span>
+        </div>
+      </section>
+
+      <section class="galaxy-card glass interactive" id="galaxy" aria-label="ArzPulse Galaxy">
+        <div class="galaxy-stars"></div>
+        <div class="galaxy-haze haze-1"></div>
+        <div class="galaxy-haze haze-2"></div>
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="orbit orbit-three"></div>
+        <div class="galaxy-core">
+          <div class="core-grid"></div>
+          <div class="core-glow"></div>
+          <svg viewBox="0 0 72 72" aria-hidden="true">
+            <path d="M12 47h12l5-16 9 20 8-12h14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>PULSE</span>
+        </div>
+        <button class="orbit-node node-usd" data-asset="DOLLAR" type="button"><strong>$</strong><span id="galaxyDollar">—</span></button>
+        <button class="orbit-node node-btc" data-asset="BTC" type="button"><strong>₿</strong><span id="galaxyBtc">—</span></button>
+        <button class="orbit-node node-gold" data-asset="GOLD" type="button"><strong>Au</strong><span id="galaxyGold">—</span></button>
+        <button class="orbit-node node-oil" data-asset="BRENT" type="button"><strong>Oil</strong><span id="galaxyOil">—</span></button>
+        <span class="galaxy-caption" data-i18n="galaxyCaption">Interactive market pulse</span>
+      </section>
+    </section>
+
+    <section class="overview-strip glass" aria-label="Market overview">
       <div class="overview-head">
         <div>
-          <div class="eyebrow">LIVE MARKET OVERVIEW</div>
-          <h1>نمای سریع بازار</h1>
+          <div class="eyebrow">MARKET OVERVIEW</div>
+          <h2 data-i18n="overviewTitle">Fast market view</h2>
         </div>
         <div class="overview-status">
           <span class="pulse-ring"><i></i></span>
-          <span><b id="overviewStatus">در حال بارگذاری</b><small id="overviewUpdated">—</small></span>
+          <span><b id="overviewStatus">Connected</b><small id="overviewUpdated">—</small></span>
         </div>
       </div>
-      <div class="overview-grid" id="overviewGrid">
-        <div class="overview-placeholder"><span class="skeleton"></span><span class="skeleton wide"></span><span class="skeleton short"></span></div>
-        <div class="overview-placeholder"><span class="skeleton"></span><span class="skeleton wide"></span><span class="skeleton short"></span></div>
-        <div class="overview-placeholder"><span class="skeleton"></span><span class="skeleton wide"></span><span class="skeleton short"></span></div>
-        <div class="overview-placeholder"><span class="skeleton"></span><span class="skeleton wide"></span><span class="skeleton short"></span></div>
-        <div class="overview-placeholder"><span class="skeleton"></span><span class="skeleton wide"></span><span class="skeleton short"></span></div>
-        <div class="overview-placeholder"><span class="skeleton"></span><span class="skeleton wide"></span><span class="skeleton short"></span></div>
-      </div>
+      <div class="overview-grid" id="overviewGrid"></div>
     </section>
 
     <section class="toolbar glass" id="markets">
       <div class="toolbar-group">
-        <span class="toolbar-title">فیلتر</span>
-        <div class="segmented" id="marketFilters" role="group" aria-label="فیلتر بازار">
-          <button class="active" type="button" data-filter="all">همه</button>
-          <button type="button" data-filter="crypto">کریپتو</button>
-          <button type="button" data-filter="commodity">کالا</button>
-          <button type="button" data-filter="index">شاخص</button>
+        <span class="toolbar-title" data-i18n="filterMarket">Market</span>
+        <div class="segmented" id="marketFilters" role="group">
+          <button class="active" type="button" data-filter="all" data-i18n="all">All</button>
+          <button type="button" data-filter="crypto" data-i18n="crypto">Crypto</button>
+          <button type="button" data-filter="commodity" data-i18n="commodities">Commodities</button>
+          <button type="button" data-filter="index" data-i18n="indices">Indices</button>
         </div>
       </div>
       <div class="toolbar-group">
-        <span class="toolbar-title">واحد</span>
-        <div class="segmented" id="currencyToggle" role="group" aria-label="واحد قیمت">
-          <button class="active" data-currency="IRR" type="button">ریال</button>
-          <button data-currency="USD" type="button">دلار</button>
+        <span class="toolbar-title" data-i18n="unit">Unit</span>
+        <div class="segmented" id="currencyToggle" role="group">
+          <button class="active" data-currency="IRR" type="button">IRR</button>
+          <button data-currency="USD" type="button">USD</button>
         </div>
-        <div class="segmented" id="densityToggle" role="group" aria-label="تراکم">
-          <button class="active" data-density="comfortable" type="button">راحت</button>
-          <button data-density="compact" type="button">فشرده</button>
+        <div class="segmented" id="densityToggle" role="group">
+          <button class="active" data-density="comfortable" type="button" data-i18n="comfortable">Comfortable</button>
+          <button data-density="compact" type="button" data-i18n="compact">Compact</button>
         </div>
       </div>
       <div class="data-meta">
-        <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><b id="lastUpdateText">—</b></span>
-        <span><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5M5 12v7c0 1.7 3.1 3 7 3s7-1.3 7-3v-7"/></svg><b id="dataCount">—</b></span>
+        <span><span class="status-led ok"></span><b id="dataCount">—</b></span>
+        <span><i>◷</i><b id="ageText">—</b></span>
       </div>
     </section>
 
-    <section class="market-grid" id="marketGrid" aria-live="polite">
-      <div class="market-skeleton glass"></div><div class="market-skeleton glass"></div><div class="market-skeleton glass"></div><div class="market-skeleton glass"></div>
-      <div class="market-skeleton glass"></div><div class="market-skeleton glass"></div><div class="market-skeleton glass"></div><div class="market-skeleton glass"></div>
+    <section class="market-grid" id="marketGrid" aria-live="polite"></section>
+
+    <section class="status-section glass" id="marketStatus">
+      <div class="section-row">
+        <div>
+          <div class="eyebrow">MARKET STATUS</div>
+          <h2 data-i18n="marketStatusTitle">Market status</h2>
+          <p class="section-lead" data-i18n="marketStatusLead">A compact view of breadth, momentum, pressure and data freshness.</p>
+        </div>
+        <div class="status-score">
+          <span data-i18n="pulseScoreLabel">Pulse score</span>
+          <strong id="pulseScoreBig">—</strong>
+          <small id="pulseLabel">—</small>
+        </div>
+      </div>
+
+      <div class="status-grid">
+        <article class="status-card interactive">
+          <div class="status-card-head"><span data-i18n="breadth">Market breadth</span><span class="status-icon">◈</span></div>
+          <div class="status-metric"><strong id="breadthValue">—</strong><span id="breadthLabel">—</span></div>
+          <div class="meter"><span id="breadthMeter"></span></div>
+          <div class="status-foot"><span id="breadthUp">—</span><span id="breadthDown">—</span></div>
+        </article>
+        <article class="status-card interactive">
+          <div class="status-card-head"><span data-i18n="momentum">Momentum</span><span class="status-icon">↗</span></div>
+          <div class="status-metric"><strong id="momentumValue">—</strong><span id="momentumLabel">—</span></div>
+          <div class="momentum-bars" id="momentumBars"></div>
+          <div class="status-foot"><span data-i18n="avgChange">Average change</span><b id="avgChange">—</b></div>
+        </article>
+        <article class="status-card interactive">
+          <div class="status-card-head"><span data-i18n="volatility">Volatility</span><span class="status-icon">≈</span></div>
+          <div class="status-metric"><strong id="volatilityValue">—</strong><span id="volatilityLabel">—</span></div>
+          <div class="volatility-scale"><span id="volatilityNeedle"></span></div>
+          <div class="status-foot"><span data-i18n="largestMove">Largest move</span><b id="largestMove">—</b></div>
+        </article>
+        <article class="status-card interactive">
+          <div class="status-card-head"><span data-i18n="dataHealth">Data health</span><span class="status-icon">✓</span></div>
+          <div class="status-metric"><strong id="healthPercent">—</strong><span id="healthLabel">—</span></div>
+          <div class="health-lines">
+            <div><span data-i18n="freshness">Freshness</span><b id="freshness">—</b></div>
+            <div><span data-i18n="sources">Sources</span><b id="sourceCount">—</b></div>
+            <div><span data-i18n="errors">Errors</span><b id="errorCount">—</b></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="status-bottom">
+        <div class="leaders">
+          <div class="mini-head"><span data-i18n="topMovers">Top movers</span><small data-i18n="byDailyChange">by daily change</small></div>
+          <div class="leader-list" id="leaderList"></div>
+        </div>
+        <div class="session-panel">
+          <div class="mini-head"><span data-i18n="marketSessions">Market sessions</span><small data-i18n="localAndGlobal">local + global</small></div>
+          <div class="session-grid" id="sessionGrid"></div>
+        </div>
+      </div>
     </section>
 
     <section class="analytics-layout" id="analytics">
       <article class="chart-card glass">
         <div class="section-row">
-          <div><div class="eyebrow">PRICE HISTORY</div><h2 id="chartHeading">روند بازار</h2></div>
+          <div><div class="eyebrow">PRICE HISTORY</div><h2 id="chartHeading">Bitcoin</h2></div>
           <div class="chart-actions" id="chartAssetControls"></div>
         </div>
         <div class="chart-toolbar">
           <div class="segmented" id="chartRangeControls">
-            <button type="button" data-range="1d">۱ روز</button>
-            <button type="button" data-range="7d" class="active">۷ روز</button>
-            <button type="button" data-range="30d">۳۰ روز</button>
+            <button type="button" data-range="1d">1D</button>
+            <button type="button" data-range="7d" class="active">7D</button>
+            <button type="button" data-range="30d">30D</button>
           </div>
-          <span class="chart-hint" id="chartHint">در حال آماده‌سازی نمودار…</span>
+          <span class="chart-hint" id="chartHint">—</span>
         </div>
         <div class="chart-wrap">
-          <svg id="mainChart" class="native-chart" viewBox="0 0 1200 430" preserveAspectRatio="none" aria-label="نمودار قیمت"></svg>
-          <div class="chart-empty" id="chartEmpty">تاریخچه‌ای برای این دارایی ثبت نشده است.</div>
+          <svg id="mainChart" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-label="Price chart"></svg>
+          <div class="chart-empty" id="chartEmpty">Historical data is not available for this asset yet.</div>
         </div>
       </article>
 
       <aside class="side-stack" id="watch">
         <article class="side-card glass">
-          <div class="side-head"><span>آمار بازار</span><span class="mini-kicker">LIVE</span></div>
+          <div class="side-head"><span data-i18n="keyStats">Key stats</span><span class="status-icon">✦</span></div>
           <div class="stats-list" id="statsList"></div>
         </article>
         <article class="side-card glass">
-          <div class="side-head"><span>واچ‌لیست</span><button class="text-btn" id="resetWatchlist" type="button">پاک کردن</button></div>
+          <div class="side-head"><span data-i18n="watchlist">Watchlist</span><button class="text-btn" id="resetWatchlist" type="button" data-i18n="clear">Clear</button></div>
           <div class="watchlist" id="watchlist"></div>
         </article>
         <article class="side-card glass">
-          <div class="side-head"><span>سلامت داده</span><span class="health-dot" id="healthDot"></span></div>
-          <p class="health-text" id="healthText">در حال بررسی…</p>
-          <div class="health-row"><span>آخرین Snapshot</span><b id="healthAge">—</b></div>
-          <div class="health-row"><span>منبع</span><b>GitHub Actions</b></div>
-          <div class="health-row"><span>زمان‌بندی</span><b>هر ۵ دقیقه</b></div>
+          <div class="side-head"><span data-i18n="serviceHealth">Service health</span><span class="health-dot" id="healthDot"></span></div>
+          <p class="health-text" id="healthText">Checking latest snapshot…</p>
+          <div class="health-row"><span data-i18n="lastSnapshot">Last snapshot</span><b id="healthAge">—</b></div>
+          <div class="health-row"><span data-i18n="updateSource">Update source</span><b>GitHub Actions</b></div>
+          <div class="health-row"><span data-i18n="schedule">Schedule</span><b>Cloudflare · 5 min</b></div>
         </article>
       </aside>
     </section>
 
-    <section class="detail-panel glass" id="detailPanel" hidden>
-      <div class="detail-head">
-        <div class="detail-title"><span id="detailLogo"></span><div><b id="detailName">—</b><small id="detailSymbol">—</small></div></div>
-        <div class="detail-actions"><button class="icon-btn" id="detailWatch" type="button" aria-label="واچ‌لیست" title="واچ‌لیست"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg></button><button class="icon-btn" id="closeDetail" type="button" aria-label="بستن" title="بستن"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
-      </div>
-      <div class="detail-grid" id="detailGrid"></div>
-    </section>
-
     <section class="comparison glass" id="compare">
       <div class="section-row">
-        <div><div class="eyebrow">RELATIVE PERFORMANCE</div><h2>مقایسه عملکرد</h2></div>
-        <span class="subtle" id="comparisonCaption">آخرین ۳۰ روز موجود</span>
+        <div><div class="eyebrow">RELATIVE PERFORMANCE</div><h2 data-i18n="comparisonTitle">Compare performance</h2></div>
+        <span class="subtle" id="comparisonCaption">—</span>
       </div>
       <div class="comparison-grid" id="comparisonGrid"></div>
     </section>
 
+    <section class="notice glass">
+      <div class="notice-icon">i</div>
+      <div>
+        <strong data-i18n="dataNoteTitle">Data & update model</strong>
+        <p data-i18n="dataNote">ArzPulse reads the generated JSON data layer. Local market snapshots come from the project’s collector and global market snapshots are stored by the automated workflow. Global quotes can be delayed.</p>
+      </div>
+      <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener" data-i18n="repo">Repository ↗</a>
+    </section>
+
     <footer class="footer">
-      <span>ArzPulse · رصد ارز، کالا، انرژی و بازارهای جهانی</span>
-      <span><a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener">GitHub</a></span>
-      <span id="buildStamp">v8</span>
+      <span>ArzPulse · Market Terminal</span>
+      <span data-i18n="footerText">Built for fast, high-signal market monitoring.</span>
+      <span><a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener">GitHub ↗</a></span>
     </footer>
   </main>
 
+  <div class="detail-panel" id="detailPanel" hidden>
+    <div class="detail-backdrop" id="detailBackdrop"></div>
+    <aside class="detail-sheet glass">
+      <div class="detail-head">
+        <div class="detail-title"><span id="detailLogo"></span><div><b id="detailName">—</b><small id="detailSymbol">—</small></div></div>
+        <div class="detail-actions"><button class="icon-btn" id="detailWatch" type="button" aria-label="Watchlist">☆</button><button class="icon-btn" id="closeDetail" type="button" aria-label="Close">×</button></div>
+      </div>
+      <div class="detail-hero"><strong id="detailPrice">—</strong><span id="detailChange" class="change neutral">—</span></div>
+      <div class="detail-grid" id="detailGrid"></div>
+    </aside>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <button class="scroll-top" id="scrollTopBtn" type="button" aria-label="بازگشت به بالا" title="بازگشت به بالا"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6M12 8v9"/></svg></button>
+  <button class="scroll-top" id="scrollTopBtn" type="button" aria-label="Back to top">↑</button>
 </body>
 </html>
