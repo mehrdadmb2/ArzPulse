@@ -217,24 +217,40 @@
     }
   }
 
+  function normalizeHistoryPayload(payload){
+    if(Array.isArray(payload)) return payload.flatMap(row=>Array.isArray(row)?normalizeHistoryPayload(row):[row]);
+    if(Array.isArray(payload?.data)) return normalizeHistoryPayload(payload.data);
+    if(Array.isArray(payload?.history)) return normalizeHistoryPayload(payload.history);
+    return payload && typeof payload==='object' ? [payload] : [];
+  }
+
   async function loadHistoryIndex(){
-    // Try a compact index if the collector exposes one; otherwise probe history by latest snapshot dates.
+    // History files in ArzPulse are daily arrays of snapshots. Flatten them into one
+    // chronological stream so every chart, sparkline and comparison can consume the
+    // real data points directly. Never require history for the first paint.
     history=[];
     try{
       const idx=await fetchJSON(`${HISTORY_BASE}index.json`);
-      if(Array.isArray(idx)) history=idx;
-      else if(Array.isArray(idx?.data)) history=idx.data;
+      const rows=normalizeHistoryPayload(idx);
+      if(rows.length) history=rows;
     }catch{}
-    if(history.length) return;
-    const latestDate=latest?.timestamp ? new Date(latest.timestamp) : new Date();
-    const probes=[];
-    for(let i=0;i<30;i++){
-      const d=new Date(latestDate); d.setUTCDate(d.getUTCDate()-i);
-      const s=d.toISOString().slice(0,10);
-      probes.push(fetchJSON(`${HISTORY_BASE}${s}.json`).then(x=>x).catch(()=>null));
+
+    if(!history.length){
+      const latestDate=latest?.timestamp ? new Date(latest.timestamp) : new Date();
+      const probes=[];
+      for(let i=0;i<30;i++){
+        const d=new Date(latestDate); d.setUTCDate(d.getUTCDate()-i);
+        const s=d.toISOString().slice(0,10);
+        probes.push(fetchJSON(`${HISTORY_BASE}${s}.json`).catch(()=>null));
+      }
+      const out=await Promise.all(probes);
+      history=out.flatMap(normalizeHistoryPayload);
     }
-    const out=await Promise.all(probes);
-    history=out.filter(Boolean).reverse();
+
+    history=history
+      .filter(row=>row && typeof row==='object')
+      .map(row=>({ ...row, time: row.time || row.timestamp || row.date || null }))
+      .sort((a,b)=>new Date(a.time||0)-new Date(b.time||0));
   }
 
   function allKeys(){
@@ -293,19 +309,30 @@
     return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="${area}" fill="${color}" opacity=".06"></polyline><polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>`;
   }
 
+  function historyValue(row,key){
+    if(!row) return NaN;
+    const direct = row[key] ?? row?.prices?.[key]?.lastPrice ?? row?.prices?.[key]?.last ?? row?.market?.[key]?.last ?? row?.market?.[key]?.price;
+    if(key==='GOLD') return Number(row.GOLD18K ?? row.gold18K ?? direct);
+    if(key==='DOLLAR') return Number(row.DOLLAR ?? row.dollarPrice ?? row.USDT ?? direct);
+    return Number(direct);
+  }
+
   function getSeries(key){
+    const cutoffDays={ '1d':1, '7d':7, '30d':30 }[chartRange] || 7;
+    const cutoff=Date.now()-cutoffDays*24*60*60*1000;
     const vals=[];
     for(const row of history){
-      if(row==null) continue;
-      const direct = row[key] ?? row?.prices?.[key]?.lastPrice ?? row?.market?.[key]?.last ?? row?.prices?.[key]?.last;
-      const v=Number(direct);
+      const stamp=new Date(row?.time || row?.timestamp || 0).getTime();
+      if(Number.isFinite(stamp) && stamp>0 && stamp<cutoff) continue;
+      const v=historyValue(row,key);
       if(Number.isFinite(v)&&v>0) vals.push(v);
-      if(key==='GOLD'){ const x=Number(row.GOLD18K ?? row.gold18K); if(x>0) vals.push(x); }
-      if(key==='DOLLAR'){ const x=Number(row.DOLLAR ?? row.dollarPrice ?? row.USDT); if(x>0) vals.push(x); }
     }
     const current=Number(getAsset(key)?.last||0);
-    if(current>0 && vals.length<2) vals.push(current);
-    return vals;
+    if(current>0){
+      if(vals.length===0) vals.push(current);
+      else if(Math.abs(vals[vals.length-1]-current)>0.0000001) vals.push(current);
+    }
+    return vals.slice(-360);
   }
 
   function renderOverview(){
@@ -474,8 +501,13 @@
   function renderChart(){
     const svg=$('#mainChart'), vals=getSeries(chartAsset);
     svg.innerHTML='';
-    if(vals.length<2){ $('#chartEmpty').style.display='grid'; return; }
+    if(vals.length<2){
+      $('#chartEmpty').style.display='grid';
+      $('#chartEmpty').textContent=history.length ? (lang==='en'?'Not enough history points for this range yet.':'برای این بازه هنوز نقاط تاریخی کافی ثبت نشده است.') : T('historyMissing');
+      return;
+    }
     $('#chartEmpty').style.display='none';
+    $('#chartEmpty').textContent=T('historyMissing');
     const W=1000,H=400,pad={l:50,r:24,t:22,b:32};
     const min=Math.min(...vals),max=Math.max(...vals),span=max-min||1;
     const x=i=>pad.l+(i/(vals.length-1))*(W-pad.l-pad.r);
