@@ -54,7 +54,7 @@ async function fetchYahoo(symbol){
 }
 
 (async()=>{
-  console.log('🚀 ArzPulse collector v6');
+  console.log('🚀 ArzPulse collector v8');
   const previous=readJSON(LATEST_PATH,null);
   const errors=[]; const prices={};
   const localAssets=[['btc','rls','BTC'],['eth','rls','ETH'],['usdt','rls','USDT'],['not','rls','NOT'],['xaut','usdt','XAUT']];
@@ -70,11 +70,11 @@ async function fetchYahoo(symbol){
     catch(e){errors.push(`${key}: ${e.message}`);market[key]=previous?.market?.[key] || {last:0,change:0,high:0,low:0,volume:0,timestamp:null,delayed:true,symbol};console.log('↩️',key,e.message);}
   }
   const now=new Date().toISOString(); const goldChange=prices.XAUT?.change || 0; const dollarChange=prices.USDT?.change || 0;
-  const latest={version:6,timestamp:now,prices,gold18K,usdtPrice:usdt,dollarPrice,goldChange,dollarChange,market,hasError:errors.length>0,errorDetails:errors};
+  const latest={version:8,timestamp:now,prices,gold18K,usdtPrice:usdt,dollarPrice,goldChange,dollarChange,market,hasError:errors.length>0,errorDetails:errors};
   writeJSON(LATEST_PATH,latest);
   const today=now.slice(0,10); const file=path.join(HISTORY_DIR,`${today}.json`); const history=readJSON(file,[]);
   history.push({time:now,BTC:num(prices.BTC?.lastPrice),ETH:num(prices.ETH?.lastPrice),USDT:num(prices.USDT?.bestSell),NOT:num(prices.NOT?.lastPrice),GOLD18K:gold18K,DOLLAR:dollarPrice,...Object.fromEntries(Object.entries(market).map(([k,v])=>[k,num(v.last)]))});
   const cutoff=Date.now()-HISTORY_KEEP_DAYS*86400000; const trimmed=history.filter(x=>new Date(x.time).getTime()>=cutoff); writeJSON(file,trimmed);
-  const meta={version:6,lastUpdate:now,gold18K,usdtPrice:usdt,dollarPrice,marketSummary:Object.fromEntries(Object.entries(market).map(([k,v])=>[k,{last:v.last,change:v.change,delayed:v.delayed}])),hasError:errors.length>0,errorCount:errors.length,errors}; writeJSON(path.join(DATA_DIR,'meta.json'),meta);
+  const meta={version:8,lastUpdate:now,gold18K,usdtPrice:usdt,dollarPrice,marketSummary:Object.fromEntries(Object.entries(market).map(([k,v])=>[k,{last:v.last,change:v.change,delayed:v.delayed}])),hasError:errors.length>0,errorCount:errors.length,errors}; writeJSON(path.join(DATA_DIR,'meta.json'),meta);
   console.log(`✅ Saved ${LATEST_PATH} and ${file}`);
 })().catch(e=>{console.error('❌ Collector failed:',e);process.exitCode=1;});

@@ -1,59 +1,41 @@
-# ArzPulse Pro Upgrade
+# ArzPulse Pro v9
 
-این نسخه برای GitHub Pages طراحی شده و روی دادهٔ محلی `docs/data/latest.json` اجرا می‌شود. لایهٔ نمایش بدون API مستقیم بازار کار می‌کند؛ بنابراین مرورگر کاربر فقط JSON خود ریپو را می‌خواند.
+این نسخه یک بازطراحی اطلاعات‌محور برای GitHub Pages است که بدون وابستگی اجباری به Chart.js، Font Awesome یا CDN لوگوها رندر می‌شود.
 
-## اصلاحات اصلی
+## اصلاح باگ صفحه خالی
+صفحه از HTML اولیه دارای skeleton و header قابل مشاهده است و JavaScript قبل از رندر بازار منتظر تاریخچه کامل نمی‌ماند. ابتدا `latest.json` رندر می‌شود، سپس دو روز اخیر و در ادامه تاریخچه ۳۰ روزه در پس‌زمینه اضافه می‌شود.
 
-- نرمال‌سازی واحد داده‌های Nobitex و Yahoo Finance برای جلوگیری از حذف شدن کارت‌های BTC/ETH/USDT/NOT.
-- نمایش کامل قیمت، تغییر روزانه، سقف، کف، حجم، بهترین خرید، بهترین فروش و اسپرد هر دارایی در صورت وجود.
-- محاسبهٔ مشتقات طلای ۱۸ عیار از XAUT با استفاده از نرخ USDT، همراه با high/low قابل محاسبه.
-- کارت‌های پیش‌فرض شامل BTC، ETH، USDT، NOT، GOLD، DOLLAR، BRENT، WTI، XAU/USD، SILVER، S&P 500، Nasdaq و DXY.
-- لوگو/نشان بصری و رنگ اختصاصی هر دارایی؛ رنگ نمودار اصلی و Sparkline با رنگ دارایی هماهنگ است.
-- پنل جزئیات با کلیک روی هر کارت، واچ‌لیست، مقایسهٔ عملکرد، ticker و وضعیت سلامت داده.
-- UI دسکتاپ/موبایل، dark/light، حالت فشرده، تعامل mouse tilt و افکت‌های ambient.
-- بدون mock data؛ اگر دادهٔ واقعی وجود نداشته باشد UI آن را `—` نشان می‌دهد.
+نمودار اصلی و Sparklineها با SVG خام رسم می‌شوند، بنابراین اگر CDN خارجی در مرورگر مسدود باشد، رندر اصلی سایت از کار نمی‌افتد.
 
-## Cloudflare Worker → GitHub Actions هر ۵ دقیقه
+## داده‌ها
+`latest.json` باید شامل `prices` برای BTC/ETH/USDT/NOT/XAUT و ترجیحاً `market` برای BRENT/WTI/XAUUSD/SILVER/SP500/NASDAQ/DXY باشد. History نیز از کلیدهای همان نمادها استفاده می‌کند.
 
-فایل `worker/index.js` هر ۵ دقیقه workflow با نام `update-prices.yml` را با GitHub REST API dispatch می‌کند.
+## ساختار
+- `docs/index.html` — داشبورد
+- `docs/assets/app.css` — ظاهر و تعاملات
+- `docs/assets/app.js` — منطق، نرمال‌سازی داده، نمودار SVG، ticker و تعاملات
+- `docs/data/` — داده‌های موجود ریپو
+- `scripts/fetch-and-save.js` — جمع‌آوری Nobitex + Yahoo
+- `.github/workflows/update-prices.yml` — اجرای collector
+- `worker/index.js` — dispatch هر ۵ دقیقه
+- `worker/wrangler.toml` — Cron Trigger
 
-### Secret موردنیاز Worker
+## Cloudflare Worker
+Secret لازم:
+- `GITHUB_TOKEN`
 
-در Cloudflare Workers یک Secret با نام `GITHUB_TOKEN` تعریف کن. برای یک fine-grained PAT، مجوز Actions روی مخزن را در حالت Read and write قرار بده. سپس متغیرهای داخل `worker/wrangler.toml` را با owner/repository واقعی نگه دار.
+Vars:
+- `GITHUB_OWNER=mehrdadmb2`
+- `GITHUB_REPO=ArzPulse`
+- `GITHUB_REF=main`
+- `WORKFLOW_FILE=update-prices.yml`
 
-Deploy:
-
-```bash
-cd worker
-npx wrangler login
-npx wrangler secret put GITHUB_TOKEN
-npx wrangler deploy
-```
-
-برای تست دستی:
-
-```bash
-curl -X POST https://YOUR-WORKER.workers.dev/dispatch
-```
-
-برای health check:
-
-```bash
-curl https://YOUR-WORKER.workers.dev/health
-```
-
-## GitHub Pages
-
-در Settings → Pages، Source را روی `Deploy from a branch` و Branch را روی `main` و Folder را روی `/docs` قرار بده.
-
-## نکتهٔ داده‌های جهانی
-
-نمادهای Brent، WTI، طلا، نقره و شاخص‌ها از Yahoo Finance در GitHub Action خوانده می‌شوند. دادهٔ جهانی ممکن است نسبت به بازار لحظه‌ای با تأخیر باشد و timestamp خودش را دارد.
+Cron:
+`*/5 * * * *`
 
 
-## UI Revision v7
-- هدر برند و نشان ArzPulse حفظ شده و بخش معرفی بزرگ حذف شده است.
-- داشبورد به‌جای Hero تبلیغاتی، نمای فشرده و اطلاعات‌محور بازار دارد.
-- کارت‌ها، Tileها، پنل جزئیات و نمودارها با Mouse/Pointer واکنش نشان می‌دهند.
-- تمام CSS و JS در نسخهٔ فعلی جدا و قابل توسعه هستند.
-- مسیر داده برای دارایی‌های مختلف با alias و چندین نام فیلد (`last`, `lastPrice`, `latest`, `price`, `high`, `dayHigh`, `low`, `dayLow`, `volume`, `quoteVolume`, `bid`, `ask` و...) مقاوم شده است.
+### UI v9 — Galactic Market Core
+
+نسخه v9 هستهٔ بصری کهکشانی ArzPulse را در بالای داشبورد نگه می‌دارد: مدارهای چندلایه، ستاره‌ها، هستهٔ PULSE، گره‌های قابل کلیک برای دلار/نفت/طلا/BTC/ETH و KPIهای زنده. این بخش به دادهٔ بازار متصل است و با حرکت Pointer پارالاکس سه‌بعدی دارد. در موبایل نیز به یک چیدمان عمودی واکنش‌گرا تبدیل می‌شود.
+
+هیچ تصویر خارجی برای این هسته لازم نیست؛ SVG/CSS داخلی است تا مشکل Broken Image یا وابستگی CDN نداشته باشد.
