@@ -1,13 +1,13 @@
 {
   "version": 4,
-  "lastUpdate": "2026-09-01T02:06:09.336Z",
-  "gold18K": 224601588,
-  "usdtPrice": 2091130,
-  "dollarPrice": 2091130,
+  "lastUpdate": "2026-09-01T02:10:48.086Z",
+  "gold18K": 224475178,
+  "usdtPrice": 2090000,
+  "dollarPrice": 2090000,
   "marketSummary": {
     "BRENT": {
-      "last": 88.69000244140625,
-      "change": -0.6942057262746412,
+      "last": 88.68000030517578,
+      "change": -0.7054050729367062,
       "delayed": true
     },
     "WTI": {
@@ -16,13 +16,13 @@
       "delayed": true
     },
     "XAUUSD": {
-      "last": 4492.89990234375,
-      "change": 0.33049294041564475,
+      "last": 4492.2998046875,
+      "change": 0.3170922203968118,
       "delayed": true
     },
     "SILVER": {
-      "last": 67.41500091552734,
-      "change": 0.6269096973307312,
+      "last": 67.3499984741211,
+      "change": 0.529883891313332,
       "delayed": true
     },
     "SP500": {
@@ -37,15 +37,11 @@
     },
     "DXY": {
       "last": 99.4749984741211,
-      "change": -0.22567550753075596,
+      "change": 0.0452561287410256,
       "delayed": true
     }
   },
-  "hasError": true,
-  "errorCount": 3,
-  "errors": [
-    "BTC: write EPROTO 802CF5CE3E7F0000:error:0A000410:SSL routines:ssl3_read_bytes:sslv3 alert handshake failure:../deps/openssl/openssl/ssl/record/rec_layer_s3.c:1601:SSL alert number 40\n",
-    "ETH: write EPROTO 802CF5CE3E7F0000:error:0A000410:SSL routines:ssl3_read_bytes:sslv3 alert handshake failure:../deps/openssl/openssl/ssl/record/rec_layer_s3.c:1601:SSL alert number 40\n",
-    "USDT: write EPROTO 802CF5CE3E7F0000:error:0A000410:SSL routines:ssl3_read_bytes:sslv3 alert handshake failure:../deps/openssl/openssl/ssl/record/rec_layer_s3.c:1601:SSL alert number 40\n"
-  ]
+  "hasError": false,
+  "errorCount": 0,
+  "errors": []
 }
