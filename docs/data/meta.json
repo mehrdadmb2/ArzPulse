@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "lastUpdate": "2026-09-07T08:31:49.915Z",
+  "lastUpdate": "2026-09-07T08:35:53.575Z",
   "gold18K": 238739715,
   "usdtPrice": 2245090,
   "dollarPrice": 2245090,
@@ -36,18 +36,18 @@
       "delayed": true
     },
     "DXY": {
-      "last": 98.85900115966797,
-      "change": -0.3035523309045864,
+      "last": 98.875,
+      "change": -0.28741796246855067,
       "delayed": true
     }
   },
   "hasError": true,
   "errorCount": 5,
   "errors": [
-    "BTC: HTTP 502",
-    "ETH: HTTP 502",
+    "BTC: HTTP 503",
+    "ETH: HTTP 503",
     "USDT: HTTP 503",
-    "NOT: HTTP 502",
+    "NOT: HTTP 503",
     "XAUT: HTTP 503"
   ]
 }

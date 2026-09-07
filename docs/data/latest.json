@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "timestamp": "2026-09-07T08:31:49.915Z",
+  "timestamp": "2026-09-07T08:35:53.575Z",
   "prices": {
     "BTC": {
       "bestBuy": 178350000000,
@@ -58,9 +58,9 @@
       "last": 96.27999877929688,
       "change": 0,
       "high": 97.91000366210938,
-      "low": 96.12000274658203,
-      "volume": 5099,
-      "timestamp": "2026-09-07T08:21:37.000Z",
+      "low": 96.05999755859375,
+      "volume": 5305,
+      "timestamp": "2026-09-07T08:25:49.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
@@ -68,9 +68,9 @@
       "last": 91.4800033569336,
       "change": 0,
       "high": 93.04000091552734,
-      "low": 90.98999786376953,
-      "volume": 34132,
-      "timestamp": "2026-09-07T08:21:39.000Z",
+      "low": 90.94000244140625,
+      "volume": 34901,
+      "timestamp": "2026-09-07T08:25:49.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
@@ -79,8 +79,8 @@
       "change": 1.0564877654115912,
       "high": 4481.2998046875,
       "low": 4430.39990234375,
-      "volume": 37096,
-      "timestamp": "2026-09-07T08:21:44.000Z",
+      "volume": 37703,
+      "timestamp": "2026-09-07T08:25:49.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
@@ -89,8 +89,8 @@
       "change": 1.0613715375644341,
       "high": 67.04499816894531,
       "low": 66.08499908447266,
-      "volume": 6589,
-      "timestamp": "2026-09-07T08:21:48.000Z",
+      "volume": 6688,
+      "timestamp": "2026-09-07T08:25:45.000Z",
       "delayed": true,
       "symbol": "SI=F"
     },
@@ -115,22 +115,22 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 98.85900115966797,
-      "change": -0.3035523309045864,
+      "last": 98.875,
+      "change": -0.28741796246855067,
       "high": 99.20899963378906,
       "low": 98.84200286865234,
       "volume": 0,
-      "timestamp": "2026-09-07T08:21:48.000Z",
+      "timestamp": "2026-09-07T08:25:51.000Z",
       "delayed": true,
       "symbol": "DX-Y.NYB"
     }
   },
   "hasError": true,
   "errorDetails": [
-    "BTC: HTTP 502",
-    "ETH: HTTP 502",
+    "BTC: HTTP 503",
+    "ETH: HTTP 503",
     "USDT: HTTP 503",
-    "NOT: HTTP 502",
+    "NOT: HTTP 503",
     "XAUT: HTTP 503"
   ]
 }
