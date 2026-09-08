@@ -1,9 +1,9 @@
 {
   "version": 4,
-  "lastUpdate": "2026-09-08T03:25:38.346Z",
-  "gold18K": 238955300,
-  "usdtPrice": 2239500,
-  "dollarPrice": 2239500,
+  "lastUpdate": "2026-09-08T03:31:00.236Z",
+  "gold18K": 238965970,
+  "usdtPrice": 2239600,
+  "dollarPrice": 2239600,
   "marketSummary": {
     "BRENT": {
       "last": 97.43000030517578,
@@ -41,7 +41,15 @@
       "delayed": true
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": []
+  "hasError": true,
+  "errorCount": 7,
+  "errors": [
+    "BRENT: HTTP 429",
+    "WTI: HTTP 429",
+    "XAUUSD: HTTP 429",
+    "SILVER: HTTP 429",
+    "SP500: HTTP 429",
+    "NASDAQ: HTTP 429",
+    "DXY: HTTP 429"
+  ]
 }
