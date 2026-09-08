@@ -1,76 +1,76 @@
 {
   "version": 4,
-  "timestamp": "2026-09-08T08:10:40.594Z",
+  "timestamp": "2026-09-08T08:15:42.752Z",
   "prices": {
     "BTC": {
-      "bestBuy": 175300920270,
-      "bestSell": 175473728750,
-      "lastPrice": 175473728750,
-      "volume": 7.6681589576,
+      "bestBuy": 175599999990,
+      "bestSell": 175671009870,
+      "lastPrice": 175600000000,
+      "volume": 7.7540024893,
       "high": 178920000000,
       "low": 174500000000,
-      "change": -1.78
+      "change": -1.71
     },
     "ETH": {
-      "bestBuy": 5531308820,
-      "bestSell": 5538119690,
+      "bestBuy": 5538119650,
+      "bestSell": 5538119660,
       "lastPrice": 5538119660,
-      "volume": 120.9260065106,
+      "volume": 121.5301599316,
       "high": 5642843300,
       "low": 5487115010,
       "change": -1.04
     },
     "USDT": {
-      "bestBuy": 2241100,
-      "bestSell": 2241580,
-      "lastPrice": 2241580,
-      "volume": 4888625.511719878,
+      "bestBuy": 2245750,
+      "bestSell": 2245790,
+      "lastPrice": 2245060,
+      "volume": 4959132.943349578,
       "high": 2250990,
       "low": 2230000,
-      "change": -0.16
+      "change": 0
     },
     "NOT": {
-      "bestBuy": 1045.71,
-      "bestSell": 1046.28,
-      "lastPrice": 1046.28,
-      "volume": 203238983.57385987,
+      "bestBuy": 1046.05,
+      "bestSell": 1047.49,
+      "lastPrice": 1045,
+      "volume": 203499431.09585986,
       "high": 1071.89,
       "low": 1020,
-      "change": 2.48
+      "change": 2.35
     },
     "XAUT": {
-      "bestBuy": 4405,
-      "bestSell": 4409.4,
-      "lastPrice": 4406,
-      "volume": 41.3235140182,
+      "bestBuy": 4402.3,
+      "bestSell": 4409.2,
+      "lastPrice": 4409.2,
+      "volume": 41.5323913582,
       "high": 4436.9,
       "low": 4390.1,
-      "change": -0.09
+      "change": -0.02
     }
   },
-  "gold18K": 238334035,
-  "usdtPrice": 2241580,
-  "dollarPrice": 2241580,
-  "goldChange": -0.09,
-  "dollarChange": -0.16,
+  "gold18K": 238770829,
+  "usdtPrice": 2245790,
+  "dollarPrice": 2245790,
+  "goldChange": -0.02,
+  "dollarChange": 0,
   "market": {
     "BRENT": {
-      "last": 99.0199966430664,
-      "change": 2.8458640408278795,
-      "high": 99.1500015258789,
+      "last": 99.08000183105469,
+      "change": 2.9081876685273684,
+      "high": 99.19999694824219,
       "low": 95.97000122070312,
-      "volume": 25960,
-      "timestamp": "2026-09-08T08:00:34.000Z",
+      "volume": 26319,
+      "timestamp": "2026-09-08T08:05:39.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 94.38999938964844,
-      "change": 3.1810187209555725,
+      "last": 94.4000015258789,
+      "change": 3.1919524068578813,
       "high": 94.5999984741211,
       "low": 90.87000274658203,
-      "volume": 140067,
-      "timestamp": "2026-09-08T08:00:38.000Z",
+      "volume": 141815,
+      "timestamp": "2026-09-08T08:05:39.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
@@ -79,18 +79,18 @@
       "change": 0.15125277908518633,
       "high": 4488.7998046875,
       "low": 4426.2001953125,
-      "volume": 110593,
-      "timestamp": "2026-09-08T08:00:36.000Z",
+      "volume": 111125,
+      "timestamp": "2026-09-08T08:05:40.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 66.54000091552734,
-      "change": 0.7464439975825098,
+      "last": 66.46499633789062,
+      "change": 0.6328815633103352,
       "high": 67.83499908447266,
       "low": 66.0250015258789,
-      "volume": 23335,
-      "timestamp": "2026-09-08T08:00:27.000Z",
+      "volume": 23576,
+      "timestamp": "2026-09-08T08:05:40.000Z",
       "delayed": true,
       "symbol": "SI=F"
     },
@@ -115,12 +115,12 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 98.93199920654297,
-      "change": -0.22993590877965084,
+      "last": 98.93499755859375,
+      "change": -0.22691215732740377,
       "high": 98.96199798583984,
       "low": 98.71600341796875,
       "volume": 0,
-      "timestamp": "2026-09-08T08:00:38.000Z",
+      "timestamp": "2026-09-08T08:05:40.000Z",
       "delayed": true,
       "symbol": "DX-Y.NYB"
     }
