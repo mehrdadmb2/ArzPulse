@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "lastUpdate": "2026-09-09T12:50:37.443Z",
+  "lastUpdate": "2026-09-09T12:57:10.010Z",
   "gold18K": 246327687,
   "usdtPrice": 2327000,
   "dollarPrice": 2327000,
@@ -11,18 +11,18 @@
       "delayed": true
     },
     "WTI": {
-      "last": 95.81999969482422,
-      "change": 2.9990335936113515,
+      "last": 95.80999755859375,
+      "change": 2.9882820765075,
       "delayed": true
     },
     "XAUUSD": {
-      "last": 4436.39990234375,
-      "change": 0.9672500727048897,
+      "last": 4442.7001953125,
+      "change": 1.1106373393421967,
       "delayed": true
     },
     "SILVER": {
-      "last": 66.63500213623047,
-      "change": 0.5098346544406699,
+      "last": 66.875,
+      "change": 0.8718387788733302,
       "delayed": true
     },
     "SP500": {
@@ -36,12 +36,18 @@
       "delayed": true
     },
     "DXY": {
-      "last": 98.65799713134766,
-      "change": -0.1841351813903283,
+      "last": 98.6520004272461,
+      "change": -0.19020226387084802,
       "delayed": true
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": []
+  "hasError": true,
+  "errorCount": 5,
+  "errors": [
+    "BTC: Request timeout",
+    "ETH: Request timeout",
+    "USDT: Request timeout",
+    "NOT: Request timeout",
+    "XAUT: Request timeout"
+  ]
 }

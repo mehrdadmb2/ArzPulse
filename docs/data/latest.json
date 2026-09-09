@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "timestamp": "2026-09-09T12:50:37.443Z",
+  "timestamp": "2026-09-09T12:57:10.010Z",
   "prices": {
     "BTC": {
       "bestBuy": 184038987600,
@@ -59,37 +59,37 @@
       "change": 2.879901702978752,
       "high": 100.95999908447266,
       "low": 98.83000183105469,
-      "volume": 20674,
+      "volume": 20882,
       "timestamp": "2026-09-09T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 95.81999969482422,
-      "change": 2.9990335936113515,
-      "high": 95.95999908447266,
+      "last": 95.80999755859375,
+      "change": 2.9882820765075,
+      "high": 95.9800033569336,
       "low": 93.76000213623047,
-      "volume": 110920,
+      "volume": 112763,
       "timestamp": "2026-09-09T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4436.39990234375,
-      "change": 0.9672500727048897,
+      "last": 4442.7001953125,
+      "change": 1.1106373393421967,
       "high": 4459.89990234375,
       "low": 4384.10009765625,
-      "volume": 68732,
+      "volume": 69907,
       "timestamp": "2026-09-09T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 66.63500213623047,
-      "change": 0.5098346544406699,
+      "last": 66.875,
+      "change": 0.8718387788733302,
       "high": 67.6449966430664,
       "low": 66.12999725341797,
-      "volume": 13959,
+      "volume": 14216,
       "timestamp": "2026-09-09T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
@@ -115,8 +115,8 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 98.65799713134766,
-      "change": -0.1841351813903283,
+      "last": 98.6520004272461,
+      "change": -0.19020226387084802,
       "high": 98.86000061035156,
       "low": 98.5989990234375,
       "volume": 0,
@@ -125,6 +125,12 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": false,
-  "errorDetails": []
+  "hasError": true,
+  "errorDetails": [
+    "BTC: Request timeout",
+    "ETH: Request timeout",
+    "USDT: Request timeout",
+    "NOT: Request timeout",
+    "XAUT: Request timeout"
+  ]
 }
