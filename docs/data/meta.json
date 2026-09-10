@@ -1,28 +1,28 @@
 {
   "version": 4,
-  "lastUpdate": "2026-09-10T01:16:29.682Z",
-  "gold18K": 251489712,
-  "usdtPrice": 2364990,
-  "dollarPrice": 2364990,
+  "lastUpdate": "2026-09-10T01:21:08.745Z",
+  "gold18K": 251487585,
+  "usdtPrice": 2364970,
+  "dollarPrice": 2364970,
   "marketSummary": {
     "BRENT": {
-      "last": 101.20999908447266,
-      "change": 3.3598866187180403,
+      "last": 101.4000015258789,
+      "change": 3.553925063325067,
       "delayed": true
     },
     "WTI": {
-      "last": 96.51000213623047,
-      "change": 3.7407324546886294,
+      "last": 96.6500015258789,
+      "change": 3.891220890123924,
       "delayed": true
     },
     "XAUUSD": {
-      "last": 4451.5,
-      "change": 1.3109105563721544,
+      "last": 4461.2001953125,
+      "change": 1.531675606284325,
       "delayed": true
     },
     "SILVER": {
-      "last": 68.12999725341797,
-      "change": 2.764831386196039,
+      "last": 68.2699966430664,
+      "change": 2.976001417773727,
       "delayed": true
     },
     "SP500": {
@@ -36,20 +36,12 @@
       "delayed": true
     },
     "DXY": {
-      "last": 98.80699920654297,
-      "change": -0.033384391511765664,
+      "last": 98.78500366210938,
+      "change": -0.05563807954145824,
       "delayed": true
     }
   },
-  "hasError": true,
-  "errorCount": 7,
-  "errors": [
-    "BRENT: HTTP 429",
-    "WTI: HTTP 429",
-    "XAUUSD: HTTP 429",
-    "SILVER: HTTP 429",
-    "SP500: HTTP 429",
-    "NASDAQ: HTTP 429",
-    "DXY: HTTP 429"
-  ]
+  "hasError": false,
+  "errorCount": 0,
+  "errors": []
 }
