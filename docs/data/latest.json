@@ -1,95 +1,95 @@
 {
   "version": 4,
-  "timestamp": "2026-09-15T23:40:25.889Z",
+  "timestamp": "2026-09-15T23:45:26.118Z",
   "prices": {
     "BTC": {
-      "bestBuy": 174645465020,
-      "bestSell": 175100376800,
-      "lastPrice": 174645464980,
-      "volume": 11.6260175669,
+      "bestBuy": 174703540780,
+      "bestSell": 175150004210,
+      "lastPrice": 175150004230,
+      "volume": 11.6273810669,
       "high": 181319999980,
       "low": 171694139860,
-      "change": -2.7
+      "change": -2.42
     },
     "ETH": {
-      "bestBuy": 5541612380,
-      "bestSell": 5555908280,
-      "lastPrice": 5540678110,
-      "volume": 316.8257710939,
+      "bestBuy": 5541612370,
+      "bestSell": 5553216900,
+      "lastPrice": 5555707670,
+      "volume": 316.8663510939,
       "high": 5819999990,
       "low": 5445077170,
-      "change": -3.98
+      "change": -3.72
     },
     "USDT": {
-      "bestBuy": 2314510,
-      "bestSell": 2314990,
-      "lastPrice": 2314540,
-      "volume": 3551849.690637729,
+      "bestBuy": 2310020,
+      "bestSell": 2310030,
+      "lastPrice": 2310030,
+      "volume": 3555649.785351876,
       "high": 2324000,
       "low": 2285500,
-      "change": 0.75
+      "change": 0.56
     },
     "NOT": {
-      "bestBuy": 984.14,
-      "bestSell": 988.94,
-      "lastPrice": 989.22,
-      "volume": 269184976.03891027,
+      "bestBuy": 984.56,
+      "bestSell": 989.65,
+      "lastPrice": 984.14,
+      "volume": 269200742.03891027,
       "high": 1076,
       "low": 976.54,
-      "change": -6.4
+      "change": -6.88
     },
     "XAUT": {
       "bestBuy": 4285,
-      "bestSell": 4290.4,
-      "lastPrice": 4292.5,
-      "volume": 42.0236708648,
+      "bestSell": 4291.5,
+      "lastPrice": 4285,
+      "volume": 42.0254808648,
       "high": 4325,
       "low": 4280,
-      "change": -0.31
+      "change": -0.49
     }
   },
-  "gold18K": 239496532,
-  "usdtPrice": 2314990,
-  "dollarPrice": 2314990,
-  "goldChange": -0.31,
-  "dollarChange": 0.75,
+  "gold18K": 239044669,
+  "usdtPrice": 2310030,
+  "dollarPrice": 2310030,
+  "goldChange": -0.49,
+  "dollarChange": 0.56,
   "market": {
     "BRENT": {
-      "last": 108.41000366210938,
-      "change": 2.583273418858884,
+      "last": 108.45999908447266,
+      "change": 2.630581729058456,
       "high": 108.55000305175781,
       "low": 108.30000305175781,
-      "volume": 43,
+      "volume": 44,
       "timestamp": "2026-09-15T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 105.45999908447266,
-      "change": 4.014202307254132,
+      "last": 105.44999694824219,
+      "change": 4.004337294638806,
       "high": 105.62999725341797,
       "low": 105.23999786376953,
-      "volume": 2282,
+      "volume": 2305,
       "timestamp": "2026-09-15T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4323.2001953125,
-      "change": -0.6594753481299868,
+      "last": 4326.10009765625,
+      "change": -0.592840030020114,
       "high": 4339.5,
       "low": 4322,
-      "volume": 6851,
+      "volume": 7735,
       "timestamp": "2026-09-15T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 64.18000030517578,
-      "change": 1.0501784072027884,
+      "last": 64.23500061035156,
+      "change": 1.136775331852773,
       "high": 64.33999633789062,
       "low": 64.16500091552734,
-      "volume": 457,
+      "volume": 471,
       "timestamp": "2026-09-15T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
