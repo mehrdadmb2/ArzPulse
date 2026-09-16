@@ -1,58 +1,58 @@
 {
   "version": 4,
-  "timestamp": "2026-09-16T13:45:23.432Z",
+  "timestamp": "2026-09-16T13:50:44.404Z",
   "prices": {
     "BTC": {
-      "bestBuy": 173400010440,
-      "bestSell": 173604432390,
-      "lastPrice": 173400010340,
-      "volume": 10.6827861822,
+      "bestBuy": 173986238260,
+      "bestSell": 174259999960,
+      "lastPrice": 174145639510,
+      "volume": 10.7169798189,
       "high": 177250000000,
       "low": 171694139860,
-      "change": -0.97
+      "change": -0.55
     },
     "ETH": {
-      "bestBuy": 5511219380,
-      "bestSell": 5519775330,
-      "lastPrice": 5523816780,
-      "volume": 245.6346743871,
+      "bestBuy": 5526149860,
+      "bestSell": 5528999980,
+      "lastPrice": 5526149860,
+      "volume": 246.1963616696,
       "high": 5644593760,
       "low": 5445077170,
-      "change": -1.15
+      "change": -1.11
     },
     "USDT": {
-      "bestBuy": 2298000,
-      "bestSell": 2299810,
-      "lastPrice": 2299400,
-      "volume": 3654497.557790097,
+      "bestBuy": 2299880,
+      "bestSell": 2299890,
+      "lastPrice": 2299890,
+      "volume": 3674177.779221006,
       "high": 2324000,
       "low": 2285500,
-      "change": 0.4
+      "change": 0.42
     },
     "NOT": {
-      "bestBuy": 970.05,
-      "bestSell": 973.59,
-      "lastPrice": 970.05,
-      "volume": 297931021.0944248,
+      "bestBuy": 972.9,
+      "bestSell": 974.98,
+      "lastPrice": 971.51,
+      "volume": 298222545.36617476,
       "high": 1044,
       "low": 950,
-      "change": -6.21
+      "change": -6.07
     },
     "XAUT": {
-      "bestBuy": 4333.1,
-      "bestSell": 4336,
-      "lastPrice": 4335,
-      "volume": 50.2576761569,
+      "bestBuy": 4332.9,
+      "bestSell": 4333,
+      "lastPrice": 4333,
+      "volume": 50.3475461569,
       "high": 4344,
       "low": 4280,
-      "change": 0.93
+      "change": 0.88
     }
   },
-  "gold18K": 240454859,
-  "usdtPrice": 2299810,
-  "dollarPrice": 2299810,
-  "goldChange": 0.93,
-  "dollarChange": 0.4,
+  "gold18K": 240296851,
+  "usdtPrice": 2299890,
+  "dollarPrice": 2299890,
+  "goldChange": 0.88,
+  "dollarChange": 0.42,
   "market": {
     "BRENT": {
       "last": 107.44000244140625,
@@ -125,6 +125,14 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": false,
-  "errorDetails": []
+  "hasError": true,
+  "errorDetails": [
+    "BRENT: HTTP 429",
+    "WTI: HTTP 429",
+    "XAUUSD: HTTP 429",
+    "SILVER: HTTP 429",
+    "SP500: HTTP 429",
+    "NASDAQ: HTTP 429",
+    "DXY: HTTP 429"
+  ]
 }
