@@ -1,47 +1,49 @@
 {
   "version": 4,
-  "lastUpdate": "2026-09-18T18:55:47.000Z",
-  "gold18K": 239910720,
-  "usdtPrice": 2270000,
-  "dollarPrice": 2270000,
+  "lastUpdate": "2026-09-18T19:02:29.479Z",
+  "gold18K": 240281870,
+  "usdtPrice": 2269990,
+  "dollarPrice": 2269990,
   "marketSummary": {
     "BRENT": {
-      "last": 98.83999633789062,
-      "change": -5.705021345491258,
+      "last": 98.75,
+      "change": -5.790879328846193,
       "delayed": true
     },
     "WTI": {
-      "last": 95.58999633789062,
-      "change": -6.201557351693589,
+      "last": 95.54000091552734,
+      "change": -6.250615756724214,
       "delayed": true
     },
     "XAUUSD": {
-      "last": 4419.5,
-      "change": 0.4500262247094695,
+      "last": 4419.7001953125,
+      "change": 0.45457642821454675,
       "delayed": true
     },
     "SILVER": {
-      "last": 67.06500244140625,
-      "change": 2.4362321536031204,
+      "last": 67.05000305175781,
+      "change": 2.413321829227421,
       "delayed": true
     },
     "SP500": {
-      "last": 7642.93994140625,
-      "change": 0.06782323534924779,
+      "last": 7641.68994140625,
+      "change": 0.051457179878037086,
       "delayed": true
     },
     "NASDAQ": {
-      "last": 26465.130859375,
-      "change": 0.17726377829052864,
+      "last": 26462.98046875,
+      "change": 0.1691240018423545,
       "delayed": true
     },
     "DXY": {
-      "last": 100.23699951171875,
-      "change": 0.01696097665992998,
+      "last": 100.22699737548828,
+      "change": 0.006980796946658795,
       "delayed": true
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": []
+  "hasError": true,
+  "errorCount": 1,
+  "errors": [
+    "BTC: Request timeout"
+  ]
 }
