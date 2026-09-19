@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "timestamp": "2026-09-19T10:36:01.782Z",
+  "timestamp": "2026-09-19T10:41:52.669Z",
   "prices": {
     "BTC": {
       "bestBuy": 185138849270,
@@ -30,28 +30,28 @@
       "change": 0.48
     },
     "NOT": {
-      "bestBuy": 1083,
+      "bestBuy": 1083.94,
       "bestSell": 1085,
       "lastPrice": 1083,
-      "volume": 218302638.82814154,
+      "volume": 218320292.82814154,
       "high": 1111.48,
       "low": 1050,
       "change": 3.04
     },
     "XAUT": {
-      "bestBuy": 4370.1,
-      "bestSell": 4380,
-      "lastPrice": 4379.6,
-      "volume": 46.7059924976,
+      "bestBuy": 4380,
+      "bestSell": 4380.8,
+      "lastPrice": 4380,
+      "volume": 47.2411324976,
       "high": 4398.5,
       "low": 4360.6,
-      "change": -0.37
+      "change": -0.36
     }
   },
-  "gold18K": 241962317,
+  "gold18K": 242006511,
   "usdtPrice": 2290980,
   "dollarPrice": 2290980,
-  "goldChange": -0.37,
+  "goldChange": -0.36,
   "dollarChange": 0.48,
   "market": {
     "BRENT": {
@@ -125,6 +125,10 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": false,
-  "errorDetails": []
+  "hasError": true,
+  "errorDetails": [
+    "BTC: Request timeout",
+    "ETH: Request timeout",
+    "USDT: Request timeout"
+  ]
 }
