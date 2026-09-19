@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "lastUpdate": "2026-09-19T11:30:44.589Z",
+  "lastUpdate": "2026-09-19T11:37:16.594Z",
   "gold18K": 242341741,
   "usdtPrice": 2289450,
   "dollarPrice": 2289450,
@@ -41,7 +41,13 @@
       "delayed": true
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": []
+  "hasError": true,
+  "errorCount": 5,
+  "errors": [
+    "BTC: Request timeout",
+    "ETH: Request timeout",
+    "USDT: Request timeout",
+    "NOT: Request timeout",
+    "XAUT: Request timeout"
+  ]
 }
