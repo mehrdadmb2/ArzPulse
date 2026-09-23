@@ -1,37 +1,37 @@
 {
   "version": 4,
-  "timestamp": "2026-09-23T01:33:28.559Z",
+  "timestamp": "2026-09-23T01:35:47.305Z",
   "prices": {
     "BTC": {
-      "bestBuy": 195999988250,
-      "bestSell": 195999989900,
-      "lastPrice": 195999988260,
-      "volume": 13.2658239631,
+      "bestBuy": 195619924250,
+      "bestSell": 195999989910,
+      "lastPrice": 195619913990,
+      "volume": 13.0137445723,
       "high": 199400000000,
       "low": 192110000120,
-      "change": 0.16
+      "change": 0.06
     },
     "ETH": {
-      "bestBuy": 6279999990,
-      "bestSell": 6280000000,
-      "lastPrice": 6280000000,
-      "volume": 267.504196571,
+      "bestBuy": 6261668250,
+      "bestSell": 6269999940,
+      "lastPrice": 6269999960,
+      "volume": 264.6667639531,
       "high": 6373213210,
       "low": 6120000000,
-      "change": -0.02
+      "change": 0
     },
     "USDT": {
-      "bestBuy": 2266770,
-      "bestSell": 2267770,
-      "lastPrice": 2267770,
-      "volume": 8511257.046556296,
+      "bestBuy": 2265020,
+      "bestSell": 2268760,
+      "lastPrice": 2268770,
+      "volume": 8464923.082785033,
       "high": 2330000,
       "low": 2225000,
-      "change": -0.96
+      "change": -0.92
     },
     "NOT": {
       "bestBuy": 1154,
-      "bestSell": 1158.06,
+      "bestSell": 1156.08,
       "lastPrice": 1149.17,
       "volume": 241840890.16069672,
       "high": 1169.99,
@@ -42,55 +42,55 @@
       "bestBuy": 4363.1,
       "bestSell": 4368.4,
       "lastPrice": 4363.1,
-      "volume": 68.474354747,
+      "volume": 68.497254747,
       "high": 4386,
       "low": 4322.1,
       "change": 0.09
     }
   },
-  "gold18K": 238876666,
-  "usdtPrice": 2267770,
-  "dollarPrice": 2267770,
+  "gold18K": 238980949,
+  "usdtPrice": 2268760,
+  "dollarPrice": 2268760,
   "goldChange": 0.09,
-  "dollarChange": -0.96,
+  "dollarChange": -0.92,
   "market": {
     "BRENT": {
       "last": 99.22000122070312,
       "change": -1.1162000777994496,
       "high": 99.37999725341797,
       "low": 98.2699966430664,
-      "volume": 935,
+      "volume": 936,
       "timestamp": "2026-09-23T01:23:10.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 90.19999694824219,
-      "change": -5.825852894310978,
+      "last": 90.19000244140625,
+      "change": -5.836287752280614,
       "high": 90.37999725341797,
       "low": 89.47000122070312,
-      "volume": 8352,
-      "timestamp": "2026-09-23T01:23:22.000Z",
+      "volume": 8432,
+      "timestamp": "2026-09-23T01:25:38.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4384.89990234375,
-      "change": 0.022810739804195193,
+      "last": 4383.2001953125,
+      "change": -0.015960835029009624,
       "high": 4407.5,
       "low": 4382.89990234375,
-      "volume": 11213,
-      "timestamp": "2026-09-23T01:23:19.000Z",
+      "volume": 11275,
+      "timestamp": "2026-09-23T01:25:44.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 67.41500091552734,
-      "change": 2.4155017713641023,
+      "last": 67.375,
+      "change": 2.3547331919765537,
       "high": 68.05500030517578,
       "low": 67.31500244140625,
-      "volume": 3360,
-      "timestamp": "2026-09-23T01:23:18.000Z",
+      "volume": 3373,
+      "timestamp": "2026-09-23T01:25:41.000Z",
       "delayed": true,
       "symbol": "SI=F"
     },
@@ -115,20 +115,16 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 100.62699890136719,
-      "change": 0.19615512854006603,
+      "last": 100.62799835205078,
+      "change": 0.19715029998341632,
       "high": 100.62999725341797,
       "low": 100.54399871826172,
       "volume": 0,
-      "timestamp": "2026-09-23T01:23:27.000Z",
+      "timestamp": "2026-09-23T01:25:45.000Z",
       "delayed": true,
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": true,
-  "errorDetails": [
-    "BTC: Request timeout",
-    "ETH: Request timeout",
-    "USDT: Request timeout"
-  ]
+  "hasError": false,
+  "errorDetails": []
 }
