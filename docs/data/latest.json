@@ -1,95 +1,95 @@
 {
   "version": 4,
-  "timestamp": "2026-09-23T12:52:11.480Z",
+  "timestamp": "2026-09-23T12:55:47.709Z",
   "prices": {
     "BTC": {
-      "bestBuy": 195300000000,
-      "bestSell": 195526289330,
-      "lastPrice": 195300000000,
-      "volume": 11.5620578045,
+      "bestBuy": 195000000160,
+      "bestSell": 195299999970,
+      "lastPrice": 195000000130,
+      "volume": 11.613713731,
       "high": 198500000000,
       "low": 192110000120,
-      "change": -1.05
+      "change": -1.2
     },
     "ETH": {
-      "bestBuy": 6209000820,
-      "bestSell": 6228062720,
-      "lastPrice": 6209000750,
-      "volume": 235.2362758632,
+      "bestBuy": 6212001500,
+      "bestSell": 6212001510,
+      "lastPrice": 6212001520,
+      "volume": 237.776887454,
       "high": 6351202400,
       "low": 6120000000,
-      "change": -1.46
+      "change": -1.42
     },
     "USDT": {
-      "bestBuy": 2283020,
-      "bestSell": 2284000,
-      "lastPrice": 2284070,
-      "volume": 7653015.356885895,
+      "bestBuy": 2285010,
+      "bestSell": 2285980,
+      "lastPrice": 2285010,
+      "volume": 7662191.137452145,
       "high": 2307000,
       "low": 2225000,
-      "change": -0.61
+      "change": -0.57
     },
     "NOT": {
-      "bestBuy": 1140.01,
-      "bestSell": 1143.9,
-      "lastPrice": 1144,
-      "volume": 257787192.4876519,
+      "bestBuy": 1137,
+      "bestSell": 1140,
+      "lastPrice": 1137.01,
+      "volume": 258866135.08340192,
       "high": 1169.99,
       "low": 1121.2,
-      "change": 0.25
+      "change": -0.36
     },
     "XAUT": {
-      "bestBuy": 4330.5,
-      "bestSell": 4333.9,
-      "lastPrice": 4332.3,
-      "volume": 58.7281555058,
+      "bestBuy": 4330,
+      "bestSell": 4334,
+      "lastPrice": 4334,
+      "volume": 58.7759474063,
       "high": 4386,
       "low": 4325,
-      "change": -0.42
+      "change": -0.38
     }
   },
-  "gold18K": 238686201,
-  "usdtPrice": 2284000,
-  "dollarPrice": 2284000,
-  "goldChange": -0.42,
-  "dollarChange": -0.61,
+  "gold18K": 238898630,
+  "usdtPrice": 2285980,
+  "dollarPrice": 2285980,
+  "goldChange": -0.38,
+  "dollarChange": -0.57,
   "market": {
     "BRENT": {
-      "last": 96.2699966430664,
-      "change": -3.0025222739885074,
+      "last": 96.38999938964844,
+      "change": -2.881612705643892,
       "high": 96.4800033569336,
       "low": 94.0999984741211,
-      "volume": 16793,
+      "volume": 16913,
       "timestamp": "2026-09-23T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 90.95999908447266,
-      "change": -3.8376122147748446,
-      "high": 91,
+      "last": 90.91999816894531,
+      "change": -3.879900952565313,
+      "high": 91.01000213623047,
       "low": 88.70999908447266,
-      "volume": 102443,
+      "volume": 103603,
       "timestamp": "2026-09-23T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4339.2998046875,
-      "change": -0.8477309771527348,
+      "last": 4339.60009765625,
+      "change": -0.8408693334398469,
       "high": 4407.5,
       "low": 4330.89990234375,
-      "volume": 62282,
+      "volume": 62941,
       "timestamp": "2026-09-23T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 65.44499969482422,
-      "change": -0.7386390790201021,
+      "last": 65.44000244140625,
+      "change": -0.7462184842832642,
       "high": 68.05500030517578,
       "low": 65.29499816894531,
-      "volume": 21020,
+      "volume": 21120,
       "timestamp": "2026-09-23T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
@@ -115,8 +115,8 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 100.9520034790039,
-      "change": 0.5197681691147251,
+      "last": 100.96700286865234,
+      "change": 0.5347033374935551,
       "high": 100.96700286865234,
       "low": 100.54399871826172,
       "volume": 0,
@@ -125,9 +125,6 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": true,
-  "errorDetails": [
-    "BTC: Request timeout",
-    "ETH: Request timeout"
-  ]
+  "hasError": false,
+  "errorDetails": []
 }
