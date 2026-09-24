@@ -1,6 +1,6 @@
 name = "arzpulse-market-updater"
 main = "index.js"
-compatibility_date = "2026-08-01"
+compatibility_date = "2026-09-01"
 
 [triggers]
 crons = ["*/5 * * * *"]
@@ -10,3 +10,22 @@ GITHUB_OWNER = "mehrdadmb2"
 GITHUB_REPO = "ArzPulse"
 GITHUB_WORKFLOW = "update-prices.yml"
 GITHUB_REF = "main"
+ALLOWED_ORIGINS = "https://mehrdadmb2.github.io"
+
+# Keep your existing SETTINGS_KV binding. It remains required for Telegram
+# channel settings, Telegram profile linking, rate-limit buckets, and KV fallback.
+#
+# Optional: bind a D1 database named PORTFOLIO_DB. D1 becomes the primary
+# portfolio store and existing KV profiles are migrated on first access.
+#
+# [[d1_databases]]
+# binding = "PORTFOLIO_DB"
+# database_name = "arzpulse-portfolio"
+# database_id = "YOUR_D1_DATABASE_ID"
+# migrations_dir = "migrations"
+
+# Do NOT put secrets in this file. Set them with `wrangler secret put`: 
+# TELEGRAM_BOT_TOKEN
+# GITHUB_TOKEN
+# ADMIN_SECRET
+# TELEGRAM_WEBHOOK_SECRET

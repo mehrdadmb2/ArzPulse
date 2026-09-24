@@ -12,7 +12,6 @@ const LATEST_PATH = path.join(DATA_DIR, 'latest.json');
 const HISTORY_KEEP_DAYS = 30;
 
 fs.mkdirSync(HISTORY_DIR, { recursive: true });
-
 function fetchText(url, timeout=12000, retries=2) {
   return new Promise((resolve,reject)=>{
     let attempt=0;
@@ -52,7 +51,6 @@ async function fetchYahoo(symbol){
   const last=num(close.at(-1)); const prev=num(close.at(-2)||last); const change=prev?((last-prev)/prev)*100:0; const ts=(r.timestamp||[]).at(-1);
   return {last,change,high:num(high.at(-1)),low:num(low.at(-1)),volume:num(volume.at(-1)),timestamp:ts?new Date(ts*1000).toISOString():new Date().toISOString(),delayed:true,symbol};
 }
-
 (async()=>{
   console.log('🚀 ArzPulse collector v4');
   const previous=readJSON(LATEST_PATH,null);
