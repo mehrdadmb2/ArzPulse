@@ -4,17 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050b12">
-  <meta name="description" content="ArzPulse — interactive market terminal with live prices, historical data, analytics and persistent portfolio profiles.">
+  <meta name="description" content="ArzPulse — interactive market terminal for crypto, gold, oil and global markets.">
   <meta name="color-scheme" content="dark light">
-  <!-- Replace the content value with your deployed Cloudflare Worker URL. -->
-  <meta name="arzpulse-worker-url" content="https://YOUR-ARZPULSE-WORKER.workers.dev">
   <title>ArzPulse | Market Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/app.css?v=13">
-  <script src="assets/config.js?v=13" defer></script>
-  <script src="assets/app.js?v=13" defer></script>
+  <link rel="stylesheet" href="assets/app.css?v=10">
+  <script src="assets/app.js?v=10" defer></script>
 </head>
 <body>
   <div class="ambient ambient-a"></div>
@@ -29,7 +26,7 @@
         <span class="brand-mark" aria-hidden="true">
           <span class="brand-mark-grid"></span>
           <span class="brand-mark-scan"></span>
-          <svg viewBox="0 0 48 48">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
             <path d="M7 29h8l4-10 7 14 6-8h9" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="39" cy="25" r="2.6" fill="currentColor"/>
           </svg>
@@ -45,7 +42,6 @@
         <a href="#marketStatus" data-i18n="navStatus">Status</a>
         <a href="#analytics" data-i18n="navChart">Charts</a>
         <a href="#watch" data-i18n="navWatch">Watchlist</a>
-        <a href="#portfolio" data-i18n="navPortfolio">Portfolio</a>
         <a href="#compare" data-i18n="navCompare">Compare</a>
       </nav>
 
@@ -53,14 +49,16 @@
         <span class="market-clock" id="marketClock">—</span>
         <span class="live-pill" id="connectionPill"><i></i><b data-i18n="checking">Checking</b></span>
         <button class="icon-btn" id="langBtn" type="button" aria-label="Switch language" title="Switch language">FA</button>
-        <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh data" title="Refresh">↻</button>
+        <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh data" title="Refresh"><i class="fa fa-rotate">↻</i></button>
         <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Theme"><span id="themeGlyph">◐</span></button>
       </div>
     </header>
 
     <section class="market-strip glass" aria-label="Live market ticker">
       <div class="strip-label"><span class="live-dot"></span><b data-i18n="liveMarket">LIVE MARKET</b></div>
-      <div class="strip-viewport"><div class="strip-track" id="tickerTrack"></div></div>
+      <div class="strip-viewport">
+        <div class="strip-track" id="tickerTrack"></div>
+      </div>
     </section>
 
     <section class="hero-grid" id="overview">
@@ -80,7 +78,6 @@
         <div class="hero-actions">
           <a class="primary-btn" href="#markets" data-i18n="exploreMarkets">Explore markets</a>
           <button class="ghost-btn" id="shareBtn" type="button" data-i18n="share">Share</button>
-          <a class="ghost-btn" href="#portfolio" data-i18n="openPortfolio">Open portfolio</a>
         </div>
         <div class="hero-meta-row">
           <span><i>●</i> <b data-i18n="dataLayer">GitHub data layer</b></span>
@@ -96,8 +93,6 @@
         <div class="orbit orbit-one"></div>
         <div class="orbit orbit-two"></div>
         <div class="orbit orbit-three"></div>
-        <div class="galaxy-signal"></div>
-
         <div class="galaxy-core">
           <div class="core-grid"></div>
           <div class="core-glow"></div>
@@ -105,18 +100,12 @@
             <path d="M12 47h12l5-16 9 20 8-12h14" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span>PULSE</span>
-          <small id="galaxyPulseSub">LIVE</small>
         </div>
-
         <button class="orbit-node node-usd" data-asset="DOLLAR" type="button"><strong>$</strong><span id="galaxyDollar">—</span></button>
         <button class="orbit-node node-btc" data-asset="BTC" type="button"><strong>₿</strong><span id="galaxyBtc">—</span></button>
         <button class="orbit-node node-gold" data-asset="GOLD" type="button"><strong>Au</strong><span id="galaxyGold">—</span></button>
         <button class="orbit-node node-oil" data-asset="BRENT" type="button"><strong>Oil</strong><span id="galaxyOil">—</span></button>
-
-        <div class="galaxy-footer">
-          <span data-i18n="galaxyCaption">Interactive market pulse</span>
-          <b id="galaxyPulseStatus">●</b>
-        </div>
+        <span class="galaxy-caption" data-i18n="galaxyCaption">Interactive market pulse</span>
       </section>
     </section>
 
@@ -184,21 +173,18 @@
           <div class="meter"><span id="breadthMeter"></span></div>
           <div class="status-foot"><span id="breadthUp">—</span><span id="breadthDown">—</span></div>
         </article>
-
         <article class="status-card interactive">
           <div class="status-card-head"><span data-i18n="momentum">Momentum</span><span class="status-icon">↗</span></div>
           <div class="status-metric"><strong id="momentumValue">—</strong><span id="momentumLabel">—</span></div>
           <div class="momentum-bars" id="momentumBars"></div>
           <div class="status-foot"><span data-i18n="avgChange">Average change</span><b id="avgChange">—</b></div>
         </article>
-
         <article class="status-card interactive">
           <div class="status-card-head"><span data-i18n="volatility">Volatility</span><span class="status-icon">≈</span></div>
           <div class="status-metric"><strong id="volatilityValue">—</strong><span id="volatilityLabel">—</span></div>
           <div class="volatility-scale"><span id="volatilityNeedle"></span></div>
           <div class="status-foot"><span data-i18n="largestMove">Largest move</span><b id="largestMove">—</b></div>
         </article>
-
         <article class="status-card interactive">
           <div class="status-card-head"><span data-i18n="dataHealth">Data health</span><span class="status-icon">✓</span></div>
           <div class="status-metric"><strong id="healthPercent">—</strong><span id="healthLabel">—</span></div>
@@ -238,7 +224,6 @@
         </div>
         <div class="chart-wrap">
           <svg id="mainChart" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-label="Price chart"></svg>
-          <div class="chart-crosshair" id="chartCrosshair" hidden></div>
           <div class="chart-empty" id="chartEmpty">Historical data is not available for this asset yet.</div>
         </div>
       </article>
@@ -248,12 +233,10 @@
           <div class="side-head"><span data-i18n="keyStats">Key stats</span><span class="status-icon">✦</span></div>
           <div class="stats-list" id="statsList"></div>
         </article>
-
         <article class="side-card glass">
           <div class="side-head"><span data-i18n="watchlist">Watchlist</span><button class="text-btn" id="resetWatchlist" type="button" data-i18n="clear">Clear</button></div>
           <div class="watchlist" id="watchlist"></div>
         </article>
-
         <article class="side-card glass">
           <div class="side-head"><span data-i18n="serviceHealth">Service health</span><span class="health-dot" id="healthDot"></span></div>
           <p class="health-text" id="healthText">Checking latest snapshot…</p>
@@ -262,134 +245,6 @@
           <div class="health-row"><span data-i18n="schedule">Schedule</span><b>Cloudflare · 5 min</b></div>
         </article>
       </aside>
-    </section>
-
-    <!-- Persistent user portfolio -->
-    <section class="portfolio-section glass" id="portfolio">
-      <div class="portfolio-head section-row">
-        <div>
-          <div class="eyebrow"><span class="eyebrow-dot"></span>PERSONAL PORTFOLIO</div>
-          <h2 data-i18n="portfolioTitle">Persistent portfolio</h2>
-          <p class="section-lead" data-i18n="portfolioLead">Track your own buy lots, current value, unrealized P/L and return across devices.</p>
-        </div>
-        <div class="portfolio-profile-badge" id="portfolioProfileBadge"><span>●</span><b id="portfolioBadgeText">Guest</b></div>
-      </div>
-
-      <div id="portfolioGuest" class="portfolio-guest-grid">
-        <div class="portfolio-setup-card interactive">
-          <div class="setup-icon">◉</div>
-          <div>
-            <h3 data-i18n="createProfileTitle">Create or open your profile</h3>
-            <p data-i18n="createProfileText">Choose a unique username and a PIN. Your profile is stored server-side with a resilient D1/KV storage layer; this browser only remembers the username.</p>
-          </div>
-          <form id="profileForm" class="profile-form">
-            <label><span data-i18n="username">Username</span><input id="profileUsername" type="text" inputmode="text" autocomplete="username" maxlength="25" placeholder="mehrdad" required></label>
-            <label><span data-i18n="pin">PIN</span><input id="profilePin" type="password" inputmode="numeric" autocomplete="new-password" minlength="4" maxlength="32" placeholder="••••" required></label>
-            <label><span data-i18n="displayName">Display name</span><input id="profileDisplayName" type="text" maxlength="60" placeholder="Your name"></label>
-            <div class="form-actions">
-              <button class="primary-btn" type="submit" data-i18n="createOrOpen">Create / Open</button>
-              <button class="ghost-btn" id="openPublicProfileBtn" type="button" data-i18n="viewProfile">View profile</button>
-            </div>
-          </form>
-          <div class="worker-setup">
-            <span data-i18n="workerEndpoint">Portfolio API</span>
-            <code id="workerEndpointText">Not configured</code>
-            <button class="text-btn" id="changeWorkerUrl" type="button" data-i18n="configure">Configure</button>
-          </div>
-        </div>
-
-        <div class="portfolio-feature-list">
-          <div class="feature-chip"><span>✓</span><b data-i18n="featurePermanent">Persistent server-side storage</b></div>
-          <div class="feature-chip"><span>✓</span><b data-i18n="featurePnL">Unrealized P/L & ROI</b></div>
-          <div class="feature-chip"><span>✓</span><b data-i18n="featureTelegram">Website + Telegram profile</b></div>
-          <div class="feature-chip"><span>✓</span><b data-i18n="featureLots">Multiple buy lots per asset</b></div>
-          <div class="feature-chip"><span>✓</span><b data-i18n="featureSell">FIFO selling & realized P/L</b></div>
-          <div class="feature-chip"><span>✓</span><b data-i18n="featureShare">Shareable profile URL</b></div>
-        </div>
-      </div>
-
-      <div id="portfolioWorkspace" class="portfolio-workspace" hidden>
-        <div class="portfolio-summary-grid" id="portfolioSummaryGrid"></div>
-        <div class="portfolio-toolbar">
-          <div class="portfolio-user-block">
-            <span class="portfolio-avatar" id="portfolioAvatar">A</span>
-            <div><b id="portfolioDisplayName">—</b><small>@<span id="portfolioUsername">—</span></small></div>
-          </div>
-          <div class="portfolio-toolbar-actions">
-            <button class="ghost-btn" id="portfolioRefreshBtn" type="button" data-i18n="refreshProfile">Refresh</button>
-            <button class="ghost-btn" id="portfolioShareBtn" type="button" data-i18n="shareProfile">Share profile</button>
-            <button class="ghost-btn" id="portfolioExportBtn" type="button" data-i18n="exportBackup">Export backup</button>
-            <button class="ghost-btn" id="portfolioLogoutBtn" type="button" data-i18n="logOut">Lock</button>
-          </div>
-        </div>
-
-        <div class="portfolio-panels">
-          <article class="portfolio-card">
-            <div class="portfolio-card-head">
-              <div><div class="eyebrow">POSITIONS</div><h3 data-i18n="openPositions">Open positions</h3></div>
-              <span class="count-pill" id="portfolioHoldingCount">0</span>
-            </div>
-            <div class="portfolio-table-wrap">
-              <table class="portfolio-table">
-                <thead>
-                  <tr>
-                    <th data-i18n="asset">Asset</th>
-                    <th data-i18n="quantity">Qty</th>
-                    <th data-i18n="entry">Entry</th>
-                    <th data-i18n="current">Current</th>
-                    <th data-i18n="value">Value</th>
-                    <th data-i18n="pnl">P/L</th>
-                    <th data-i18n="actions">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="portfolioHoldingsBody"></tbody>
-              </table>
-            </div>
-            <div class="portfolio-mobile-list" id="portfolioMobileList"></div>
-          </article>
-
-          <article class="portfolio-card portfolio-entry-card">
-            <div class="portfolio-card-head">
-              <div><div class="eyebrow">ADD POSITION</div><h3 data-i18n="addBuy">Record a purchase</h3></div>
-              <span class="status-icon">＋</span>
-            </div>
-            <form id="holdingForm" class="holding-form">
-              <label><span data-i18n="asset">Asset</span><select id="holdingSymbol"></select></label>
-              <label><span data-i18n="quantity">Quantity</span><input id="holdingQuantity" type="number" min="0" step="any" required placeholder="0.25"></label>
-              <label><span data-i18n="buyPrice">Buy price</span><input id="holdingBuyPrice" type="number" min="0" step="any" required placeholder="195000000000"></label>
-              <label><span data-i18n="buyDate">Purchase date</span><input id="holdingBuyDate" type="datetime-local"></label>
-              <label class="wide"><span data-i18n="note">Note</span><input id="holdingNote" type="text" maxlength="120" placeholder="Optional note"></label>
-              <div class="holding-quote" id="holdingQuote">—</div>
-              <button class="primary-btn wide" type="submit" data-i18n="savePurchase">Save purchase</button>
-            </form>
-
-            <div class="sell-divider"></div>
-            <form id="sellForm" class="holding-form sell-form">
-              <div class="form-caption"><span class="eyebrow">SELL / CLOSE</span><small data-i18n="sellHint">FIFO is used when closing part of a position.</small></div>
-              <label><span data-i18n="asset">Asset</span><select id="sellSymbol"></select></label>
-              <label><span data-i18n="quantity">Quantity</span><input id="sellQuantity" type="number" min="0" step="any" required placeholder="0.05"></label>
-              <label><span data-i18n="sellPrice">Sell price</span><input id="sellPrice" type="number" min="0" step="any" required placeholder="0"></label>
-              <button class="ghost-btn danger-btn wide" type="submit" data-i18n="recordSell">Record sale</button>
-            </form>
-          </article>
-        </div>
-
-        <div class="portfolio-bottom-grid">
-          <article class="portfolio-card">
-            <div class="portfolio-card-head"><div><div class="eyebrow">ALLOCATION</div><h3 data-i18n="allocation">Portfolio allocation</h3></div></div>
-            <div class="allocation-list" id="portfolioAllocation"></div>
-          </article>
-          <article class="portfolio-card">
-            <div class="portfolio-card-head"><div><div class="eyebrow">REALIZED</div><h3 data-i18n="realizedHistory">Realized P/L</h3></div></div>
-            <div class="realized-list" id="realizedList"></div>
-          </article>
-        </div>
-
-        <div class="portfolio-note">
-          <span>i</span>
-          <p data-i18n="portfolioNote">Portfolio numbers are derived from your recorded lots and the latest ArzPulse market snapshot. They are not a brokerage statement or tax record.</p>
-        </div>
-      </div>
     </section>
 
     <section class="comparison glass" id="compare">
@@ -404,7 +259,7 @@
       <div class="notice-icon">i</div>
       <div>
         <strong data-i18n="dataNoteTitle">Data & update model</strong>
-        <p data-i18n="dataNote">ArzPulse reads generated JSON data. Local market snapshots come from the project collector and global market snapshots are stored by automation. Global quotes can be delayed.</p>
+        <p data-i18n="dataNote">ArzPulse reads the generated JSON data layer. Local market snapshots come from the project’s collector and global market snapshots are stored by the automated workflow. Global quotes can be delayed.</p>
       </div>
       <a href="https://github.com/mehrdadmb2/ArzPulse" target="_blank" rel="noopener" data-i18n="repo">Repository ↗</a>
     </section>
@@ -420,20 +275,12 @@
     <div class="detail-backdrop" id="detailBackdrop"></div>
     <aside class="detail-sheet glass">
       <div class="detail-head">
-        <div class="detail-title"><span class="detail-logo" id="detailLogo"></span><div><b id="detailName">—</b><small id="detailSymbol">—</small></div></div>
+        <div class="detail-title"><span id="detailLogo"></span><div><b id="detailName">—</b><small id="detailSymbol">—</small></div></div>
         <div class="detail-actions"><button class="icon-btn" id="detailWatch" type="button" aria-label="Watchlist">☆</button><button class="icon-btn" id="closeDetail" type="button" aria-label="Close">×</button></div>
       </div>
       <div class="detail-hero"><strong id="detailPrice">—</strong><span id="detailChange" class="change neutral">—</span></div>
       <div class="detail-grid" id="detailGrid"></div>
-      <div class="detail-chart" id="detailMiniChart"></div>
     </aside>
-  </div>
-
-  <div class="modal-backdrop" id="simpleModal" hidden>
-    <div class="simple-modal glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-head"><div><div class="eyebrow">ARZPULSE</div><h3 id="modalTitle">Configure</h3></div><button class="icon-btn" id="closeSimpleModal" type="button">×</button></div>
-      <div id="modalBody"></div>
-    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
