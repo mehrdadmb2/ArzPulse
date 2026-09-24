@@ -1,28 +1,45 @@
-name: Update Crypto Prices
+name: Update Market Prices
 
 on:
-  schedule:
-    # هر ۱۰ دقیقه یکبار (بهینه برای ریپوهای عمومی)
-    - cron: '*/10 * * * *'
   workflow_dispatch:
+    inputs:
+      reason:
+        description: Optional reason for the update
+        required: false
+        default: scheduled
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arzpulse-price-update
+  cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          node-version: '20'
-      - name: Run fetch script
-        run: node scripts/fetch-and-save.js
-      - name: Commit and push
+          fetch-depth: 1
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Collect market data
+        working-directory: scripts
+        run: node fetch-and-save.js
+      - name: Commit generated JSON data
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add docs/data/
-          git add docs/index.html
-          git diff --staged --quiet || git commit -m "Auto-update prices $(date -u '+%Y-%m-%d %H:%M:%S')"
+          git config user.name "ArzPulse Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/data
+          if git diff --cached --quiet; then
+            echo "No generated data changes."
+            exit 0
+          fi
+          git commit -m "chore(data): update market snapshot"
           git push
