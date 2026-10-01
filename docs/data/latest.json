@@ -1,95 +1,95 @@
 {
   "version": 4,
-  "timestamp": "2026-10-01T07:35:49.223Z",
+  "timestamp": "2026-10-01T07:41:06.685Z",
   "prices": {
     "BTC": {
-      "bestBuy": 213140010100,
-      "bestSell": 213250000000,
-      "lastPrice": 213250000000,
-      "volume": 12.5488364766,
+      "bestBuy": 212900000030,
+      "bestSell": 212999999910,
+      "lastPrice": 212900000080,
+      "volume": 12.6059941835,
       "high": 218960571870,
       "low": 210100000000,
-      "change": 0.8
+      "change": 0.63
     },
     "ETH": {
-      "bestBuy": 6880000000,
-      "bestSell": 6882359840,
-      "lastPrice": 6880000000,
-      "volume": 319.8426477064,
+      "bestBuy": 6850000000,
+      "bestSell": 6850000950,
+      "lastPrice": 6850000000,
+      "volume": 321.5039824564,
       "high": 7000000000,
       "low": 6750000000,
-      "change": 1.05
+      "change": 0.61
     },
     "USDT": {
-      "bestBuy": 2553080,
-      "bestSell": 2553800,
-      "lastPrice": 2553800,
-      "volume": 4779982.403399265,
+      "bestBuy": 2551030,
+      "bestSell": 2552980,
+      "lastPrice": 2551030,
+      "volume": 4796448.294046966,
       "high": 2573950,
       "low": 2522100,
-      "change": 0.19
+      "change": 0.08
     },
     "NOT": {
-      "bestBuy": 1270,
-      "bestSell": 1272.5,
-      "lastPrice": 1266.04,
-      "volume": 236760583.43617645,
+      "bestBuy": 1263.95,
+      "bestSell": 1268.2,
+      "lastPrice": 1263.95,
+      "volume": 237416196.86817643,
       "high": 1298.4,
       "low": 1230,
-      "change": 1.28
+      "change": 1.12
     },
     "XAUT": {
-      "bestBuy": 4189.3,
-      "bestSell": 4200.1,
-      "lastPrice": 4188.4,
-      "volume": 51.188760832,
+      "bestBuy": 4189,
+      "bestSell": 4199.2,
+      "lastPrice": 4189,
+      "volume": 51.4635272952,
       "high": 4220,
       "low": 4175.5,
-      "change": -0.28
+      "change": -0.26
     }
   },
-  "gold18K": 258641874,
-  "usdtPrice": 2553800,
-  "dollarPrice": 2553800,
-  "goldChange": -0.28,
-  "dollarChange": 0.19,
+  "gold18K": 258503423,
+  "usdtPrice": 2552980,
+  "dollarPrice": 2552980,
+  "goldChange": -0.26,
+  "dollarChange": 0.08,
   "market": {
     "BRENT": {
-      "last": 99.86000061035156,
-      "change": -3.5448644955255326,
-      "high": 99.87000274658203,
+      "last": 100.06999969482422,
+      "change": -3.3420256208527648,
+      "high": 100.22000122070312,
       "low": 96.55999755859375,
-      "volume": 7942,
+      "volume": 8787,
       "timestamp": "2026-10-01T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 92.2699966430664,
-      "change": 2.0460058743470255,
-      "high": 92.2699966430664,
+      "last": 92.41000366210938,
+      "change": 2.200846641741615,
+      "high": 92.62000274658203,
       "low": 88.79000091552734,
-      "volume": 41711,
+      "volume": 44624,
       "timestamp": "2026-10-01T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4188.7998046875,
-      "change": 0.050149503834804265,
+      "last": 4185,
+      "change": -0.04060943543088104,
       "high": 4222.7998046875,
       "low": 4169.39990234375,
-      "volume": 30008,
+      "volume": 30954,
       "timestamp": "2026-10-01T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 60.904998779296875,
-      "change": 1.3428054382509444,
+      "last": 60.84000015258789,
+      "change": 1.2346510451412405,
       "high": 61.75,
       "low": 60.2599983215332,
-      "volume": 7333,
+      "volume": 7649,
       "timestamp": "2026-10-01T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
@@ -115,9 +115,9 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 101.71600341796875,
-      "change": 0.26220451230005837,
-      "high": 101.7249984741211,
+      "last": 101.73300170898438,
+      "change": 0.2789598514099227,
+      "high": 101.73500061035156,
       "low": 101.45899963378906,
       "volume": 0,
       "timestamp": "2026-10-01T04:00:00.000Z",
