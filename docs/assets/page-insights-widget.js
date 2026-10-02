@@ -171,8 +171,7 @@
   }
   function mount() {
     if ($('#arzpulseInsights')) return $('#arzpulseInsights');
-    const mountPoint = $('#siteAnalyticsMount');
-    const anchor = mountPoint || $('#marketStatus') || $('#analytics') || $('.market-grid');
+    const anchor = $('#marketStatus') || $('#analytics') || $('.market-grid');
     if (!anchor || !anchor.parentNode) return null;
     const wrapper = document.createElement('section');
     wrapper.id = 'arzpulseInsights';
@@ -195,11 +194,7 @@
       </div>
       <div class="arzpi-footer"><div class="arzpi-footer-left"><span>${escapeHtml(T('source'))}</span><span id="arzpiUpdated">—</span></div><button type="button" id="arzpiRefresh">↻ ${escapeHtml(T('refresh'))}</button></div>
     </div>`;
-    if (anchor.id === 'siteAnalyticsMount') {
-      anchor.appendChild(wrapper);
-    } else {
-      anchor.parentNode.insertBefore(wrapper, anchor.nextSibling);
-    }
+    anchor.parentNode.insertBefore(wrapper, anchor.nextSibling);
     $('#arzpiRefresh', wrapper).addEventListener('click', () => load(true));
     return wrapper;
   }
