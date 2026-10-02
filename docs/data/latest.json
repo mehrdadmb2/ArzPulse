@@ -1,95 +1,95 @@
 {
   "version": 4,
-  "timestamp": "2026-10-02T08:20:49.893Z",
+  "timestamp": "2026-10-02T08:55:50.373Z",
   "prices": {
     "BTC": {
-      "bestBuy": 223400000000,
-      "bestSell": 223474236990,
-      "lastPrice": 223474236990,
-      "volume": 17.7435085504,
+      "bestBuy": 223200000000,
+      "bestSell": 223300000000,
+      "lastPrice": 223200000000,
+      "volume": 17.243848804,
       "high": 226533199180,
-      "low": 212230224180,
-      "change": 4.86
+      "low": 214300000000,
+      "change": 3.74
     },
     "ETH": {
-      "bestBuy": 7117971130,
-      "bestSell": 7142425020,
-      "lastPrice": 7135025200,
-      "volume": 273.2958183991,
+      "bestBuy": 7124355950,
+      "bestSell": 7124455980,
+      "lastPrice": 7124455000,
+      "volume": 267.4156555414,
       "high": 7150384540,
-      "low": 6840000000,
-      "change": 4.3
+      "low": 6870000000,
+      "change": 2.61
     },
     "USDT": {
-      "bestBuy": 2586540,
-      "bestSell": 2588010,
-      "lastPrice": 2588010,
-      "volume": 2596049.2501359135,
+      "bestBuy": 2586200,
+      "bestSell": 2586210,
+      "lastPrice": 2585000,
+      "volume": 2360413.512002497,
       "high": 2590000,
-      "low": 2553860,
-      "change": 1.25
+      "low": 2570100,
+      "change": 0.44
     },
     "NOT": {
-      "bestBuy": 1299.01,
-      "bestSell": 1299.7,
-      "lastPrice": 1297,
-      "volume": 169090080.40989023,
-      "high": 1299.55,
+      "bestBuy": 1306.05,
+      "bestSell": 1308.99,
+      "lastPrice": 1306.05,
+      "volume": 184190877.582927,
+      "high": 1315,
       "low": 1244,
-      "change": 2.3
+      "change": 2.51
     },
     "XAUT": {
-      "bestBuy": 4199,
-      "bestSell": 4204.4,
-      "lastPrice": 4199,
-      "volume": 38.5077596019,
+      "bestBuy": 4200.1,
+      "bestSell": 4206.6,
+      "lastPrice": 4200.1,
+      "volume": 40.3314339585,
       "high": 4208,
       "low": 4175,
-      "change": 0.31
+      "change": 0.38
     }
   },
-  "gold18K": 262374910,
-  "usdtPrice": 2588010,
-  "dollarPrice": 2588010,
-  "goldChange": 0.31,
-  "dollarChange": 1.25,
+  "gold18K": 262329620,
+  "usdtPrice": 2586210,
+  "dollarPrice": 2586210,
+  "goldChange": 0.38,
+  "dollarChange": 0.44,
   "market": {
     "BRENT": {
-      "last": 99.63999938964844,
-      "change": -2.6097138428883095,
+      "last": 99.27999877929688,
+      "change": -2.961586210146834,
       "high": 102.91000366210938,
-      "low": 99.61000061035156,
-      "volume": 8071,
+      "low": 99.2300033569336,
+      "volume": 11094,
       "timestamp": "2026-10-02T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 89.41999816894531,
-      "change": -3.7148750679494214,
+      "last": 89.36000061035156,
+      "change": -3.7794788763044913,
       "high": 93.51000213623047,
-      "low": 89.33000183105469,
-      "volume": 47620,
+      "low": 89.29000091552734,
+      "volume": 64609,
       "timestamp": "2026-10-02T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4221.10009765625,
-      "change": 0.4473810494857843,
+      "last": 4211.2001953125,
+      "change": 0.2117980876821774,
       "high": 4226.7998046875,
       "low": 4162.89990234375,
-      "volume": 38818,
+      "volume": 42561,
       "timestamp": "2026-10-02T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 61.79499816894531,
-      "change": 1.7620415343117972,
+      "last": 61.53499984741211,
+      "change": 1.3338845510818915,
       "high": 61.91999816894531,
       "low": 60.529998779296875,
-      "volume": 6526,
+      "volume": 7240,
       "timestamp": "2026-10-02T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
@@ -115,8 +115,8 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 101.81199645996094,
-      "change": -0.28207837263891344,
+      "last": 101.9489974975586,
+      "change": -0.14789518003839505,
       "high": 102.13200378417969,
       "low": 101.79000091552734,
       "volume": 0,
