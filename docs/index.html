@@ -11,7 +11,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/app.css?v=10">
+  <link rel="stylesheet" href="assets/page-insights-widget.css?v=1">
+
+  <!-- GitHub Page Insights: ArzPulse traffic / visitor analytics -->
+  <script>
+    window.PAGE_INSIGHTS_CONFIG = Object.freeze({
+      workerUrl: 'https://github-page-insights-worker.game-developer-mb.workers.dev',
+      platformId: 'arzpulse',
+      platformName: 'ArzPulse | Market Terminal',
+      platformType: 'web',
+      environment: 'production',
+      appVersion: 'ArzPulse'
+    });
+  </script>
   <script src="assets/app.js?v=10" defer></script>
+  <script src="assets/page-insights.js?v=1" defer></script>
+  <script src="assets/page-insights-widget.js?v=1" defer></script>
 </head>
 <body>
   <div class="ambient ambient-a"></div>
@@ -207,6 +222,8 @@
         </div>
       </div>
     </section>
+
+    <div id="siteAnalyticsMount" class="site-analytics-slot" aria-live="polite"></div>
 
     <section class="analytics-layout" id="analytics">
       <article class="chart-card glass">
