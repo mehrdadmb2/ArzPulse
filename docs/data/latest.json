@@ -1,95 +1,95 @@
 {
   "version": 4,
-  "timestamp": "2026-10-06T08:06:23.185Z",
+  "timestamp": "2026-10-06T08:11:04.273Z",
   "prices": {
     "BTC": {
-      "bestBuy": 229050000070,
-      "bestSell": 229375990160,
-      "lastPrice": 229050000060,
-      "volume": 10.793163783,
+      "bestBuy": 229409546590,
+      "bestSell": 229695985010,
+      "lastPrice": 229695995010,
+      "volume": 10.805975638,
       "high": 232600000000,
       "low": 228000000000,
-      "change": -1.51
+      "change": -1.24
     },
     "ETH": {
-      "bestBuy": 7253000000,
-      "bestSell": 7267478840,
-      "lastPrice": 7253000000,
-      "volume": 160.6381620466,
+      "bestBuy": 7255722820,
+      "bestSell": 7267094510,
+      "lastPrice": 7255722820,
+      "volume": 160.9883351907,
       "high": 7359999970,
       "low": 7216610730,
-      "change": -1.32
+      "change": -1.28
     },
     "USDT": {
-      "bestBuy": 2675040,
-      "bestSell": 2675050,
-      "lastPrice": 2678410,
-      "volume": 2723689.0917587676,
+      "bestBuy": 2675010,
+      "bestSell": 2675030,
+      "lastPrice": 2678300,
+      "volume": 2747986.2807616815,
       "high": 2697980,
-      "low": 2674560,
-      "change": -0.66
+      "low": 2674020,
+      "change": -0.67
     },
     "NOT": {
-      "bestBuy": 1330,
-      "bestSell": 1330.69,
+      "bestBuy": 1325.82,
+      "bestSell": 1330.79,
       "lastPrice": 1330,
-      "volume": 161400366.6322144,
+      "volume": 161595166.6322144,
       "high": 1372.5,
       "low": 1307,
       "change": -2.21
     },
     "XAUT": {
-      "bestBuy": 4153.9,
+      "bestBuy": 4155.1,
       "bestSell": 4159.3,
-      "lastPrice": 4159.3,
-      "volume": 46.0665392429,
+      "lastPrice": 4154.6,
+      "volume": 46.0799689439,
       "high": 4178.9,
       "low": 4145,
-      "change": -0.43
+      "change": -0.54
     }
   },
-  "gold18K": 268289994,
-  "usdtPrice": 2675050,
-  "dollarPrice": 2675050,
-  "goldChange": -0.43,
-  "dollarChange": -0.66,
+  "gold18K": 268287988,
+  "usdtPrice": 2675030,
+  "dollarPrice": 2675030,
+  "goldChange": -0.54,
+  "dollarChange": -0.67,
   "market": {
     "BRENT": {
-      "last": 100,
-      "change": -0.31897896311569507,
+      "last": 99.83999633789062,
+      "change": -0.47847224720272646,
       "high": 100.9800033569336,
       "low": 99.38999938964844,
-      "volume": 4379,
+      "volume": 4641,
       "timestamp": "2026-10-06T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 88.62999725341797,
-      "change": -0.8945578094910419,
+      "last": 88.41999816894531,
+      "change": -1.129377314976946,
       "high": 90.05000305175781,
       "low": 88.27999877929688,
-      "volume": 26818,
+      "volume": 28314,
       "timestamp": "2026-10-06T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4167,
-      "change": 0.24538577251176594,
+      "last": 4169.60009765625,
+      "change": 0.30793623869774744,
       "high": 4179.60009765625,
       "low": 4130.7001953125,
-      "volume": 37813,
+      "volume": 38221,
       "timestamp": "2026-10-06T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 61.16999816894531,
-      "change": 0.4945024401741666,
+      "last": 61.28499984741211,
+      "change": 0.6834355250728499,
       "high": 61.529998779296875,
       "low": 60.56999969482422,
-      "volume": 5528,
+      "volume": 5676,
       "timestamp": "2026-10-06T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
@@ -115,24 +115,16 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 102.0780029296875,
-      "change": -0.09004134374720442,
+      "last": 102.03500366210938,
+      "change": -0.13212734585030975,
       "high": 102.28500366210938,
-      "low": 102.04399871826172,
+      "low": 102.01000213623047,
       "volume": 0,
       "timestamp": "2026-10-06T04:00:00.000Z",
       "delayed": true,
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": true,
-  "errorDetails": [
-    "BRENT: HTTP 429",
-    "WTI: HTTP 429",
-    "XAUUSD: HTTP 429",
-    "SILVER: HTTP 429",
-    "SP500: HTTP 429",
-    "NASDAQ: HTTP 429",
-    "DXY: HTTP 429"
-  ]
+  "hasError": false,
+  "errorDetails": []
 }
