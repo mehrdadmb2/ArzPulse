@@ -1,24 +1,24 @@
 {
   "version": 4,
-  "timestamp": "2026-10-07T03:41:03.000Z",
+  "timestamp": "2026-10-07T03:45:56.153Z",
   "prices": {
     "BTC": {
-      "bestBuy": 226367685040,
-      "bestSell": 226375758300,
-      "lastPrice": 226375758300,
-      "volume": 11.8972263439,
+      "bestBuy": 226358946490,
+      "bestSell": 226920001200,
+      "lastPrice": 226358946500,
+      "volume": 11.9272531016,
       "high": 231800000000,
       "low": 224900000000,
-      "change": -1.06
+      "change": -1.07
     },
     "ETH": {
-      "bestBuy": 7000285500,
-      "bestSell": 7026793710,
-      "lastPrice": 7026864010,
-      "volume": 206.9165115413,
+      "bestBuy": 7011056130,
+      "bestSell": 7034999910,
+      "lastPrice": 7007190990,
+      "volume": 207.7254737585,
       "high": 7309999990,
       "low": 6930000000,
-      "change": -3.34
+      "change": -3.61
     },
     "USDT": {
       "bestBuy": 2681850,
@@ -30,67 +30,67 @@
       "change": -0.15
     },
     "NOT": {
-      "bestBuy": 1256.03,
-      "bestSell": 1264.99,
-      "lastPrice": 1254.01,
-      "volume": 169098611.6234941,
+      "bestBuy": 1254.4,
+      "bestSell": 1260.59,
+      "lastPrice": 1254.3,
+      "volume": 169354602.12202275,
       "high": 1347.5,
       "low": 1235,
-      "change": -4.61
+      "change": -4.59
     },
     "XAUT": {
-      "bestBuy": 4137.8,
-      "bestSell": 4140,
-      "lastPrice": 4137.7,
-      "volume": 148.8946268419,
+      "bestBuy": 4140.5,
+      "bestSell": 4141,
+      "lastPrice": 4140,
+      "volume": 149.4593068419,
       "high": 4170,
       "low": 4062.5,
-      "change": -0.53
+      "change": -0.48
     }
   },
-  "gold18K": 267730892,
+  "gold18K": 267795562,
   "usdtPrice": 2681920,
   "dollarPrice": 2681920,
-  "goldChange": -0.53,
+  "goldChange": -0.48,
   "dollarChange": -0.15,
   "market": {
     "BRENT": {
-      "last": 101.47000122070312,
-      "change": 0.8848671440107737,
-      "high": 101.87999725341797,
+      "last": 101.62000274658203,
+      "change": 1.0340036752775612,
+      "high": 101.86000061035156,
       "low": 100.94999694824219,
-      "volume": 1544,
-      "timestamp": "2026-10-07T03:29:55.000Z",
+      "volume": 1605,
+      "timestamp": "2026-10-07T03:35:52.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 90.12999725341797,
-      "change": 0.7714610836060148,
-      "high": 90.61000061035156,
+      "last": 90.26000213623047,
+      "change": 0.9168153761639433,
+      "high": 90.5999984741211,
       "low": 89.62000274658203,
-      "volume": 11153,
-      "timestamp": "2026-10-07T03:30:34.000Z",
+      "volume": 11706,
+      "timestamp": "2026-10-07T03:35:49.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4169,
-      "change": -0.4322824206276229,
+      "last": 4169.7001953125,
+      "change": -0.41555974153781705,
       "high": 4197.7998046875,
       "low": 4164.2001953125,
-      "volume": 15661,
-      "timestamp": "2026-10-07T03:30:57.000Z",
+      "volume": 15800,
+      "timestamp": "2026-10-07T03:35:53.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 61.1150016784668,
-      "change": -0.08664267222390466,
+      "last": 61.150001525878906,
+      "change": -0.02942345983965898,
       "high": 61.845001220703125,
-      "low": 60.9900016784668,
-      "volume": 2167,
-      "timestamp": "2026-10-07T03:30:48.000Z",
+      "low": 61,
+      "volume": 2248,
+      "timestamp": "2026-10-07T03:35:52.000Z",
       "delayed": true,
       "symbol": "SI=F"
     },
@@ -115,12 +115,12 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 102.02799987792969,
-      "change": 0.19443979506501133,
+      "last": 102.0270004272461,
+      "change": 0.19345830565558172,
       "high": 102.06300354003906,
       "low": 101.90299987792969,
       "volume": 0,
-      "timestamp": "2026-10-07T03:31:01.000Z",
+      "timestamp": "2026-10-07T03:35:54.000Z",
       "delayed": true,
       "symbol": "DX-Y.NYB"
     }
