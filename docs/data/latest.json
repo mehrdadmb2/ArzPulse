@@ -1,95 +1,95 @@
 {
   "version": 4,
-  "timestamp": "2026-10-08T06:11:02.639Z",
+  "timestamp": "2026-10-08T06:16:03.033Z",
   "prices": {
     "BTC": {
-      "bestBuy": 218600060000,
-      "bestSell": 218600060010,
-      "lastPrice": 218600060010,
-      "volume": 23.8989543022,
+      "bestBuy": 218143970010,
+      "bestSell": 218600059970,
+      "lastPrice": 218143970000,
+      "volume": 23.9323578436,
       "high": 227000099900,
       "low": 209000000040,
-      "change": -3.6
+      "change": -3.8
     },
     "ETH": {
-      "bestBuy": 6780000680,
-      "bestSell": 6788623070,
-      "lastPrice": 6780000410,
-      "volume": 400.4355322582,
+      "bestBuy": 6788623100,
+      "bestSell": 6798803910,
+      "lastPrice": 6798684580,
+      "volume": 400.6930837331,
       "high": 7072999880,
       "low": 6500000000,
-      "change": -3.5
+      "change": -3.23
     },
     "USDT": {
-      "bestBuy": 2640150,
-      "bestSell": 2642300,
-      "lastPrice": 2640150,
-      "volume": 4688763.841452282,
+      "bestBuy": 2638020,
+      "bestSell": 2638500,
+      "lastPrice": 2638970,
+      "volume": 4705878.738192065,
       "high": 2689950,
       "low": 2507000,
-      "change": -1.81
+      "change": -1.86
     },
     "NOT": {
-      "bestBuy": 1200.02,
-      "bestSell": 1201.47,
-      "lastPrice": 1200.01,
-      "volume": 253159414.59490725,
+      "bestBuy": 1202,
+      "bestSell": 1205.53,
+      "lastPrice": 1205.53,
+      "volume": 253591983.59490725,
       "high": 1269.9,
       "low": 1156,
-      "change": -5.07
+      "change": -4.63
     },
     "XAUT": {
-      "bestBuy": 4123.7,
+      "bestBuy": 4123.5,
       "bestSell": 4124,
-      "lastPrice": 4124,
-      "volume": 161.9356488683,
+      "lastPrice": 4123.5,
+      "volume": 162.1899688683,
       "high": 4170,
       "low": 4028,
-      "change": -0.42
+      "change": -0.43
     }
   },
-  "gold18K": 262756281,
-  "usdtPrice": 2642300,
-  "dollarPrice": 2642300,
-  "goldChange": -0.42,
-  "dollarChange": -1.81,
+  "gold18K": 262378401,
+  "usdtPrice": 2638500,
+  "dollarPrice": 2638500,
+  "goldChange": -0.43,
+  "dollarChange": -1.86,
   "market": {
     "BRENT": {
-      "last": 102.76000213623047,
-      "change": 2.5548954750074886,
+      "last": 102.81999969482422,
+      "change": 2.6147732798189414,
       "high": 102.87000274658203,
       "low": 100.75,
-      "volume": 3538,
+      "volume": 3628,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 90.33999633789062,
-      "change": 2.3334816346608895,
-      "high": 90.43000030517578,
+      "last": 90.41000366210938,
+      "change": 2.4127830904683036,
+      "high": 90.44000244140625,
       "low": 88.7699966430664,
-      "volume": 17792,
+      "volume": 18134,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4143.7001953125,
-      "change": 0.07245151444183678,
+      "last": 4143.5,
+      "change": 0.06761669658357619,
       "high": 4166.7998046875,
       "low": 4128.10009765625,
-      "volume": 31990,
+      "volume": 32322,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 59.5099983215332,
-      "change": -0.6494264516296258,
+      "last": 59.625,
+      "change": -0.45743379431228676,
       "high": 60.84000015258789,
-      "low": 59.474998474121094,
-      "volume": 7786,
+      "low": 59.4900016784668,
+      "volume": 7994,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
@@ -115,9 +115,9 @@
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 102.31600189208984,
-      "change": 0.07433883989471972,
-      "high": 102.33599853515625,
+      "last": 102.33000183105469,
+      "change": 0.0880320512184309,
+      "high": 102.34100341796875,
       "low": 102.13300323486328,
       "volume": 0,
       "timestamp": "2026-10-08T04:00:00.000Z",
