@@ -1,24 +1,24 @@
 {
   "version": 4,
-  "timestamp": "2026-10-08T20:05:58.754Z",
+  "timestamp": "2026-10-08T20:10:57.730Z",
   "prices": {
     "BTC": {
-      "bestBuy": 218860000000,
-      "bestSell": 218895621910,
+      "bestBuy": 218895654320,
+      "bestSell": 218897810920,
       "lastPrice": 218895621910,
-      "volume": 15.7935471385,
+      "volume": 15.8031435317,
       "high": 223900000000,
       "low": 214012000000,
       "change": -0.79
     },
     "ETH": {
-      "bestBuy": 6592641850,
-      "bestSell": 6608999980,
-      "lastPrice": 6592707790,
-      "volume": 390.7476284689,
+      "bestBuy": 6593131930,
+      "bestSell": 6607999980,
+      "lastPrice": 6607999990,
+      "volume": 391.9106351386,
       "high": 6890000000,
       "low": 6350000010,
-      "change": -3.33
+      "change": -3.11
     },
     "USDT": {
       "bestBuy": 2676990,
@@ -30,66 +30,66 @@
       "change": 1.11
     },
     "NOT": {
-      "bestBuy": 1170,
-      "bestSell": 1171.24,
-      "lastPrice": 1171.24,
-      "volume": 332379995.5173535,
+      "bestBuy": 1173,
+      "bestSell": 1173.39,
+      "lastPrice": 1173,
+      "volume": 333237221.80610347,
       "high": 1238.4,
       "low": 1120,
-      "change": -3.43
+      "change": -3.28
     },
     "XAUT": {
-      "bestBuy": 4114.6,
-      "bestSell": 4123,
-      "lastPrice": 4112.5,
-      "volume": 50.6794204345,
+      "bestBuy": 4116.1,
+      "bestSell": 4122.8,
+      "lastPrice": 4123.9,
+      "volume": 51.0913804345,
       "high": 4135.9,
       "low": 4099.2,
-      "change": 0.2
+      "change": 0.48
     }
   },
-  "gold18K": 266219923,
+  "gold18K": 266207009,
   "usdtPrice": 2677780,
   "dollarPrice": 2677780,
-  "goldChange": 0.2,
+  "goldChange": 0.48,
   "dollarChange": 1.11,
   "market": {
     "BRENT": {
-      "last": 103.91999816894531,
-      "change": 3.7125761816386813,
+      "last": 103.66000366210938,
+      "change": 3.4531006180114323,
       "high": 105.91000366210938,
       "low": 100.75,
-      "volume": 45828,
+      "volume": 45909,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 91.18000030517578,
-      "change": 3.2850040393963,
+      "last": 90.9800033569336,
+      "change": 3.0584556127904188,
       "high": 93.19999694824219,
       "low": 88.7699966430664,
-      "volume": 295002,
+      "volume": 295848,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4155.7001953125,
-      "change": 0.3622575722091839,
+      "last": 4157.39990234375,
+      "change": 0.40330635504968426,
       "high": 4170.7001953125,
       "low": 4128.10009765625,
-      "volume": 142363,
+      "volume": 142856,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 59.45000076293945,
-      "change": -0.7495909958392356,
+      "last": 59.470001220703125,
+      "change": -0.7162006915862483,
       "high": 60.84000015258789,
       "low": 58.72999954223633,
-      "volume": 46251,
+      "volume": 46393,
       "timestamp": "2026-10-08T04:00:00.000Z",
       "delayed": true,
       "symbol": "SI=F"
@@ -99,7 +99,7 @@
       "change": -0.4666909708803184,
       "high": 7797.7900390625,
       "low": 7731.259765625,
-      "volume": 3474130000,
+      "volume": 3489250000,
       "timestamp": "2026-10-08T13:30:00.000Z",
       "delayed": true,
       "symbol": "^GSPC"
@@ -109,14 +109,14 @@
       "change": -1.2540524485118911,
       "high": 27491.89453125,
       "low": 27066.7578125,
-      "volume": 7644385000,
+      "volume": 7663665000,
       "timestamp": "2026-10-08T13:30:00.000Z",
       "delayed": true,
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 102.1050033569336,
-      "change": -0.13203688346689127,
+      "last": 102.0989990234375,
+      "change": -0.13790966674305513,
       "high": 102.46700286865234,
       "low": 102.03299713134766,
       "volume": 0,
