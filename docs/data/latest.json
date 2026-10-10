@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "timestamp": "2026-10-10T23:26:13.976Z",
+  "timestamp": "2026-10-10T23:33:56.719Z",
   "prices": {
     "BTC": {
       "bestBuy": 219430021230,
@@ -125,6 +125,12 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": false,
-  "errorDetails": []
+  "hasError": true,
+  "errorDetails": [
+    "BTC: Request timeout",
+    "ETH: Request timeout",
+    "USDT: Request timeout",
+    "NOT: Request timeout",
+    "XAUT: Request timeout"
+  ]
 }
