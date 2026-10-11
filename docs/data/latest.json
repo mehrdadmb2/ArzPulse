@@ -1,58 +1,58 @@
 {
   "version": 4,
-  "timestamp": "2026-10-11T05:34:25.738Z",
+  "timestamp": "2026-10-11T05:41:12.187Z",
   "prices": {
     "BTC": {
-      "bestBuy": 219104185430,
-      "bestSell": 219653756030,
-      "lastPrice": 219104165430,
-      "volume": 6.2908181286,
-      "high": 221804745630,
+      "bestBuy": 219000000000,
+      "bestSell": 219008760130,
+      "lastPrice": 219008760130,
+      "volume": 5.5799326236,
+      "high": 221399909940,
       "low": 218800000010,
-      "change": -0.61
+      "change": -0.91
     },
     "ETH": {
-      "bestBuy": 6637492000,
-      "bestSell": 6650000000,
-      "lastPrice": 6650000000,
-      "volume": 89.5953743736,
-      "high": 6699998870,
+      "bestBuy": 6637492930,
+      "bestSell": 6649899970,
+      "lastPrice": 6637492870,
+      "volume": 82.7033870949,
+      "high": 6684065730,
       "low": 6611116500,
-      "change": 0.19
+      "change": -0.64
     },
     "USDT": {
-      "bestBuy": 2652850,
-      "bestSell": 2653240,
-      "lastPrice": 2652850,
-      "volume": 2870009.138210254,
-      "high": 2684800,
-      "low": 2650000,
-      "change": -0.81
+      "bestBuy": 2648000,
+      "bestSell": 2649980,
+      "lastPrice": 2649990,
+      "volume": 2543700.2226914302,
+      "high": 2675000,
+      "low": 2647300,
+      "change": -0.87
     },
     "NOT": {
-      "bestBuy": 1252.3,
-      "bestSell": 1254.69,
-      "lastPrice": 1252.3,
-      "volume": 132318114.36571641,
+      "bestBuy": 1247.1,
+      "bestSell": 1252.28,
+      "lastPrice": 1247.42,
+      "volume": 125250269.09876734,
       "high": 1281.3,
       "low": 1240.5,
-      "change": -0.61
+      "change": -0.92
     },
     "XAUT": {
-      "bestBuy": 4178.8,
-      "bestSell": 4182,
-      "lastPrice": 4178.8,
-      "volume": 14.9430221916,
+      "bestBuy": 4177.4,
+      "bestSell": 4184.9,
+      "lastPrice": 4177.4,
+      "volume": 14.8267466697,
       "high": 4190,
       "low": 4175.2,
-      "change": 0
+      "change": -0.06
     }
   },
-  "gold18K": 267554888,
-  "usdtPrice": 2653240,
-  "dollarPrice": 2653240,
-  "goldChange": 0,
-  "dollarChange": -0.81,
+  "gold18K": 267411455,
+  "usdtPrice": 2649980,
+  "dollarPrice": 2649980,
+  "goldChange": -0.06,
+  "dollarChange": -0.87,
   "market": {
     "BRENT": {
       "last": 104.72000122070312,
@@ -125,12 +125,6 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": true,
-  "errorDetails": [
-    "BTC: Request timeout",
-    "ETH: Request timeout",
-    "USDT: Request timeout",
-    "NOT: Request timeout",
-    "XAUT: Request timeout"
-  ]
+  "hasError": false,
+  "errorDetails": []
 }
