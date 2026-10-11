@@ -1,9 +1,9 @@
 {
   "version": 4,
-  "lastUpdate": "2026-10-11T07:09:17.691Z",
-  "gold18K": 265263557,
-  "usdtPrice": 2627000,
-  "dollarPrice": 2627000,
+  "lastUpdate": "2026-10-11T07:17:27.378Z",
+  "gold18K": 265123186,
+  "usdtPrice": 2629000,
+  "dollarPrice": 2629000,
   "marketSummary": {
     "BRENT": {
       "last": 104.72000122070312,
@@ -42,12 +42,8 @@
     }
   },
   "hasError": true,
-  "errorCount": 5,
+  "errorCount": 1,
   "errors": [
-    "BTC: Request timeout",
-    "ETH: Request timeout",
-    "USDT: Request timeout",
-    "NOT: Request timeout",
-    "XAUT: Request timeout"
+    "BTC: Request timeout"
   ]
 }
