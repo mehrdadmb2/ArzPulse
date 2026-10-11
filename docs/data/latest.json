@@ -1,46 +1,46 @@
 {
   "version": 4,
-  "timestamp": "2026-10-11T00:17:11.352Z",
+  "timestamp": "2026-10-11T00:21:14.056Z",
   "prices": {
     "BTC": {
-      "bestBuy": 219803653980,
-      "bestSell": 219846976800,
-      "lastPrice": 219846976880,
-      "volume": 7.4459629387,
+      "bestBuy": 219430021260,
+      "bestSell": 219833785510,
+      "lastPrice": 219430021250,
+      "volume": 7.4478145587,
       "high": 221804745630,
       "low": 218000000000,
-      "change": 0.39
+      "change": 0.2
     },
     "ETH": {
-      "bestBuy": 6642002980,
-      "bestSell": 6656948150,
-      "lastPrice": 6640856150,
-      "volume": 96.5437369776,
+      "bestBuy": 6640066550,
+      "bestSell": 6656249240,
+      "lastPrice": 6640132970,
+      "volume": 96.6742269776,
       "high": 6699998870,
       "low": 6611116500,
-      "change": 0.18
+      "change": 0.17
     },
     "USDT": {
-      "bestBuy": 2650420,
-      "bestSell": 2650850,
-      "lastPrice": 2650430,
-      "volume": 2695897.675058007,
+      "bestBuy": 2650430,
+      "bestSell": 2655490,
+      "lastPrice": 2655500,
+      "volume": 2696845.973858007,
       "high": 2684800,
       "low": 2650000,
-      "change": -0.74
+      "change": -0.55
     },
     "NOT": {
-      "bestBuy": 1268,
+      "bestBuy": 1264.62,
       "bestSell": 1270,
-      "lastPrice": 1268,
-      "volume": 146756440.93114817,
+      "lastPrice": 1264.62,
+      "volume": 146810941.73064816,
       "high": 1281.3,
       "low": 1240,
-      "change": 0.24
+      "change": -0.03
     },
     "XAUT": {
       "bestBuy": 4175.5,
-      "bestSell": 4181.3,
+      "bestSell": 4181,
       "lastPrice": 4175.2,
       "volume": 16.6094873024,
       "high": 4190,
@@ -48,11 +48,11 @@
       "change": -0.28
     }
   },
-  "gold18K": 267269135,
-  "usdtPrice": 2650850,
-  "dollarPrice": 2650850,
+  "gold18K": 267717748,
+  "usdtPrice": 2655490,
+  "dollarPrice": 2655490,
   "goldChange": -0.28,
-  "dollarChange": -0.74,
+  "dollarChange": -0.55,
   "market": {
     "BRENT": {
       "last": 104.72000122070312,
@@ -125,8 +125,6 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": true,
-  "errorDetails": [
-    "BTC: Request timeout"
-  ]
+  "hasError": false,
+  "errorDetails": []
 }
