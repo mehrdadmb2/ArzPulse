@@ -1,39 +1,39 @@
 {
   "version": 4,
-  "timestamp": "2026-10-11T00:04:15.044Z",
+  "timestamp": "2026-10-11T00:11:15.785Z",
   "prices": {
     "BTC": {
-      "bestBuy": 219430021230,
-      "bestSell": 219807295460,
-      "lastPrice": 219807315650,
-      "volume": 7.4427083134,
+      "bestBuy": 219803653980,
+      "bestSell": 219846976800,
+      "lastPrice": 219846976880,
+      "volume": 7.4459629387,
       "high": 221804745630,
       "low": 218000000000,
-      "change": 0.37
+      "change": 0.39
     },
     "ETH": {
-      "bestBuy": 6643378390,
-      "bestSell": 6658799600,
-      "lastPrice": 6658799640,
-      "volume": 96.1375769776,
+      "bestBuy": 6640000000,
+      "bestSell": 6653030490,
+      "lastPrice": 6640856150,
+      "volume": 96.5437369776,
       "high": 6699998870,
       "low": 6611116500,
-      "change": 0.46
+      "change": 0.18
     },
     "USDT": {
-      "bestBuy": 2650670,
-      "bestSell": 2656470,
-      "lastPrice": 2656470,
-      "volume": 2691176.683843007,
+      "bestBuy": 2650460,
+      "bestSell": 2650860,
+      "lastPrice": 2650460,
+      "volume": 2694887.805058007,
       "high": 2684800,
       "low": 2650000,
-      "change": -0.51
+      "change": -0.74
     },
     "NOT": {
       "bestBuy": 1268,
       "bestSell": 1270,
-      "lastPrice": 1268.01,
-      "volume": 145754481.93114817,
+      "lastPrice": 1268,
+      "volume": 146756440.93114817,
       "high": 1281.3,
       "low": 1240,
       "change": 0.24
@@ -48,11 +48,11 @@
       "change": -0.28
     }
   },
-  "gold18K": 267835765,
-  "usdtPrice": 2656470,
-  "dollarPrice": 2656470,
+  "gold18K": 267270143,
+  "usdtPrice": 2650860,
+  "dollarPrice": 2650860,
   "goldChange": -0.28,
-  "dollarChange": -0.51,
+  "dollarChange": -0.74,
   "market": {
     "BRENT": {
       "last": 104.72000122070312,
@@ -125,12 +125,6 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": true,
-  "errorDetails": [
-    "BTC: Request timeout",
-    "ETH: Request timeout",
-    "USDT: Request timeout",
-    "NOT: Request timeout",
-    "XAUT: Request timeout"
-  ]
+  "hasError": false,
+  "errorDetails": []
 }
