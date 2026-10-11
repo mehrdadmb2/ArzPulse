@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "timestamp": "2026-10-11T00:11:15.785Z",
+  "timestamp": "2026-10-11T00:17:11.352Z",
   "prices": {
     "BTC": {
       "bestBuy": 219803653980,
@@ -12,8 +12,8 @@
       "change": 0.39
     },
     "ETH": {
-      "bestBuy": 6640000000,
-      "bestSell": 6653030490,
+      "bestBuy": 6642002980,
+      "bestSell": 6656948150,
       "lastPrice": 6640856150,
       "volume": 96.5437369776,
       "high": 6699998870,
@@ -21,10 +21,10 @@
       "change": 0.18
     },
     "USDT": {
-      "bestBuy": 2650460,
-      "bestSell": 2650860,
-      "lastPrice": 2650460,
-      "volume": 2694887.805058007,
+      "bestBuy": 2650420,
+      "bestSell": 2650850,
+      "lastPrice": 2650430,
+      "volume": 2695897.675058007,
       "high": 2684800,
       "low": 2650000,
       "change": -0.74
@@ -48,9 +48,9 @@
       "change": -0.28
     }
   },
-  "gold18K": 267270143,
-  "usdtPrice": 2650860,
-  "dollarPrice": 2650860,
+  "gold18K": 267269135,
+  "usdtPrice": 2650850,
+  "dollarPrice": 2650850,
   "goldChange": -0.28,
   "dollarChange": -0.74,
   "market": {
@@ -125,6 +125,8 @@
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": false,
-  "errorDetails": []
+  "hasError": true,
+  "errorDetails": [
+    "BTC: Request timeout"
+  ]
 }
