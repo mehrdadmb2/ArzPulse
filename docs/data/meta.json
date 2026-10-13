@@ -1,47 +1,65 @@
 {
-  "version": 4,
-  "lastUpdate": "2026-10-13T12:20:18.902Z",
-  "gold18K": 258685946,
-  "usdtPrice": 2562900,
-  "dollarPrice": 2562900,
+  "version": 5,
+  "lastAttempt": "2026-10-13T12:25:18.053Z",
+  "lastUpdate": "2026-10-13T12:25:18.053Z",
+  "retentionDays": 30,
+  "gold18K": 258495180,
+  "usdtPrice": 2561010,
+  "dollarPrice": 2561010,
   "marketSummary": {
     "BRENT": {
-      "last": 104.66000366210938,
-      "change": -1.8659145197355227,
-      "delayed": true
+      "last": 104.69999694824219,
+      "change": -1.8284149552154905,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-10-13T04:00:00.000Z"
     },
     "WTI": {
-      "last": 92.2300033569336,
-      "change": -1.610832666147894,
-      "delayed": true
+      "last": 92.25,
+      "change": -1.5895006376412717,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-10-13T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4211.7998046875,
-      "change": 0.5058871411544789,
-      "delayed": true
+      "last": 4209.2998046875,
+      "change": 0.4462298142385027,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-10-13T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 60.65999984741211,
-      "change": 0.8629737069348827,
-      "delayed": true
+      "last": 60.56999969482422,
+      "change": 0.713325123899487,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-10-13T04:00:00.000Z"
     },
     "SP500": {
       "last": 7807.240234375,
       "change": -0.055044263563885414,
-      "delayed": true
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-10-12T13:30:00.000Z"
     },
     "NASDAQ": {
       "last": 27245.900390625,
       "change": -0.4394825128739086,
-      "delayed": true
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-10-12T13:30:00.000Z"
     },
     "DXY": {
       "last": 102.2750015258789,
       "change": -0.2973292062112701,
-      "delayed": true
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-10-13T04:00:00.000Z"
     }
   },
   "hasError": false,
   "errorCount": 0,
-  "errors": []
+  "errors": [],
+  "successfulSources": 12,
+  "successfulLocalSources": 5
 }
