@@ -59,6 +59,25 @@ function formatPrice(value) {
   return positive(value) ? formatNumber(value, 2) : '—';
 }
 
+// Local market prices are stored in IRR. Derive an approximate USD value from
+// the same snapshot's USDT/IRR quote; never label the conversion as an official FX rate.
+function getUsdtIrrRate(data) {
+  const rate = numeric(data?.usdtPrice || data?.dollarPrice || data?.prices?.USDT?.bestSell);
+  return positive(rate) ? rate : 0;
+}
+
+function formatUsd(value, usdtIrrRate) {
+  const amount = numeric(value);
+  if (!positive(amount) || !positive(usdtIrrRate)) return '—';
+  return `$${formatNumber(amount / usdtIrrRate, 8)}`;
+}
+
+function formatDualPrice(value, usdtIrrRate) {
+  if (!positive(value)) return '—';
+  const usd = formatUsd(value, usdtIrrRate);
+  return `${formatPrice(value)} IRR${usd !== '—' ? `  |  ${usd}` : ''}`;
+}
+
 function formatPercent(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return '—';
@@ -415,6 +434,7 @@ function localAssetRows(data) {
 
 function generatePricesMessage(data, env) {
   const stale = isDataStale(data, env);
+  const usdtIrrRate = getUsdtIrrRate(data);
   const timestamp = data?.timestamp;
   const sections = [
     '📊 <b>ArzPulse · Market Snapshot</b>',
@@ -433,11 +453,11 @@ function generatePricesMessage(data, env) {
     const isStaleAsset = Boolean(coin.stale);
     sections.push([
       `${changeMark(coin.change)} <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b>${isStaleAsset ? ' <i>(قدیمی)</i>' : ''}`,
-      `<pre><code>Last      ${formatPrice(coin.lastPrice)} IRR
-Buy       ${formatPrice(coin.bestBuy)} IRR
-Sell      ${formatPrice(coin.bestSell)} IRR
-High      ${formatPrice(coin.high)} IRR
-Low       ${formatPrice(coin.low)} IRR
+      `<pre><code>Last      ${formatDualPrice(coin.lastPrice, usdtIrrRate)}
+Buy       ${formatDualPrice(coin.bestBuy, usdtIrrRate)}
+Sell      ${formatDualPrice(coin.bestSell, usdtIrrRate)}
+High      ${formatDualPrice(coin.high, usdtIrrRate)}
+Low       ${formatDualPrice(coin.low, usdtIrrRate)}
 Volume    ${formatNumber(coin.volume, 4)} ${asset.symbol}</code></pre>`,
       `<blockquote>تغییر ۲۴ ساعت: <b>${formatPercent(coin.change)}</b> · Spread: <code>${positive(coin.bestBuy) && positive(coin.bestSell) ? formatPercent(((coin.bestSell - coin.bestBuy) / coin.bestSell) * 100) : '—'}</code></blockquote>`
     ].join('\n'));
@@ -446,8 +466,10 @@ Volume    ${formatNumber(coin.volume, 4)} ${asset.symbol}</code></pre>`,
   const usdt = numeric(data?.usdtPrice || data?.prices?.USDT?.bestSell);
   const gold = numeric(data?.gold18K);
   sections.push('🥇 <b>طلا و نرخ مرجع</b>');
-  sections.push(`<pre><code>18K Gold / gram  ${formatPrice(gold)} IRR
-USDT / IRR       ${formatPrice(usdt)} IRR</code></pre>`);
+  sections.push(`<pre><code>18K Gold / gram  ${formatDualPrice(gold, usdtIrrRate)}
+USDT / IRR       ${formatPrice(usdt)} IRR
+USDT / USD       ${positive(usdt) ? '$1.00 approx.' : '—'}</code></pre>`);
+  sections.push('<blockquote>💱 معادل دلاری قیمت‌های داخلی تخمینی است و با نرخ USDT/IRR همین Snapshot محاسبه می‌شود؛ نرخ رسمی اسکناس دلار نیست.</blockquote>');
   if (data?.derivedStale?.gold18K) sections.push('<blockquote>⚠️ قیمت طلای ۱۸ عیار از یکی از ورودی‌های قدیمی محاسبه شده است.</blockquote>');
 
   if (data?.market && typeof data.market === 'object') {
@@ -467,31 +489,36 @@ USDT / IRR       ${formatPrice(usdt)} IRR</code></pre>`);
 
 function generateGoldMessage(data, env) {
   const stale = isDataStale(data, env) || Boolean(data?.derivedStale?.gold18K);
+  const usdtIrrRate = getUsdtIrrRate(data);
   return [
     '🥇 <b>ArzPulse · 18K Gold</b>',
-    `<blockquote>هر گرم طلای ۱۸ عیار\n<code>${formatPrice(data?.gold18K)} ریال</code></blockquote>`,
+    `<blockquote>هر گرم طلای ۱۸ عیار\n<code>${formatDualPrice(data?.gold18K, usdtIrrRate)}</code></blockquote>`,
     `<pre><code>USDT / IRR   ${formatPrice(data?.usdtPrice || data?.prices?.USDT?.bestSell)} ریال
+USDT / USD   $1.00 approx.
 XAUT / USDT  ${formatPrice(data?.prices?.XAUT?.bestSell)} USD
 Update       ${html(formatTime(data?.timestamp))}</code></pre>`,
+    '<blockquote>معادل دلاری طلا با نرخ USDT/IRR همین Snapshot محاسبه می‌شود و تقریبی است.</blockquote>',
     '<blockquote>فرمول محاسبه: (XAUT/USDT × USDT/IRR ÷ 31.1034768) × 0.75. نتیجه تخمینی است و جایگزین نرخ رسمی بازار طلا نیست.</blockquote>',
     stale ? '<blockquote>⚠️ حداقل یکی از داده‌های مورد استفاده قدیمی است.</blockquote>' : '',
     '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">ArzPulse Dashboard</a>'
   ].filter(Boolean).join('\n\n');
 }
 
-function generateSingleAssetMessage(coin, name, symbol, env) {
+function generateSingleAssetMessage(coin, name, symbol, env, data) {
+  const usdtIrrRate = getUsdtIrrRate(data);
   if (!coin || ![coin.lastPrice, coin.bestBuy, coin.bestSell].some(positive)) {
     return `⚠️ <b>${html(name)} (${html(symbol)})</b>\n<blockquote>در آخرین Snapshot دادهٔ قابل استفاده‌ای وجود ندارد.</blockquote>`;
   }
   const stale = Boolean(coin.stale);
   return [
     `${changeMark(coin.change)} <b>${html(name)} · ${html(symbol)}</b>`,
-    `<blockquote>قیمت آخر: <code>${formatPrice(coin.lastPrice)} ریال</code>\nتغییر ۲۴ ساعت: <b>${formatPercent(coin.change)}</b></blockquote>`,
-    `<pre><code>Best buy  ${formatPrice(coin.bestBuy)} IRR
-Best sell ${formatPrice(coin.bestSell)} IRR
-Day high  ${formatPrice(coin.high)} IRR
-Day low   ${formatPrice(coin.low)} IRR
+    `<blockquote>قیمت آخر: <code>${formatDualPrice(coin.lastPrice, usdtIrrRate)}</code>\nتغییر ۲۴ ساعت: <b>${formatPercent(coin.change)}</b></blockquote>`,
+    `<pre><code>Best buy  ${formatDualPrice(coin.bestBuy, usdtIrrRate)}
+Best sell ${formatDualPrice(coin.bestSell, usdtIrrRate)}
+Day high  ${formatDualPrice(coin.high, usdtIrrRate)}
+Day low   ${formatDualPrice(coin.low, usdtIrrRate)}
 Volume    ${formatNumber(coin.volume, 4)} ${html(symbol)}</code></pre>`,
+    '<blockquote>معادل دلاری تخمینی و بر پایه نرخ USDT/IRR همین Snapshot است.</blockquote>',
     stale || isDataStale({ timestamp: coin.fetchedAt }, env) ? '<blockquote>⚠️ اطلاعات این دارایی ممکن است قدیمی باشد.</blockquote>' : '',
     '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>'
   ].filter(Boolean).join('\n\n');
@@ -933,6 +960,7 @@ Stale assets        ${formatNumber(staleAssets.length, 0)}</code></pre>`,
         '💵 <b>ArzPulse · Dollar Reference</b>',
         `<blockquote>مرجع دلار بر پایهٔ بازار USDT/IRR نوبیتکس است و لزوماً نرخ اسکناس بازار آزاد نیست.</blockquote>`,
         `<pre><code>USDT / IRR  ${formatPrice(price)} ریال
+USDT / USD  $1.00 approx.
 24h change  ${formatPercent(data.dollarChange ?? data.prices?.USDT?.change)}
 Updated     ${html(formatTime(data.timestamp))}</code></pre>`,
         isDataStale(data, env) ? '<blockquote>⚠️ Snapshot قدیمی است.</blockquote>' : ''
@@ -943,7 +971,7 @@ Updated     ${html(formatTime(data.timestamp))}</code></pre>`,
       const symbol = command.name.toUpperCase();
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, `⚠️ دادهٔ ${symbol} در دسترس نیست.`, token); return; }
-      await sendMessage(chatId, generateSingleAssetMessage(data.prices?.[symbol], getSymbolName(symbol), symbol, env), token);
+      await sendMessage(chatId, generateSingleAssetMessage(data.prices?.[symbol], getSymbolName(symbol), symbol, env, data), token);
       return;
     }
     default:

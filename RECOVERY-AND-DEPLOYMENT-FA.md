@@ -158,3 +158,11 @@ GitHub → Actions → Update Market Data → Run workflow. اگر خطا داد
 - Push رد می‌شود: از `git pull --rebase origin main` استفاده کنید؛ `force push` نزنید.
 
 این پروژه تست‌های خودکار محلی دارد؛ آن‌ها جایگزین بررسی Secrets، KV ID، Webhook و Cron واقعی در Cloudflare نیستند.
+
+
+## اصلاحات تکمیلی ۱۳ اکتبر ۲۰۲۶
+
+- Worker بازار با `scheduled()` منتظر پاسخ GitHub می‌ماند و زمان‌بندی/موفقیت یا خطای dispatch را در Workers Logs ثبت می‌کند.
+- ورک‌فلو پشتیبان GitHub هر ۱۵ دقیقه بررسی می‌کند؛ اگر Snapshot در ۷ دقیقهٔ اخیر تازه شده باشد، جمع‌آوری تکراری را رد می‌کند. مسیر اصلی همچنان Cron ورکر Cloudflare در هر ۵ دقیقه است. این مسیر پشتیبان جایگزین بررسی Cron Trigger خود Cloudflare نیست.
+- پیام‌های `/prices`، `/btc`، `/eth`، `/usdt`، `/not` و `/gold` معادل دلاری تخمینی را کنار قیمت ریالی/IRR نشان می‌دهند. تبدیل با نرخ USDT/IRR همان Snapshot انجام می‌شود و نرخ رسمی اسکناس دلار محسوب نمی‌شود.
+- Worker آپدیت بازار و Worker ربات دو سرویس جدا هستند: فایل `worker/wrangler.toml` فقط برای `arzpulse-market-updater` است؛ فایل `telegram-bot/wrangler.toml.example` فقط برای `arzpulse-bot` است.

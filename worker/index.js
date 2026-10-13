@@ -73,11 +73,17 @@ async function triggerGitHubWorkflow(env) {
 }
 
 export default {
-  async scheduled(event, env, ctx) {
-    ctx.waitUntil(triggerGitHubWorkflow(env).catch((error) => {
+  async scheduled(event, env) {
+    const scheduledAt = new Date(event?.scheduledTime || Date.now()).toISOString();
+    console.log(`[scheduled] cron=${event?.cron || 'unknown'} scheduledAt=${scheduledAt}`);
+    try {
+      await triggerGitHubWorkflow(env);
+      console.log(`[scheduled] GitHub accepted workflow dispatch at ${new Date().toISOString()}`);
+    } catch (error) {
       console.error('[scheduled] workflow dispatch failed:', error?.stack || error);
+      // Preserve the failed invocation in Cloudflare Cron Events/Workers Logs.
       throw error;
-    }));
+    }
   },
 
   async fetch(request, env) {
@@ -90,7 +96,11 @@ export default {
         githubTokenConfigured: Boolean(env.GITHUB_TOKEN),
         target: `${env.GITHUB_OWNER || 'mehrdadmb2'}/${env.GITHUB_REPO || 'ArzPulse'}`,
         workflow: env.GITHUB_WORKFLOW || 'update-prices.yml',
-        scheduledEveryMinutes: 5
+        scheduledEveryMinutes: 5,
+        cronExpression: '*/5 * * * *',
+        githubOwnerConfigured: Boolean(env.GITHUB_OWNER || 'mehrdadmb2'),
+        githubRepoConfigured: Boolean(env.GITHUB_REPO || 'ArzPulse'),
+        githubRef: env.GITHUB_REF || 'main'
       });
     }
     if (url.pathname === '/trigger') {
