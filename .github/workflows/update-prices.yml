@@ -1,91 +1,87 @@
-name: Update Crypto Prices
+name: Update Market Data
 
 on:
   schedule:
-    # Fallback schedule. The Cloudflare market-updater Worker also dispatches this workflow.
-    - cron: '*/10 * * * *'
+    - cron: '*/15 * * * *' # fallback only; the five-minute Worker is primary
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Optional reason for manual refresh'
+        required: false
+        type: string
 
-# Shared group with keep-alive.yml prevents these two repository writers from
-# committing to main at the same time. Retries still handle external writers.
+# Shared across both workflows; prevents two workflows writing main at the same time.
 concurrency:
-  group: arzpulse-main-writers
+  group: arzpulse-main-writer
   cancel-in-progress: false
 
 permissions:
   contents: write
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout latest main
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Collect market data and compact rolling history
-        id: collector
-        continue-on-error: true
-        env:
-          HISTORY_KEEP_DAYS: '30'
-          MAX_SNAPSHOTS_PER_DAY: '350'
-        run: node scripts/fetch-and-save.js
-      - name: Commit generated data and safely retry push
-        env:
-          HISTORY_KEEP_DAYS: '30'
-          MAX_SNAPSHOTS_PER_DAY: '350'
+
+      - name: Skip fallback when the five-minute updater is healthy
+        if: github.event_name == 'schedule'
+        shell: bash
         run: |
           set -euo pipefail
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          git add -A docs/data/
-          if git diff --cached --quiet; then
-            echo "No generated data changes to commit."
-            exit 0
+          age_seconds=$(node -e 'const fs=require("fs");let t=NaN;try{t=Date.parse(JSON.parse(fs.readFileSync("docs/data/latest.json","utf8")).timestamp||"")}catch{};process.stdout.write(String(Number.isFinite(t)?Math.floor((Date.now()-t)/1000):9999999))')
+          echo "Latest snapshot age: ${age_seconds}s"
+          if [ "$age_seconds" -ge 0 ] && [ "$age_seconds" -lt 720 ]; then
+            echo "SKIP_COLLECTOR=true" >> "$GITHUB_ENV"
+            echo "Skipping scheduled fallback because the Cloudflare updater recently refreshed data."
           fi
-          git commit -m "Auto-update prices $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
-          # Never force-push. If main moved, rebase this generated-data commit.
-          # If two runs modified the same daily JSON, rerun the collector from the
-          # newest main and produce a fresh commit rather than dropping other files.
-          for attempt in 1 2 3 4 5; do
-            echo "Push attempt ${attempt}/5"
-            if git push origin HEAD:refs/heads/main; then
+      - name: Collect market data and retry safe push
+        if: env.SKIP_COLLECTOR != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+          attempt=1
+          while [ "$attempt" -le 3 ]; do
+            echo "Collector/push attempt $attempt of 3"
+            node scripts/fetch-and-save.js
+            git add docs/data/latest.json docs/data/meta.json docs/data/history/
+            if git diff --cached --quiet; then
+              echo "No market data changes to commit."
+              exit 0
+            fi
+            git commit -m "Auto-update prices $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            if git push origin HEAD:main; then
               echo "Market data pushed successfully."
               exit 0
             fi
 
+            echo "Push was rejected; fetching latest remote main."
             git fetch origin main
             if git rebase origin/main; then
-              echo "Rebased onto newest origin/main; retrying push."
-              continue
+              if git push origin HEAD:main; then
+                echo "Rebased and pushed successfully."
+                exit 0
+              fi
             fi
 
-            echo "Rebase conflict in generated data; regenerate from newest main."
+            echo "Conflict detected. Resetting this ephemeral runner to remote main and recollecting."
             git rebase --abort || true
             git reset --hard origin/main
-            node scripts/fetch-and-save.js
-            git add -A docs/data/
-            if git diff --cached --quiet; then
-              echo "Remote already contains an up-to-date snapshot after regeneration."
-              exit 0
-            fi
-            git commit -m "Auto-update prices retry $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            attempt=$((attempt + 1))
+            sleep $((attempt * 2))
           done
-
-          echo "ERROR: unable to push market data after five attempts. Check branch protection and credentials."
-          exit 1
-      - name: Mark collector outage as a failed run after publishing diagnostics/retention
-        if: steps.collector.outcome == 'failure'
-        run: |
-          echo "The collector had no successful upstream sources. Diagnostic metadata and any safe retention deletions were published; inspect the collector log."
+          echo "Failed to push market data after 3 attempts." >&2
           exit 1

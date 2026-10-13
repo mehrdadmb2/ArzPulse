@@ -1,21 +1,16 @@
-name: Keep Alive – Prevent Cron Deactivation
+name: Keep Alive – Prevent Schedule Deactivation
 
 on:
   schedule:
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
-# Use the same group as update-prices.yml because both workflows write to main.
 concurrency:
-  group: arzpulse-main-writers
+  group: arzpulse-main-writer
   cancel-in-progress: false
 
 permissions:
   contents: write
-
-defaults:
-  run:
-    shell: bash
 
 jobs:
   keep-alive:
@@ -26,23 +21,26 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Push a weekly empty commit with conflict-safe retry
+      - name: Create a weekly activity commit with push retry
+        shell: bash
         run: |
           set -euo pipefail
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          for attempt in 1 2 3 4 5; do
-            git fetch origin main
-            git reset --hard origin/main
-            git commit --allow-empty -m "Keep-alive: maintain scheduled workflow activity $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            echo "Push attempt ${attempt}/5"
-            if git push origin HEAD:refs/heads/main; then
-              echo "Keep-alive commit pushed."
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+          attempt=1
+          while [ "$attempt" -le 3 ]; do
+            git commit --allow-empty -m "chore: scheduled repository keep-alive $(date -u '+%Y-%m-%d')"
+            if git push origin HEAD:main; then
               exit 0
             fi
-            echo "Remote moved during push; retrying from the latest main."
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort || true
+            git reset --hard origin/main
+            attempt=$((attempt + 1))
+            sleep $((attempt * 2))
           done
-
-          echo "ERROR: keep-alive could not push after five attempts."
+          echo "Keep-alive push failed after 3 attempts." >&2
           exit 1
