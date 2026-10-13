@@ -2,27 +2,90 @@ name: Update Crypto Prices
 
 on:
   schedule:
-    # هر ۱۰ دقیقه یکبار (بهینه برای ریپوهای عمومی)
+    # Fallback schedule. The Cloudflare market-updater Worker also dispatches this workflow.
     - cron: '*/10 * * * *'
   workflow_dispatch:
+
+# Shared group with keep-alive.yml prevents these two repository writers from
+# committing to main at the same time. Retries still handle external writers.
+concurrency:
+  group: arzpulse-main-writers
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Run fetch script
+      - name: Collect market data and compact rolling history
+        id: collector
+        continue-on-error: true
+        env:
+          HISTORY_KEEP_DAYS: '30'
+          MAX_SNAPSHOTS_PER_DAY: '350'
         run: node scripts/fetch-and-save.js
-      - name: Commit and push
+      - name: Commit generated data and safely retry push
+        env:
+          HISTORY_KEEP_DAYS: '30'
+          MAX_SNAPSHOTS_PER_DAY: '350'
         run: |
+          set -euo pipefail
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add docs/data/
-          git add docs/index.html
-          git diff --staged --quiet || git commit -m "Auto-update prices $(date -u '+%Y-%m-%d %H:%M:%S')"
-          git push
+
+          git add -A docs/data/
+          if git diff --cached --quiet; then
+            echo "No generated data changes to commit."
+            exit 0
+          fi
+          git commit -m "Auto-update prices $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+          # Never force-push. If main moved, rebase this generated-data commit.
+          # If two runs modified the same daily JSON, rerun the collector from the
+          # newest main and produce a fresh commit rather than dropping other files.
+          for attempt in 1 2 3 4 5; do
+            echo "Push attempt ${attempt}/5"
+            if git push origin HEAD:refs/heads/main; then
+              echo "Market data pushed successfully."
+              exit 0
+            fi
+
+            git fetch origin main
+            if git rebase origin/main; then
+              echo "Rebased onto newest origin/main; retrying push."
+              continue
+            fi
+
+            echo "Rebase conflict in generated data; regenerate from newest main."
+            git rebase --abort || true
+            git reset --hard origin/main
+            node scripts/fetch-and-save.js
+            git add -A docs/data/
+            if git diff --cached --quiet; then
+              echo "Remote already contains an up-to-date snapshot after regeneration."
+              exit 0
+            fi
+            git commit -m "Auto-update prices retry $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          done
+
+          echo "ERROR: unable to push market data after five attempts. Check branch protection and credentials."
+          exit 1
+      - name: Mark collector outage as a failed run after publishing diagnostics/retention
+        if: steps.collector.outcome == 'failure'
+        run: |
+          echo "The collector had no successful upstream sources. Diagnostic metadata and any safe retention deletions were published; inspect the collector log."
+          exit 1

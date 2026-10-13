@@ -2,21 +2,47 @@ name: Keep Alive – Prevent Cron Deactivation
 
 on:
   schedule:
-    # هر هفته یکبار (یکشنبه ساعت ۰۰:۰۰ UTC)
     - cron: '0 0 * * 0'
   workflow_dispatch:
+
+# Use the same group as update-prices.yml because both workflows write to main.
+concurrency:
+  group: arzpulse-main-writers
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
-      - name: Make a dummy commit if no changes
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Push a weekly empty commit with conflict-safe retry
         run: |
+          set -euo pipefail
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          # ایجاد یک commit خالی برای فعال نگه داشتن مخزن
-          git commit --allow-empty -m "🔄 Keep-alive: prevent cron deactivation" || echo "No changes to commit"
-          git push
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git commit --allow-empty -m "Keep-alive: maintain scheduled workflow activity $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "Push attempt ${attempt}/5"
+            if git push origin HEAD:refs/heads/main; then
+              echo "Keep-alive commit pushed."
+              exit 0
+            fi
+            echo "Remote moved during push; retrying from the latest main."
+          done
+
+          echo "ERROR: keep-alive could not push after five attempts."
+          exit 1
