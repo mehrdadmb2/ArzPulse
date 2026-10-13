@@ -2,7 +2,7 @@ name: Update Market Data
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # fallback only; the five-minute Worker is primary
+    - cron: '*/15 * * * *' # fail-safe backup; the Cloudflare Worker is the five-minute primary
   workflow_dispatch:
     inputs:
       reason:
@@ -34,16 +34,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Skip fallback when the five-minute updater is healthy
+      - name: Skip backup collection when the five-minute updater is healthy
         if: github.event_name == 'schedule'
         shell: bash
         run: |
           set -euo pipefail
           age_seconds=$(node -e 'const fs=require("fs");let t=NaN;try{t=Date.parse(JSON.parse(fs.readFileSync("docs/data/latest.json","utf8")).timestamp||"")}catch{};process.stdout.write(String(Number.isFinite(t)?Math.floor((Date.now()-t)/1000):9999999))')
           echo "Latest snapshot age: ${age_seconds}s"
-          if [ "$age_seconds" -ge 0 ] && [ "$age_seconds" -lt 720 ]; then
+          if [ "$age_seconds" -ge 0 ] && [ "$age_seconds" -lt 420 ]; then
             echo "SKIP_COLLECTOR=true" >> "$GITHUB_ENV"
-            echo "Skipping scheduled fallback because the Cloudflare updater recently refreshed data."
+            echo "Skipping scheduled fallback because the Cloudflare updater refreshed data within the last seven minutes."
           fi
 
       - name: Collect market data and retry safe push
