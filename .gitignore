@@ -1,0 +1,10 @@
+# Local Cloudflare configuration (contains environment-specific IDs)
+telegram-bot/wrangler.toml
+
+# Local tooling / generated files
+node_modules/
+.wrangler/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
