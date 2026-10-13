@@ -1,0 +1,10 @@
+{
+  "name": "arzpulse-telegram-bot-worker",
+  "private": true,
+  "type": "module",
+  "description": "Dependency-free Cloudflare Worker for the ArzPulse Telegram bot",
+  "scripts": {
+    "check": "node --check index.js",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
