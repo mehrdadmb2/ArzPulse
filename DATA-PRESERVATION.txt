@@ -1,0 +1,2 @@
+Important: this source-update package intentionally omits docs/data/ so it cannot overwrite your latest live market snapshot/history with older uploaded snapshots.
+When merging these files into the existing ArzPulse repository, preserve the current docs/data/ directory. The collector recreates the directory if it is missing, but the website will not have current data until the next successful workflow run.

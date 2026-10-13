@@ -1,19 +1,21 @@
-# Cloudflare Worker roles
+# ArzPulse market updater Worker
 
-This folder is the **market-data updater**, deployed separately from the Telegram bot in `../telegram-bot/`. Its Cron Trigger dispatches `.github/workflows/update-prices.yml` every five minutes.
+This is the market-data dispatcher, not the Telegram bot. It dispatches the `update-prices.yml` GitHub Actions workflow on a five-minute Cron Trigger.
 
-## Production bindings
+## Deploy manually from PowerShell
 
-Required Secret:
-- `GITHUB_TOKEN` — fine-grained token with access to `mehrdadmb2/ArzPulse` and `Actions: write`.
-- `ADMIN_SECRET` — required only for the manual `POST /trigger` endpoint. Generate a long random value and do not put it in source files.
+From the repository root:
 
-Variables in `wrangler.toml`:
-- `GITHUB_OWNER=mehrdadmb2`
-- `GITHUB_REPO=ArzPulse`
-- `GITHUB_WORKFLOW=update-prices.yml`
-- `GITHUB_REF=main`
+```powershell
+cd .\worker
+npx wrangler login
+npx wrangler secret put GITHUB_TOKEN
+npx wrangler secret put ADMIN_SECRET
+npx wrangler deploy --config .\wrangler.toml
+```
 
-`GET /health` shows safe configuration status. `POST /trigger` is disabled unless `ADMIN_SECRET` is configured and requires `Authorization: Bearer <ADMIN_SECRET>`. The scheduled `scheduled()` handler does not need this secret to dispatch the scheduled workflow.
+`GITHUB_TOKEN` must have Actions: write permission for `mehrdadmb2/ArzPulse`. `ADMIN_SECRET` protects the manual `POST /trigger` endpoint. The Worker config contains no secrets.
 
-Do not deploy `telegram-bot/index.js` over this Worker, and do not deploy this file over the `arzpulse-bot` Worker.
+Check `GET /health`. For manual dispatch, use `POST /trigger` with `Authorization: Bearer <ADMIN_SECRET>`.
+
+The bot is deployed separately from `telegram-bot/`. Never upload `telegram-bot/index.js` to this Worker.

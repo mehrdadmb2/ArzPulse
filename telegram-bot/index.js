@@ -279,11 +279,13 @@ async function getChannelSettings(env) {
   if (!env.SETTINGS_KV) return [];
   try {
     const result = await env.SETTINGS_KV.get(CHANNELS_KEY, { type: 'json', cacheTtl: 30 });
-    if (!Array.isArray(result)) return [];
+    if (result == null) return [];
+    if (!Array.isArray(result)) throw new Error('The stored channels value is not a JSON array.');
     return [...new Set(result.map((id) => String(id)).filter((id) => /^-?\d+$/.test(id)))].slice(0, MAX_CHANNELS);
   } catch (error) {
     console.error('[kv] channels read failed:', error.message);
-    return [];
+    // Never report a KV quota/network failure as an empty subscription list.
+    throw new Error(`Cloudflare KV could not read channel settings: ${error.message}`);
   }
 }
 
@@ -1038,6 +1040,16 @@ function safeHealth(env) {
 
 async function diagnosticDetails(env) {
   const health = safeHealth(env);
+  if (env.SETTINGS_KV) {
+    try {
+      const channels = await getChannelSettings(env);
+      health.settingsKv = { readOk: true, configuredDestinations: channels.length };
+    } catch (error) {
+      health.settingsKv = { readOk: false, error: error.message };
+    }
+  } else {
+    health.settingsKv = { readOk: false, error: 'SETTINGS_KV binding is missing' };
+  }
   const latest = await fetchLatestData();
   health.marketData = latest ? {
     available: true,
@@ -1089,13 +1101,20 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/webhook') {
       if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
-      if (env.TELEGRAM_WEBHOOK_SECRET) {
-        const provided = request.headers.get('x-telegram-bot-api-secret-token') || '';
-        if (provided !== env.TELEGRAM_WEBHOOK_SECRET) return new Response('Unauthorized', { status: 401 });
+      if (!env.TELEGRAM_WEBHOOK_SECRET) {
+        console.error('[webhook] TELEGRAM_WEBHOOK_SECRET is not configured; refusing unauthenticated updates.');
+        return new Response('Webhook secret is not configured', { status: 503, headers: { 'Cache-Control': 'no-store' } });
       }
+      const provided = request.headers.get('x-telegram-bot-api-secret-token') || '';
+      if (provided !== env.TELEGRAM_WEBHOOK_SECRET) return new Response('Unauthorized', { status: 401 });
+      const contentLength = Number(request.headers.get('content-length') || 0);
+      if (contentLength > 1024 * 1024) return new Response('Payload Too Large', { status: 413 });
       let update;
       try { update = await request.json(); }
       catch { return new Response('Bad Request', { status: 400 }); }
+      if (!update || typeof update !== 'object' || !Number.isInteger(update.update_id)) {
+        return new Response('Invalid Telegram update', { status: 400 });
+      }
 
       // Telegram receives an immediate 200 response; processing continues under waitUntil,
       // preventing slow chart rendering or upstream requests from causing webhook retries.

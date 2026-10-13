@@ -1,11 +1,10 @@
-# Copy this file to wrangler.toml and fill in the existing SETTINGS_KV namespace ID.
-# This is a separate Worker from ../worker (the market updater).
 name = "arzpulse-bot"
 main = "index.js"
 compatibility_date = "2026-10-01"
+workers_dev = true
 
 [triggers]
-crons = ["0 * * * *"] # hourly channel digest; market update dispatch stays in arzpulse-market-updater
+crons = ["0 * * * *"] # hourly channel reports; market updater is separate
 
 [vars]
 GITHUB_OWNER = "mehrdadmb2"
@@ -13,8 +12,7 @@ GITHUB_REPO = "ArzPulse"
 GITHUB_WORKFLOW = "update-prices.yml"
 GITHUB_REF = "main"
 DATA_STALE_MINUTES = "15"
-# Set BOT_ADMIN_IDS as a comma-separated list of Telegram numeric user IDs in Worker Variables.
-# Set ALLOWED_UPDATES when calling Telegram setWebhook: ["message", "channel_post"].
+# Set BOT_ADMIN_IDS in the Cloudflare dashboard (comma-separated numeric Telegram user IDs).
 
 [[kv_namespaces]]
 binding = "SETTINGS_KV"

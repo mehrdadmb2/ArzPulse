@@ -68,3 +68,29 @@ test('manual diagnostic and trigger endpoints require ADMIN_SECRET', async () =>
     assert.equal(response.status, 503, `${route} should be disabled when ADMIN_SECRET is missing`);
   }
 });
+
+
+test('webhook fails closed if TELEGRAM_WEBHOOK_SECRET is not configured', async () => {
+  const response = await bot.fetch(new Request('https://worker.test/webhook', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ update_id: 990003, message: { text: '/start', chat: { id: 1, type: 'private' } } })
+  }), { TELEGRAM_BOT_TOKEN: 'fake-token' }, ctxRecorder().ctx);
+  assert.equal(response.status, 503);
+});
+
+test('webhook rejects malformed updates after secret validation', async () => {
+  const response = await bot.fetch(new Request('https://worker.test/webhook', {
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'test-secret' },
+    body: JSON.stringify({ hello: 'world' })
+  }), { TELEGRAM_BOT_TOKEN: 'fake-token', TELEGRAM_WEBHOOK_SECRET: 'test-secret' }, ctxRecorder().ctx);
+  assert.equal(response.status, 400);
+});
+
+test('unknown paths return 404 and do not expose secrets', async () => {
+  const response = await bot.fetch(new Request('https://worker.test/not-a-route'), {
+    TELEGRAM_BOT_TOKEN: 'never-leak', ADMIN_SECRET: 'also-never-leak'
+  }, ctxRecorder().ctx);
+  assert.equal(response.status, 404);
+  const body = await response.text();
+  assert.equal(body.includes('never-leak'), false);
+});

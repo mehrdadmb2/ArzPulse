@@ -1,6 +1,7 @@
 name = "arzpulse-market-updater"
 main = "index.js"
-compatibility_date = "2026-08-01"
+compatibility_date = "2026-10-01"
+workers_dev = true
 
 [triggers]
 crons = ["*/5 * * * *"]

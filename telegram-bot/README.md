@@ -32,7 +32,7 @@ Keep the existing `SETTINGS_KV` binding and point it at the **same Namespace ID 
 - `DATA_STALE_MINUTES=15`
 - `BOT_ADMIN_IDS=123456789` — comma-separated numeric Telegram user IDs, not usernames. This is required for `/refresh`.
 
-`telegram-bot/wrangler.toml.example` is an example only. Copy it to `wrangler.toml` locally and replace the KV namespace ID with the existing ID; never commit secrets or the actual private token.
+`wrangler.toml.example` is an example only. Copy it to `wrangler.toml` locally and replace the KV namespace ID with the existing ID. The Worker refuses webhook updates until `TELEGRAM_WEBHOOK_SECRET` is configured, by design. Never commit secrets or the actual private token.
 
 ## Deploy from local machine
 
@@ -51,7 +51,7 @@ npm run check
 npm test
 ```
 
-For Windows PowerShell, use `Copy-Item wrangler.toml.example wrangler.toml` instead of `cp`.
+For Windows PowerShell, use `Copy-Item wrangler.toml.example wrangler.toml` instead of `cp`. No `.ps1` installer is used.
 
 ## Register/check Telegram webhook
 
