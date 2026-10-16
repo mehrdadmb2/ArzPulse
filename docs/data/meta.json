@@ -1,68 +1,65 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-16T18:36:10.631Z",
-  "lastUpdate": "2026-10-16T18:36:10.631Z",
+  "lastAttempt": "2026-10-16T18:41:09.381Z",
+  "lastUpdate": "2026-10-16T18:41:09.381Z",
   "retentionDays": 30,
-  "gold18K": 265560384,
+  "gold18K": 265547604,
   "usdtPrice": 2650000,
   "dollarPrice": 2650000,
   "marketSummary": {
     "BRENT": {
-      "last": 109.87000274658203,
-      "change": 3.729233993505507,
+      "last": 109.95999908447266,
+      "change": 3.8142003260644235,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-16T04:00:00.000Z"
     },
     "WTI": {
-      "last": 99.05000305175781,
-      "change": 1.10238013432469,
+      "last": 99.2300033569336,
+      "change": 1.2861101567121382,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-16T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4180.2001953125,
-      "change": 0.24220276299666352,
+      "last": 4177.39990234375,
+      "change": 0.1750510663185941,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-16T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 57.150001525878906,
-      "change": 0.5506971082680139,
+      "last": 57.099998474121094,
+      "change": 0.4627208776897501,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-16T04:00:00.000Z"
     },
     "SP500": {
-      "last": 7647.52978515625,
-      "change": -1.2465072934239227,
+      "last": 7649.2998046875,
+      "change": -1.2236508135172908,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-16T13:30:00.000Z"
     },
     "NASDAQ": {
-      "last": 26109.64453125,
-      "change": -2.258765783989862,
+      "last": 26117.412109375,
+      "change": -2.229687920754378,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-16T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.84100341796875,
-      "change": -0.15587900199142157,
+      "last": 101.86000061035156,
+      "change": -0.13725430357689952,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-16T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 2,
-  "errors": [
-    "BTC: Request timeout after 12000ms",
-    "ETH: Request timeout after 12000ms"
-  ],
-  "successfulSources": 10,
-  "successfulLocalSources": 3
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
+  "successfulSources": 12,
+  "successfulLocalSources": 5
 }
