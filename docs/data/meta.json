@@ -1,11 +1,11 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-19T19:55:20.321Z",
-  "lastUpdate": "2026-10-19T19:55:20.321Z",
+  "lastAttempt": "2026-10-19T20:00:21.133Z",
+  "lastUpdate": "2026-10-19T20:00:21.133Z",
   "retentionDays": 30,
-  "gold18K": 261603323,
-  "usdtPrice": 2607000,
-  "dollarPrice": 2607000,
+  "gold18K": 261848168,
+  "usdtPrice": 2609440,
+  "dollarPrice": 2609440,
   "marketSummary": {
     "BRENT": {
       "last": 109.43000030517578,
@@ -15,53 +15,54 @@
       "timestamp": "2026-10-19T04:00:00.000Z"
     },
     "WTI": {
-      "last": 98.44999694824219,
-      "change": -2.9188508105469664,
+      "last": 98.43000030517578,
+      "change": -2.9385694204910435,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-19T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4161.2998046875,
-      "change": -0.4735665854986159,
+      "last": 4162.7001953125,
+      "change": -0.44007323225923767,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-19T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 57.34000015258789,
-      "change": 0.6053184089281922,
+      "last": 57.334999084472656,
+      "change": 0.5965438353533927,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-19T04:00:00.000Z"
     },
     "SP500": {
-      "last": 7698.06982421875,
-      "change": 0.5043434390505537,
+      "last": 7690.759765625,
+      "change": 0.4089048867585973,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-19T13:30:00.000Z"
     },
     "NASDAQ": {
-      "last": 26460.48046875,
-      "change": 1.2259021144758604,
+      "last": 26430.88671875,
+      "change": 1.1126897317967872,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-19T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.99800109863281,
-      "change": 0.15515000630788534,
+      "last": 101.98600006103516,
+      "change": 0.14336579771675526,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-19T04:00:00.000Z"
     }
   },
   "hasError": true,
-  "errorCount": 1,
+  "errorCount": 2,
   "errors": [
-    "BTC: Request timeout after 12000ms"
+    "BTC: Request timeout after 12000ms",
+    "ETH: getaddrinfo ENOTFOUND apiv2.nobitex.ir"
   ],
-  "successfulSources": 11,
-  "successfulLocalSources": 4
+  "successfulSources": 10,
+  "successfulLocalSources": 3
 }
