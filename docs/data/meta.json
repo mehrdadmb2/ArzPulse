@@ -1,36 +1,36 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-20T20:40:20.139Z",
-  "lastUpdate": "2026-10-20T20:40:20.139Z",
+  "lastAttempt": "2026-10-20T20:45:20.322Z",
+  "lastUpdate": "2026-10-20T20:45:20.322Z",
   "retentionDays": 30,
-  "gold18K": 262415767,
+  "gold18K": 262181450,
   "usdtPrice": 2626330,
   "dollarPrice": 2626330,
   "marketSummary": {
     "BRENT": {
-      "last": 108.88999938964844,
-      "change": -0.6024679541063552,
+      "last": 108.97000122070312,
+      "change": -0.5294402691898245,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-20T04:00:00.000Z"
     },
     "WTI": {
-      "last": 97.95999908447266,
-      "change": -5.498750121808292,
+      "last": 98.05999755859375,
+      "change": -5.402282370903083,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-20T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4140.39990234375,
-      "change": -0.4735509927657474,
+      "last": 4140.89990234375,
+      "change": -0.4615320511955267,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-20T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 57.974998474121094,
-      "change": 1.7569408288714485,
+      "last": 58.005001068115234,
+      "change": 1.809600980007756,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-20T04:00:00.000Z"
@@ -50,20 +50,16 @@
       "timestamp": "2026-10-20T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.70700073242188,
-      "change": -0.26770211367438373,
+      "last": 101.7040023803711,
+      "change": -0.27064225090921684,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-20T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 3,
-  "errors": [
-    "BTC: Request timeout after 12000ms",
-    "NOT: Request timeout after 12000ms",
-    "XAUT: Request timeout after 12000ms"
-  ],
-  "successfulSources": 9,
-  "successfulLocalSources": 2
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
+  "successfulSources": 12,
+  "successfulLocalSources": 5
 }
