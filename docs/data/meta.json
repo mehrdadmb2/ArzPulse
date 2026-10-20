@@ -1,65 +1,73 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-20T18:05:20.033Z",
-  "lastUpdate": "2026-10-20T18:05:20.033Z",
+  "lastAttempt": "2026-10-20T18:10:20.826Z",
+  "lastUpdate": "2026-10-20T18:10:20.826Z",
   "retentionDays": 30,
-  "gold18K": 262051726,
-  "usdtPrice": 2622560,
-  "dollarPrice": 2622560,
+  "gold18K": 262046743,
+  "usdtPrice": 2622700,
+  "dollarPrice": 2622700,
   "marketSummary": {
     "BRENT": {
       "last": 108.7300033569336,
       "change": -0.7485163596360678,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-20T04:00:00.000Z"
     },
     "WTI": {
       "last": 97.88999938964844,
       "change": -5.566278283443699,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-20T04:00:00.000Z"
     },
     "XAUUSD": {
       "last": 4141.39990234375,
       "change": -0.44951310962530594,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-20T04:00:00.000Z"
     },
     "SILVER": {
       "last": 58.02000045776367,
       "change": 1.835927707823136,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-20T04:00:00.000Z"
     },
     "SP500": {
       "last": 7719.419921875,
       "change": 0.3730457509119485,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-20T13:30:00.000Z"
     },
     "NASDAQ": {
       "last": 26472.638671875,
       "change": 0.15795172197304647,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-20T13:30:00.000Z"
     },
     "DXY": {
       "last": 101.7229995727539,
       "change": -0.2520139004900453,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-20T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
-  "successfulSources": 12,
+  "hasError": true,
+  "errorCount": 7,
+  "errors": [
+    "BRENT: HTTP 429 from upstream",
+    "WTI: HTTP 429 from upstream",
+    "XAUUSD: HTTP 429 from upstream",
+    "SILVER: HTTP 429 from upstream",
+    "SP500: HTTP 429 from upstream",
+    "NASDAQ: HTTP 429 from upstream",
+    "DXY: HTTP 429 from upstream"
+  ],
+  "successfulSources": 5,
   "successfulLocalSources": 5
 }

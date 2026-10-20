@@ -1,80 +1,80 @@
 {
   "version": 5,
-  "timestamp": "2026-10-20T18:05:20.033Z",
-  "attemptTimestamp": "2026-10-20T18:05:20.033Z",
-  "lastGoodTimestamp": "2026-10-20T18:05:20.033Z",
+  "timestamp": "2026-10-20T18:10:20.826Z",
+  "attemptTimestamp": "2026-10-20T18:10:20.826Z",
+  "lastGoodTimestamp": "2026-10-20T18:10:20.826Z",
   "prices": {
     "BTC": {
-      "bestBuy": 215821422310,
-      "bestSell": 215821422350,
-      "lastPrice": 215821422350,
-      "volume": 9.3385275969,
+      "bestBuy": 215550260010,
+      "bestSell": 216099999610,
+      "lastPrice": 215550259990,
+      "volume": 9.4142406895,
       "high": 218500000000,
       "low": 212000000990,
-      "change": 0.84,
-      "fetchedAt": "2026-10-20T18:05:20.832Z",
+      "change": 0.71,
+      "fetchedAt": "2026-10-20T18:10:21.522Z",
       "stale": false,
       "source": "Nobitex",
       "pair": "btc-rls"
     },
     "ETH": {
-      "bestBuy": 6397252260,
-      "bestSell": 6409999700,
-      "lastPrice": 6409905930,
-      "volume": 122.249679029,
+      "bestBuy": 6402105240,
+      "bestSell": 6425593350,
+      "lastPrice": 6400533740,
+      "volume": 124.6400198748,
       "high": 6489009860,
       "low": 6205211000,
-      "change": 2.7,
-      "fetchedAt": "2026-10-20T18:05:21.208Z",
+      "change": 2.55,
+      "fetchedAt": "2026-10-20T18:10:21.636Z",
       "stale": false,
       "source": "Nobitex",
       "pair": "eth-rls"
     },
     "USDT": {
-      "bestBuy": 2622550,
-      "bestSell": 2622560,
-      "lastPrice": 2622560,
-      "volume": 2049975.3193940923,
+      "bestBuy": 2622650,
+      "bestSell": 2622700,
+      "lastPrice": 2622700,
+      "volume": 2082568.4284723545,
       "high": 2638500,
       "low": 2600000,
-      "change": 0.25,
-      "fetchedAt": "2026-10-20T18:05:21.408Z",
+      "change": 0.26,
+      "fetchedAt": "2026-10-20T18:10:21.753Z",
       "stale": false,
       "source": "Nobitex",
       "pair": "usdt-rls"
     },
     "NOT": {
-      "bestBuy": 1053,
-      "bestSell": 1053.79,
-      "lastPrice": 1053,
-      "volume": 162634148.25673884,
+      "bestBuy": 1052.85,
+      "bestSell": 1056.58,
+      "lastPrice": 1052.89,
+      "volume": 162699655.25673884,
       "high": 1073.69,
       "low": 989,
-      "change": 6.1,
-      "fetchedAt": "2026-10-20T18:05:21.591Z",
+      "change": 6.08,
+      "fetchedAt": "2026-10-20T18:10:21.966Z",
       "stale": false,
       "source": "Nobitex",
       "pair": "not-rls"
     },
     "XAUT": {
-      "bestBuy": 4137.2,
-      "bestSell": 4143.9,
-      "lastPrice": 4137.2,
-      "volume": 43.9652925575,
+      "bestBuy": 4137,
+      "bestSell": 4143.6,
+      "lastPrice": 4137.1,
+      "volume": 44.0214925575,
       "high": 4162,
       "low": 4128,
       "change": -0.51,
-      "fetchedAt": "2026-10-20T18:05:21.779Z",
+      "fetchedAt": "2026-10-20T18:10:22.177Z",
       "stale": false,
       "source": "Nobitex",
       "pair": "xaut-usdt"
     }
   },
-  "gold18K": 262051726,
-  "usdtPrice": 2622560,
-  "dollarPrice": 2622560,
+  "gold18K": 262046743,
+  "usdtPrice": 2622700,
+  "dollarPrice": 2622700,
   "goldChange": -0.51,
-  "dollarChange": 0.25,
+  "dollarChange": 0.26,
   "derivedStale": {
     "gold18K": false,
     "dollar": false
@@ -89,9 +89,11 @@
       "timestamp": "2026-10-20T04:00:00.000Z",
       "fetchedAt": "2026-10-20T18:05:21.845Z",
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "source": "Yahoo Finance",
-      "symbol": "BZ=F"
+      "symbol": "BZ=F",
+      "lastCheckedAt": "2026-10-20T18:10:20.826Z",
+      "lastError": "HTTP 429 from upstream"
     },
     "WTI": {
       "last": 97.88999938964844,
@@ -102,9 +104,11 @@
       "timestamp": "2026-10-20T04:00:00.000Z",
       "fetchedAt": "2026-10-20T18:05:21.920Z",
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "source": "Yahoo Finance",
-      "symbol": "CL=F"
+      "symbol": "CL=F",
+      "lastCheckedAt": "2026-10-20T18:10:20.826Z",
+      "lastError": "HTTP 429 from upstream"
     },
     "XAUUSD": {
       "last": 4141.39990234375,
@@ -115,9 +119,11 @@
       "timestamp": "2026-10-20T04:00:00.000Z",
       "fetchedAt": "2026-10-20T18:05:21.968Z",
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "source": "Yahoo Finance",
-      "symbol": "GC=F"
+      "symbol": "GC=F",
+      "lastCheckedAt": "2026-10-20T18:10:20.826Z",
+      "lastError": "HTTP 429 from upstream"
     },
     "SILVER": {
       "last": 58.02000045776367,
@@ -128,9 +134,11 @@
       "timestamp": "2026-10-20T04:00:00.000Z",
       "fetchedAt": "2026-10-20T18:05:22.024Z",
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "source": "Yahoo Finance",
-      "symbol": "SI=F"
+      "symbol": "SI=F",
+      "lastCheckedAt": "2026-10-20T18:10:20.826Z",
+      "lastError": "HTTP 429 from upstream"
     },
     "SP500": {
       "last": 7719.419921875,
@@ -141,9 +149,11 @@
       "timestamp": "2026-10-20T13:30:00.000Z",
       "fetchedAt": "2026-10-20T18:05:22.051Z",
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "source": "Yahoo Finance",
-      "symbol": "^GSPC"
+      "symbol": "^GSPC",
+      "lastCheckedAt": "2026-10-20T18:10:20.826Z",
+      "lastError": "HTTP 429 from upstream"
     },
     "NASDAQ": {
       "last": 26472.638671875,
@@ -154,9 +164,11 @@
       "timestamp": "2026-10-20T13:30:00.000Z",
       "fetchedAt": "2026-10-20T18:05:22.106Z",
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "source": "Yahoo Finance",
-      "symbol": "^IXIC"
+      "symbol": "^IXIC",
+      "lastCheckedAt": "2026-10-20T18:10:20.826Z",
+      "lastError": "HTTP 429 from upstream"
     },
     "DXY": {
       "last": 101.7229995727539,
@@ -167,14 +179,24 @@
       "timestamp": "2026-10-20T04:00:00.000Z",
       "fetchedAt": "2026-10-20T18:05:22.186Z",
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "source": "Yahoo Finance",
-      "symbol": "DX-Y.NYB"
+      "symbol": "DX-Y.NYB",
+      "lastCheckedAt": "2026-10-20T18:10:20.826Z",
+      "lastError": "HTTP 429 from upstream"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errorDetails": [],
-  "successfulSources": 12,
+  "hasError": true,
+  "errorCount": 7,
+  "errorDetails": [
+    "BRENT: HTTP 429 from upstream",
+    "WTI: HTTP 429 from upstream",
+    "XAUUSD: HTTP 429 from upstream",
+    "SILVER: HTTP 429 from upstream",
+    "SP500: HTTP 429 from upstream",
+    "NASDAQ: HTTP 429 from upstream",
+    "DXY: HTTP 429 from upstream"
+  ],
+  "successfulSources": 5,
   "successfulLocalSources": 5
 }
