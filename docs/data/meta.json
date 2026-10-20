@@ -1,7 +1,7 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-20T21:15:19.092Z",
-  "lastUpdate": "2026-10-20T21:15:19.092Z",
+  "lastAttempt": "2026-10-20T21:20:20.944Z",
+  "lastUpdate": "2026-10-20T21:20:20.944Z",
   "retentionDays": 30,
   "gold18K": 262501093,
   "usdtPrice": 2626360,
@@ -50,16 +50,18 @@
       "timestamp": "2026-10-20T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.7020034790039,
-      "change": -0.2726023423991056,
+      "last": 101.70500183105469,
+      "change": -0.2696622051642725,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-20T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
-  "successfulSources": 12,
-  "successfulLocalSources": 5
+  "hasError": true,
+  "errorCount": 1,
+  "errors": [
+    "XAUT: Request timeout after 12000ms"
+  ],
+  "successfulSources": 11,
+  "successfulLocalSources": 4
 }
