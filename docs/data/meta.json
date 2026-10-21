@@ -1,36 +1,36 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-21T20:22:30.994Z",
-  "lastUpdate": "2026-10-21T20:22:30.994Z",
+  "lastAttempt": "2026-10-21T20:25:18.974Z",
+  "lastUpdate": "2026-10-21T20:25:18.974Z",
   "retentionDays": 30,
-  "gold18K": 266940430,
+  "gold18K": 267036893,
   "usdtPrice": 2666980,
   "dollarPrice": 2666980,
   "marketSummary": {
     "BRENT": {
-      "last": 109.83999633789062,
-      "change": 0.9651580232806285,
+      "last": 109.76000213623047,
+      "change": 0.8916271831418644,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     },
     "WTI": {
-      "last": 97.83000183105469,
-      "change": -3.8903615766335906,
+      "last": 97.76000213623047,
+      "change": -3.959130310492145,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4152.89990234375,
-      "change": 0.248631401648624,
+      "last": 4153.10009765625,
+      "change": 0.2534640021357737,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 58.04499816894531,
-      "change": 0.5874551687474326,
+      "last": 58.04999923706055,
+      "change": 0.5961216297812125,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
@@ -50,22 +50,16 @@
       "timestamp": "2026-10-21T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.69200134277344,
-      "change": -0.03735575828776983,
+      "last": 101.68599700927734,
+      "change": -0.043257983096538125,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 5,
-  "errors": [
-    "BTC: Request timeout after 12000ms",
-    "ETH: Request timeout after 12000ms",
-    "USDT: Request timeout after 12000ms",
-    "NOT: Request timeout after 12000ms",
-    "XAUT: Request timeout after 12000ms"
-  ],
-  "successfulSources": 7,
-  "successfulLocalSources": 0
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
+  "successfulSources": 12,
+  "successfulLocalSources": 5
 }
