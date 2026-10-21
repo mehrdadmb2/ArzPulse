@@ -1,36 +1,36 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-21T07:35:21.687Z",
-  "lastUpdate": "2026-10-21T07:35:21.687Z",
+  "lastAttempt": "2026-10-21T07:40:21.557Z",
+  "lastUpdate": "2026-10-21T07:40:21.557Z",
   "retentionDays": 30,
   "gold18K": 262766050,
   "usdtPrice": 2625970,
   "dollarPrice": 2625970,
   "marketSummary": {
     "BRENT": {
-      "last": 109.75,
-      "change": 0.8824331982661449,
+      "last": 109.5999984741211,
+      "change": 0.7445514769530083,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     },
     "WTI": {
-      "last": 98.72000122070312,
-      "change": -3.016013033904897,
+      "last": 98.4800033569336,
+      "change": -3.251790479244247,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4139.2998046875,
-      "change": -0.07966718705523132,
+      "last": 4141.5,
+      "change": -0.026555729018410437,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 57.43000030517578,
-      "change": -0.47828816835701216,
+      "last": 57.48500061035156,
+      "change": -0.3829769287040461,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
@@ -50,16 +50,22 @@
       "timestamp": "2026-10-20T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.7770004272461,
-      "change": 0.04619784602542907,
+      "last": 101.7750015258789,
+      "change": 0.04423293763928257,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
-  "successfulSources": 12,
-  "successfulLocalSources": 5
+  "hasError": true,
+  "errorCount": 5,
+  "errors": [
+    "BTC: Request timeout after 12000ms",
+    "ETH: Request timeout after 12000ms",
+    "USDT: Request timeout after 12000ms",
+    "NOT: Request timeout after 12000ms",
+    "XAUT: Request timeout after 12000ms"
+  ],
+  "successfulSources": 7,
+  "successfulLocalSources": 0
 }
