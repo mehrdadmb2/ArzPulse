@@ -1,7 +1,7 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-21T21:30:18.092Z",
-  "lastUpdate": "2026-10-21T21:30:18.092Z",
+  "lastAttempt": "2026-10-21T21:35:20.572Z",
+  "lastUpdate": "2026-10-21T21:35:20.572Z",
   "retentionDays": 30,
   "gold18K": 267452168,
   "usdtPrice": 2667530,
@@ -50,16 +50,22 @@
       "timestamp": "2026-10-21T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.7040023803711,
-      "change": -0.02555880832056205,
+      "last": 101.7030029296875,
+      "change": -0.026541262513635304,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-21T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
-  "successfulSources": 12,
-  "successfulLocalSources": 5
+  "hasError": true,
+  "errorCount": 5,
+  "errors": [
+    "BTC: Request timeout after 12000ms",
+    "ETH: Request timeout after 12000ms",
+    "USDT: Request timeout after 12000ms",
+    "NOT: Request timeout after 12000ms",
+    "XAUT: Request timeout after 12000ms"
+  ],
+  "successfulSources": 7,
+  "successfulLocalSources": 0
 }
