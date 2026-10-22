@@ -1,8 +1,8 @@
 {
   "version": 5,
-  "timestamp": "2026-10-22T13:50:21.068Z",
-  "attemptTimestamp": "2026-10-22T13:50:21.068Z",
-  "lastGoodTimestamp": "2026-10-22T13:50:21.068Z",
+  "timestamp": "2026-10-22T13:55:20.217Z",
+  "attemptTimestamp": "2026-10-22T13:55:20.217Z",
+  "lastGoodTimestamp": "2026-10-22T13:55:20.217Z",
   "prices": {
     "BTC": {
       "bestBuy": 221250000010,
@@ -13,9 +13,11 @@
       "low": 219000000000,
       "change": 0.3,
       "fetchedAt": "2026-10-22T13:50:22.156Z",
-      "stale": false,
+      "stale": true,
       "source": "Nobitex",
-      "pair": "btc-rls"
+      "pair": "btc-rls",
+      "lastCheckedAt": "2026-10-22T13:55:20.217Z",
+      "lastError": "Request timeout after 12000ms"
     },
     "ETH": {
       "bestBuy": 6530007430,
@@ -26,9 +28,11 @@
       "low": 6451000000,
       "change": -0.02,
       "fetchedAt": "2026-10-22T13:50:22.340Z",
-      "stale": false,
+      "stale": true,
       "source": "Nobitex",
-      "pair": "eth-rls"
+      "pair": "eth-rls",
+      "lastCheckedAt": "2026-10-22T13:55:20.217Z",
+      "lastError": "Request timeout after 12000ms"
     },
     "USDT": {
       "bestBuy": 2715000,
@@ -39,9 +43,11 @@
       "low": 2638000,
       "change": 2.87,
       "fetchedAt": "2026-10-22T13:50:22.433Z",
-      "stale": false,
+      "stale": true,
       "source": "Nobitex",
-      "pair": "usdt-rls"
+      "pair": "usdt-rls",
+      "lastCheckedAt": "2026-10-22T13:55:20.217Z",
+      "lastError": "Request timeout after 12000ms"
     },
     "NOT": {
       "bestBuy": 1052.62,
@@ -52,9 +58,11 @@
       "low": 1007.18,
       "change": -2.22,
       "fetchedAt": "2026-10-22T13:50:22.616Z",
-      "stale": false,
+      "stale": true,
       "source": "Nobitex",
-      "pair": "not-rls"
+      "pair": "not-rls",
+      "lastCheckedAt": "2026-10-22T13:55:20.217Z",
+      "lastError": "Request timeout after 12000ms"
     },
     "XAUT": {
       "bestBuy": 4080.4,
@@ -65,9 +73,11 @@
       "low": 4080,
       "change": -1.3,
       "fetchedAt": "2026-10-22T13:50:22.796Z",
-      "stale": false,
+      "stale": true,
       "source": "Nobitex",
-      "pair": "xaut-usdt"
+      "pair": "xaut-usdt",
+      "lastCheckedAt": "2026-10-22T13:55:20.217Z",
+      "lastError": "Request timeout after 12000ms"
     }
   },
   "gold18K": 267966260,
@@ -76,105 +86,111 @@
   "goldChange": -1.3,
   "dollarChange": 2.87,
   "derivedStale": {
-    "gold18K": false,
-    "dollar": false
+    "gold18K": true,
+    "dollar": true
   },
   "market": {
     "BRENT": {
-      "last": 112.20999908447266,
-      "change": 3.11523561767633,
+      "last": 111.94999694824219,
+      "change": 2.876306986028084,
       "high": 112.68000030517578,
       "low": 109.7300033569336,
-      "volume": 19678,
+      "volume": 20068,
       "timestamp": "2026-10-22T04:00:00.000Z",
-      "fetchedAt": "2026-10-22T13:50:22.917Z",
+      "fetchedAt": "2026-10-22T13:56:50.721Z",
       "delayed": true,
       "stale": false,
       "source": "Yahoo Finance",
       "symbol": "BZ=F"
     },
     "WTI": {
-      "last": 99.66999816894531,
-      "change": 2.5939234209843294,
+      "last": 99.27999877929688,
+      "change": 2.1924829850368845,
       "high": 100.08999633789062,
       "low": 97.72000122070312,
-      "volume": 122094,
+      "volume": 125305,
       "timestamp": "2026-10-22T04:00:00.000Z",
-      "fetchedAt": "2026-10-22T13:50:22.965Z",
+      "fetchedAt": "2026-10-22T13:56:50.812Z",
       "delayed": true,
       "stale": false,
       "source": "Yahoo Finance",
       "symbol": "CL=F"
     },
     "XAUUSD": {
-      "last": 4083.5,
-      "change": -1.6024096385542168,
+      "last": 4077,
+      "change": -1.7590361445783131,
       "high": 4164.2998046875,
-      "low": 4072.699951171875,
-      "volume": 120855,
+      "low": 4069.39990234375,
+      "volume": 125060,
       "timestamp": "2026-10-22T04:00:00.000Z",
-      "fetchedAt": "2026-10-22T13:50:23.043Z",
+      "fetchedAt": "2026-10-22T13:56:50.901Z",
       "delayed": true,
       "stale": false,
       "source": "Yahoo Finance",
       "symbol": "GC=F"
     },
     "SILVER": {
-      "last": 55.435001373291016,
-      "change": -3.460345305099711,
+      "last": 55.22999954223633,
+      "change": -3.8173545139310323,
       "high": 58.10499954223633,
-      "low": 55.22999954223633,
-      "volume": 33348,
+      "low": 55.119998931884766,
+      "volume": 34639,
       "timestamp": "2026-10-22T04:00:00.000Z",
-      "fetchedAt": "2026-10-22T13:50:23.095Z",
+      "fetchedAt": "2026-10-22T13:56:50.984Z",
       "delayed": true,
       "stale": false,
       "source": "Yahoo Finance",
       "symbol": "SI=F"
     },
     "SP500": {
-      "last": 7685.8798828125,
-      "change": -0.9190212381639868,
+      "last": 7694.0498046875,
+      "change": -0.8137003291561662,
       "high": 7699.52001953125,
-      "low": 7679.740234375,
-      "volume": 314266207,
+      "low": 7678.4599609375,
+      "volume": 370635011,
       "timestamp": "2026-10-22T13:30:00.000Z",
-      "fetchedAt": "2026-10-22T13:50:23.167Z",
+      "fetchedAt": "2026-10-22T13:56:51.080Z",
       "delayed": true,
       "stale": false,
       "source": "Yahoo Finance",
       "symbol": "^GSPC"
     },
     "NASDAQ": {
-      "last": 26265.31640625,
-      "change": -1.6385622326260705,
+      "last": 26306.052734375,
+      "change": -1.486008052742479,
       "high": 26359.40625,
-      "low": 26239.298828125,
-      "volume": 1348692000,
+      "low": 26226.728515625,
+      "volume": 1487220000,
       "timestamp": "2026-10-22T13:30:00.000Z",
-      "fetchedAt": "2026-10-22T13:50:23.215Z",
+      "fetchedAt": "2026-10-22T13:56:51.158Z",
       "delayed": true,
       "stale": false,
       "source": "Yahoo Finance",
       "symbol": "^IXIC"
     },
     "DXY": {
-      "last": 101.81900024414062,
-      "change": 0.03831938034143827,
+      "last": 101.82099914550781,
+      "change": 0.04028332354360119,
       "high": 101.84200286865234,
       "low": 101.44599914550781,
       "volume": 0,
       "timestamp": "2026-10-22T04:00:00.000Z",
-      "fetchedAt": "2026-10-22T13:50:23.277Z",
+      "fetchedAt": "2026-10-22T13:56:51.308Z",
       "delayed": true,
       "stale": false,
       "source": "Yahoo Finance",
       "symbol": "DX-Y.NYB"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errorDetails": [],
-  "successfulSources": 12,
-  "successfulLocalSources": 5
+  "hasError": true,
+  "errorCount": 5,
+  "errorDetails": [
+    "BTC: Request timeout after 12000ms",
+    "ETH: Request timeout after 12000ms",
+    "USDT: Request timeout after 12000ms",
+    "NOT: Request timeout after 12000ms",
+    "XAUT: Request timeout after 12000ms"
+  ],
+  "successfulSources": 7,
+  "successfulLocalSources": 0
 }
