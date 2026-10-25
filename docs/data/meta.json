@@ -1,73 +1,65 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-25T11:05:19.675Z",
-  "lastUpdate": "2026-10-25T11:05:19.675Z",
+  "lastAttempt": "2026-10-25T11:10:19.282Z",
+  "lastUpdate": "2026-10-25T11:10:19.282Z",
   "retentionDays": 30,
-  "gold18K": 260780161,
-  "usdtPrice": 2697990,
-  "dollarPrice": 2697990,
+  "gold18K": 260677967,
+  "usdtPrice": 2697000,
+  "dollarPrice": 2697000,
   "marketSummary": {
     "BRENT": {
       "last": 111.69999694824219,
       "change": -1.2989319117144813,
       "delayed": true,
-      "stale": true,
+      "stale": false,
       "timestamp": "2026-10-23T04:00:00.000Z"
     },
     "WTI": {
       "last": 103.2699966430664,
       "change": 3.820242661837197,
       "delayed": true,
-      "stale": true,
+      "stale": false,
       "timestamp": "2026-10-23T04:00:00.000Z"
     },
     "XAUUSD": {
       "last": 4007.89990234375,
       "change": -1.2929760925690073,
       "delayed": true,
-      "stale": true,
+      "stale": false,
       "timestamp": "2026-10-23T04:00:00.000Z"
     },
     "SILVER": {
       "last": 53.94900131225586,
       "change": -1.4882014235945338,
       "delayed": true,
-      "stale": true,
+      "stale": false,
       "timestamp": "2026-10-23T04:00:00.000Z"
     },
     "SP500": {
       "last": 7623.68017578125,
       "change": -0.5186972294159081,
       "delayed": true,
-      "stale": true,
+      "stale": false,
       "timestamp": "2026-10-23T13:30:00.000Z"
     },
     "NASDAQ": {
       "last": 25955.33984375,
       "change": -0.20577423438047251,
       "delayed": true,
-      "stale": true,
+      "stale": false,
       "timestamp": "2026-10-23T13:30:00.000Z"
     },
     "DXY": {
       "last": 101.80999755859375,
       "change": 0.1968280159835101,
       "delayed": true,
-      "stale": true,
+      "stale": false,
       "timestamp": "2026-10-23T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 7,
-  "errors": [
-    "BRENT: HTTP 429 from upstream",
-    "WTI: HTTP 429 from upstream",
-    "XAUUSD: HTTP 429 from upstream",
-    "SILVER: HTTP 429 from upstream",
-    "SP500: HTTP 429 from upstream",
-    "NASDAQ: HTTP 429 from upstream",
-    "DXY: HTTP 429 from upstream"
-  ],
-  "successfulSources": 5,
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
+  "successfulSources": 12,
   "successfulLocalSources": 5
 }
