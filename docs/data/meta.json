@@ -1,11 +1,11 @@
 {
   "version": 5,
-  "lastAttempt": "2026-10-25T15:40:19.780Z",
-  "lastUpdate": "2026-10-25T15:40:19.780Z",
+  "lastAttempt": "2026-10-25T15:50:19.169Z",
+  "lastUpdate": "2026-10-25T15:50:19.169Z",
   "retentionDays": 30,
-  "gold18K": 259720632,
-  "usdtPrice": 2687900,
-  "dollarPrice": 2687900,
+  "gold18K": 259751599,
+  "usdtPrice": 2689160,
+  "dollarPrice": 2689160,
   "marketSummary": {
     "BRENT": {
       "last": 111.69999694824219,
@@ -57,15 +57,9 @@
       "timestamp": "2026-10-23T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 5,
-  "errors": [
-    "BTC: Request timeout after 12000ms",
-    "ETH: Request timeout after 12000ms",
-    "USDT: Request timeout after 12000ms",
-    "NOT: Request timeout after 12000ms",
-    "XAUT: Request timeout after 12000ms"
-  ],
-  "successfulSources": 7,
-  "successfulLocalSources": 0
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
+  "successfulSources": 12,
+  "successfulLocalSources": 5
 }
