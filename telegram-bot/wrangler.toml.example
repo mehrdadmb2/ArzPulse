@@ -4,7 +4,7 @@ compatibility_date = "2026-10-01"
 workers_dev = true
 
 [triggers]
-crons = ["0 * * * *"] # hourly channel reports; market updater is separate
+crons = ["*/5 * * * *", "0 * * * *"] # market workflow every 5 minutes; keep hourly channel reports
 
 [vars]
 GITHUB_OWNER = "mehrdadmb2"

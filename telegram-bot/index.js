@@ -16,6 +16,8 @@ const HTTP_TIMEOUT_MS = 3500;
 const REFRESH_LOCK_KEY = 'bot:refresh-lock:v1';
 const REFRESH_LOCK_SECONDS = 240;
 const CHANNELS_KEY = 'channels'; // Keep the existing KV key for backwards compatibility.
+const GLOBAL_CRYPTOS = ['BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH','SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE'];
+const GLOBAL_CRYPTO_NAMES = { BTC:'بیت‌کوین', ETH:'اتریوم', BNB:'بایننس کوین', SOL:'سولانا', XRP:'ریپل', ADA:'کاردانو', DOGE:'دوج‌کوین', TRX:'ترون', LINK:'چین‌لینک', AVAX:'آوالانچ', DOT:'پولکادات', LTC:'لایت‌کوین', BCH:'بیت‌کوین کش', SHIB:'شیبا اینو', UNI:'یونی‌سواپ', NEAR:'نیر', SUI:'سویی', XLM:'استلار', ETC:'اتریوم کلاسیک', ATOM:'کازموس', APT:'آپتوس', FIL:'فایل‌کوین', ARB:'آربیتروم', OP:'آپتیمیسم', HBAR:'هدرا', INJ:'اینجکتیو', AAVE:'آوه', PEPE:'پپه' };
 
 const COLORS = {
   BTC: { line: '#f7931a', fill: 'rgba(247,147,26,0.18)', name: 'Bitcoin', fa: 'بیت‌کوین' },
@@ -23,7 +25,11 @@ const COLORS = {
   USDT: { line: '#26a17b', fill: 'rgba(38,161,123,0.18)', name: 'Tether', fa: 'تتر' },
   NOT: { line: '#a855f7', fill: 'rgba(168,85,247,0.18)', name: 'Notcoin', fa: 'نات‌کوین' },
   GOLD: { line: '#fbbf24', fill: 'rgba(251,191,36,0.18)', name: '18K Gold', fa: 'طلای ۱۸ عیار' },
-  DOLLAR: { line: '#34d399', fill: 'rgba(52,211,153,0.18)', name: 'Dollar / USDT', fa: 'دلار / تتر' }
+  DOLLAR: { line: '#34d399', fill: 'rgba(52,211,153,0.18)', name: 'Dollar / USDT', fa: 'دلار / تتر' },
+  BNB:{line:'#f3ba2f',fill:'rgba(243,186,47,0.18)',name:'BNB Chain',fa:'بایننس کوین'}, SOL:{line:'#916cff',fill:'rgba(145,108,255,0.18)',name:'Solana',fa:'سولانا'},
+  XRP:{line:'#52beeb',fill:'rgba(82,190,235,0.18)',name:'XRP',fa:'ریپل'}, ADA:{line:'#306fdb',fill:'rgba(48,111,219,0.18)',name:'Cardano',fa:'کاردانو'}, DOGE:{line:'#c5a45e',fill:'rgba(197,164,94,0.18)',name:'Dogecoin',fa:'دوج‌کوین'},
+  TRX:{line:'#ef3a4d',fill:'rgba(239,58,77,0.18)',name:'TRON',fa:'ترون'}, LINK:{line:'#3068d6',fill:'rgba(48,104,214,0.18)',name:'Chainlink',fa:'چین‌لینک'}, AVAX:{line:'#e84154',fill:'rgba(232,65,84,0.18)',name:'Avalanche',fa:'آوالانچ'}, DOT:{line:'#e64199',fill:'rgba(230,65,153,0.18)',name:'Polkadot',fa:'پولکادات'}, LTC:{line:'#a4b2c0',fill:'rgba(164,178,192,0.18)',name:'Litecoin',fa:'لایت‌کوین'}, BCH:{line:'#86c46c',fill:'rgba(134,196,108,0.18)',name:'Bitcoin Cash',fa:'بیت‌کوین کش'}, SHIB:{line:'#f37084',fill:'rgba(243,112,132,0.18)',name:'Shiba Inu',fa:'شیبا اینو'},
+  UNI:{line:'#ff007a',fill:'rgba(255,0,122,0.18)',name:'Uniswap',fa:'یونی‌سواپ'}, NEAR:{line:'#5bc8bc',fill:'rgba(91,200,188,0.18)',name:'NEAR Protocol',fa:'نیر'}, SUI:{line:'#58acff',fill:'rgba(88,172,255,0.18)',name:'Sui',fa:'سویی'}, XLM:{line:'#756feb',fill:'rgba(117,111,235,0.18)',name:'Stellar',fa:'استلار'}, ETC:{line:'#3e70aa',fill:'rgba(62,112,170,0.18)',name:'Ethereum Classic',fa:'اتریوم کلاسیک'}, ATOM:{line:'#62a4dd',fill:'rgba(98,164,221,0.18)',name:'Cosmos',fa:'کازموس'}, APT:{line:'#42abf4',fill:'rgba(66,171,244,0.18)',name:'Aptos',fa:'آپتوس'}, FIL:{line:'#0085ff',fill:'rgba(0,133,255,0.18)',name:'Filecoin',fa:'فایل‌کوین'}, ARB:{line:'#2b74dc',fill:'rgba(43,116,220,0.18)',name:'Arbitrum',fa:'آربیتروم'}, OP:{line:'#ff0420',fill:'rgba(255,4,32,0.18)',name:'Optimism',fa:'آپتیمیسم'}, HBAR:{line:'#8259d6',fill:'rgba(130,89,214,0.18)',name:'Hedera',fa:'هدرا'}, INJ:{line:'#00b3ff',fill:'rgba(0,179,255,0.18)',name:'Injective',fa:'اینجکتیو'}, AAVE:{line:'#b055cf',fill:'rgba(176,85,207,0.18)',name:'Aave',fa:'آوه'}, PEPE:{line:'#43b581',fill:'rgba(67,181,129,0.18)',name:'Pepe',fa:'پپه'}
 };
 
 const recentUpdateIds = new Map();
@@ -95,7 +101,7 @@ function changeMark(value) {
 function getSymbolName(symbol) {
   return COLORS[symbol]?.fa || ({
     XAUT: 'تتر گلد', BRENT: 'نفت برنت', WTI: 'نفت WTI', XAUUSD: 'انس جهانی طلا',
-    SILVER: 'نقره', SP500: 'شاخص S&P 500', NASDAQ: 'شاخص نزدک', DXY: 'شاخص دلار'
+    SILVER: 'نقره', SP500: 'شاخص S&P 500', NASDAQ: 'شاخص نزدک', DXY: 'شاخص دلار', ...GLOBAL_CRYPTO_NAMES
   })[symbol] || symbol;
 }
 
@@ -367,6 +373,9 @@ function getWelcomeMessage() {
 /eth      اتریوم
 /usdt     تتر
 /not      نات‌کوین
+/crypto   فهرست رمزارزهای جهانی
+/macro    شاخص‌های کلان و محرک‌های بازار
+/sentiment ترس‌وطمع و احساسات بازار
 /chart    راهنمای نمودار
 /chartall نمودارهای منتخب
 /refresh  درخواست آپدیت دستی
@@ -389,11 +398,14 @@ function getHelpMessage() {
 /eth
 /usdt
 /not
-/status</code></pre>`,
+/status
+/crypto   رمزارزهای بیشتر + حجم و تغییر جهانی
+/macro    احساسات، دامیننس، فاندینگ و شاخص‌های کلان
+/sentiment شاخص ترس و طمع</code></pre>`,
     '<b>نمودارهای تاریخی</b>',
     `<pre><code>/chart BTC 24h
-/chart ETH 7d
-/chart NOT 30d
+/chart SOL 7d
+/chart BNB 30d
 /chart GOLD 7d
 /chartall</code></pre>`,
     '<b>مدیریت و نگه‌داری</b>',
@@ -411,12 +423,12 @@ function getChartHelpMessage() {
     '📈 <b>راهنمای نمودار</b>',
     '<blockquote>تاریخچهٔ موجود از Snapshotهای واقعی بازار ساخته می‌شود. اگر منبعی داده نداشته باشد، عدد ساختگی تولید نمی‌شود.</blockquote>',
     `<pre><code>/chart BTC 24h
-/chart ETH 7d
-/chart NOT 30d
+/chart SOL 7d
+/chart BNB 30d
 /chart GOLD 7d
 /chart DOLLAR 30d
 /chartall</code></pre>`,
-    '<b>نمادها:</b> <code>BTC · ETH · USDT · NOT · GOLD · DOLLAR</code>',
+    '<b>نمادها:</b> <code>BTC · ETH · BNB · SOL · XRP · ADA · DOGE · LINK · AVAX · DOT · LTC · GOLD · DOLLAR</code>',
     '<b>بازه‌ها:</b> <code>24h · 7d · 30d</code>'
   ].join('\n');
 }
@@ -483,8 +495,136 @@ USDT / USD       ${positive(usdt) ? '$1.00 approx.' : '—'}</code></pre>`);
       sections.push('<blockquote>* قیمت‌های بازار جهانی ممکن است با تأخیر منبع نمایش داده شوند. ارقام بازار جهانی بر حسب واحد قرارداد/شاخص هستند، نه ریال.</blockquote>');
     }
   }
-  sections.push('━━━━━━━━━━━━━━━━━━\n🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>  ·  📈 <a href="https://t.me/ArzPulseBot">@ArzPulseBot</a>');
+  const context = data?.marketContext || {};
+  const fg = context.fearGreed;
+  const global = context.global;
+  sections.push('🧭 <b>محرک‌های کلیدی بازار</b>');
+  sections.push(`<pre><code>Fear & Greed    ${fg ? `${formatNumber(fg.value, 0)}/100 · ${html(fg.classification || '')}` : '—'}
+BTC dominance   ${positive(global?.btcDominance) ? `${formatNumber(global.btcDominance, 2)}%` : '—'}
+Global cap      ${formatCompactUsd(global?.totalMarketCapUsd)}
+24h volume      ${formatCompactUsd(global?.totalVolume24hUsd)}
+BTC funding     ${context.derivatives?.BTC ? formatPercent(numeric(context.derivatives.BTC.fundingRate) * 100) : '—'}</code></pre>`);
+  sections.push('━━━━━━━━━━━━━━━━━━\n🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>  ·  برای جزئیات بیشتر <code>/crypto</code> و <code>/macro</code>');
   return sections.join('\n\n');
+}
+
+function formatCompactUsd(value) {
+  const n = numeric(value);
+  if (!positive(n)) return '—';
+  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(2)}K`;
+  return `$${formatNumber(n, n < 1 ? 6 : 2)}`;
+}
+
+function globalCryptoLine(symbol, item, rate) {
+  const usd = numeric(item?.last);
+  if (!positive(usd)) return '';
+  const irr = positive(rate) ? `${formatPrice(usd * rate)} IRR` : 'IRR unavailable';
+  const change = formatPercent(item.change);
+  const mark = numeric(item.change) > 0 ? '🟢' : numeric(item.change) < 0 ? '🔴' : '⚪';
+  return `${mark} <code>${symbol.padEnd(5)}</code> <b>$${formatNumber(usd, usd < 0.01 ? 8 : 4)}</b> · ${irr} · ${change} · Vol ${formatCompactUsd(item.volumeUsd)}`;
+}
+
+function generateCryptoMessage(data) {
+  const rate = getUsdtIrrRate(data);
+  const sourceData = data?.globalCrypto || {};
+  const rows = GLOBAL_CRYPTOS.map((symbol) => ({ symbol, item: sourceData[symbol] }))
+    .filter((x) => x.item && positive(x.item.last))
+    .sort((a, b) => Number(b.item.volumeUsd || 0) - Number(a.item.volumeUsd || 0));
+  const lines = rows.map(({ symbol, item }) => globalCryptoLine(symbol, item, rate));
+  const freshCount = rows.filter(({ item }) => !item.stale).length;
+  return [
+    '🪙 <b>ArzPulse · Global Crypto Board</b>',
+    `<blockquote>نماد معتبر: <b>${formatNumber(rows.length, 0)}</b> · داده تازه: <b>${formatNumber(freshCount, 0)}</b> · نرخ تقریبی تبدیل: ${positive(rate) ? `${formatPrice(rate)} IRR/USDT` : 'در دسترس نیست'}</blockquote>`,
+    lines.join('\n'),
+    '<blockquote>قیمت USD و حجم جهانی از Binance Spot هستند. معادل IRR تخمینی و با نرخ USDT/IRR همان Snapshot محاسبه می‌شود؛ حجم جهانی، حجم معاملات جفت USDT است نه کل همه صرافی‌ها.</blockquote>',
+    `<blockquote>Snapshot: <code>${html(formatTime(data?.timestamp))}</code> · منبع قیمت: <a href="https://www.binance.com/en/markets">Binance Markets</a></blockquote>`,
+    '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>'
+  ].join('\n\n');
+}
+
+function generateMacroMessage(data) {
+  const context = data?.marketContext || {};
+  const fg = context.fearGreed;
+  const global = context.global;
+  const crypto = Object.entries(data?.globalCrypto || {}).map(([symbol, item]) => ({ symbol, ...item })).filter((x) => positive(x.last) && !x.stale);
+  const up = crypto.filter((x) => numeric(x.change) > 0).length;
+  const down = crypto.filter((x) => numeric(x.change) < 0).length;
+  const flat = Math.max(0, crypto.length - up - down);
+  const derivatives = context.derivatives || {};
+  const fundingLine = ['BTC', 'ETH'].map((symbol) => {
+    const item = derivatives[symbol];
+    return item ? `${symbol}: ${formatPercent(numeric(item.fundingRate) * 100)} / 8h` : `${symbol}: —`;
+  }).join(' · ');
+  const marketLines = Object.entries({ DXY: 'Dollar Index', SP500: 'S&P 500', NASDAQ: 'Nasdaq', BRENT: 'Brent', WTI: 'WTI', XAUUSD: 'Gold' })
+    .map(([key, name]) => ({ key, name, item: data?.market?.[key] }))
+    .filter((x) => positive(x.item?.last))
+    .map((x) => `${x.key.padEnd(7)} ${formatNumber(x.item.last, 3)} · ${formatPercent(x.item.change)}${x.item.stale ? ' *' : ''}`);
+  const rows = [
+    '🧭 <b>ArzPulse · Market Drivers</b>',
+    `<blockquote>Snapshot: <code>${html(formatTime(data?.timestamp))}</code> · ${isDataStale(data, {}) ? '⚠️ دادهٔ اصلی ممکن است قدیمی باشد' : 'دادهٔ اصلی تازه است'}</blockquote>`,
+    '🧠 <b>Sentiment & Crypto Market</b>',
+    `<pre><code>Fear & Greed       ${fg ? `${formatNumber(fg.value, 0)}/100 · ${html(fg.classification || '')}${fg.stale ? ' *' : ''}` : '—'}
+Yesterday          ${fg?.yesterday ? `${formatNumber(fg.yesterday.value, 0)}/100 · ${html(fg.yesterday.classification || '')}` : '—'}
+Total market cap   ${formatCompactUsd(global?.totalMarketCapUsd)}
+24h global volume  ${formatCompactUsd(global?.totalVolume24hUsd)}
+BTC dominance      ${positive(global?.btcDominance) ? `${formatNumber(global.btcDominance, 2)}%` : '—'}
+ETH dominance      ${positive(global?.ethDominance) ? `${formatNumber(global.ethDominance, 2)}%` : '—'}
+Market cap 24h     ${formatPercent(global?.marketCapChange24h)}
+Global breadth     ${formatNumber(up, 0)} up / ${formatNumber(down, 0)} down / ${formatNumber(flat, 0)} flat</code></pre>`,
+    '📉 <b>Derivatives positioning</b>',
+    `<pre><code>${html(fundingLine)}
+BTC open interest  ${formatCompactUsd(derivatives.BTC?.openInterestUsd)}
+BTC mark / index   ${positive(derivatives.BTC?.markPrice) ? formatNumber(derivatives.BTC.markPrice, 2) : '—'} / ${positive(derivatives.BTC?.indexPrice) ? formatNumber(derivatives.BTC.indexPrice, 2) : '—'}</code></pre>`,
+    '🌐 <b>Macro & Commodities</b>',
+    `<pre><code>${html(marketLines.join('\n') || 'Global macro data unavailable')}</code></pre>`,
+    '<blockquote>Funding rates are per settlement period (typically 8h) and may be annualized differently by platforms. Positive rates often indicate longs pay shorts; open interest is position notional, not net directional exposure. Fear & Greed is from Alternative.me and must be interpreted as sentiment, not a prediction.</blockquote>',
+    `<blockquote>Sources: <a href="https://alternative.me/crypto/fear-and-greed-index/">Alternative.me</a> · <a href="https://www.binance.com/en/markets">Binance</a> · <a href="https://www.coingecko.com/">CoinGecko</a> · macro quotes may be delayed.</blockquote>`,
+    '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>'
+  ];
+  return rows.join('\n\n');
+}
+
+function generateSentimentMessage(data) {
+  const context = data?.marketContext || {};
+  const fg = context.fearGreed;
+  const crypto = Object.entries(data?.globalCrypto || {}).map(([symbol, item]) => ({ symbol, ...item })).filter((x) => positive(x.last) && !x.stale);
+  const up = crypto.filter((x) => numeric(x.change) > 0).length;
+  const down = crypto.filter((x) => numeric(x.change) < 0).length;
+  return [
+    '🧠 <b>ArzPulse · Market Sentiment</b>',
+    fg ? `<blockquote>Fear & Greed: <b>${formatNumber(fg.value, 0)}/100 · ${html(fg.classification || 'Unknown')}</b>${fg.stale ? ' · ⚠️ stale' : ''}\nYesterday: ${fg.yesterday ? `${formatNumber(fg.yesterday.value, 0)}/100 · ${html(fg.yesterday.classification || '')}` : '—'}\nUpdated: ${html(formatTime(fg.timestamp))}</blockquote>` : '<blockquote>Fear & Greed currently unavailable.</blockquote>',
+    `<pre><code>Global crypto breadth  ${formatNumber(up, 0)} up / ${formatNumber(down, 0)} down
+BTC dominance          ${positive(context.global?.btcDominance) ? `${formatNumber(context.global.btcDominance, 2)}%` : '—'}
+ETH dominance          ${positive(context.global?.ethDominance) ? `${formatNumber(context.global.ethDominance, 2)}%` : '—'}
+BTC funding             ${context.derivatives?.BTC ? formatPercent(numeric(context.derivatives.BTC.fundingRate) * 100) : '—'}
+ETH funding             ${context.derivatives?.ETH ? formatPercent(numeric(context.derivatives.ETH.fundingRate) * 100) : '—'}</code></pre>`,
+    '<blockquote>شاخص ترس و طمع روزانه به‌روزرسانی می‌شود؛ سایر داده‌ها ممکن است سریع‌تر عوض شوند. این شاخص به‌تنهایی سیگنال خریدوفروش نیست. منبع: <a href="https://alternative.me/crypto/fear-and-greed-index/">Alternative.me</a>.</blockquote>'
+  ].join('\n\n');
+}
+
+function generateGlobalCryptoSingleMessage(symbol, data, env) {
+  const item = data?.globalCrypto?.[symbol];
+  if (!item || !positive(item.last)) return `⚠️ دادهٔ جهانی ${html(symbol)} فعلاً در Snapshot موجود نیست. دستور <code>/crypto</code> را برای فهرست بازار بفرست.`;
+  const rate = getUsdtIrrRate(data);
+  const localEstimate = positive(rate) ? `${formatPrice(numeric(item.last) * rate)} IRR` : '—';
+  return [
+    `${changeMark(item.change)} <b>${html(GLOBAL_CRYPTO_NAMES[symbol] || symbol)} · ${html(symbol)}</b>`,
+    `<blockquote>قیمت جهانی: <code>$${formatNumber(item.last, numeric(item.last) < 0.01 ? 8 : 4)}</code>\nمعادل تقریبی: <code>${localEstimate}</code>\nتغییر ۲۴ ساعت: <b>${formatPercent(item.change)}</b></blockquote>`,
+    `<pre><code>24h high       $${formatNumber(item.high, 8)}
+24h low        $${formatNumber(item.low, 8)}
+Weighted avg   $${formatNumber(item.weightedAverage, 8)}
+Bid / Ask      $${formatNumber(item.bid, 8)} / $${formatNumber(item.ask, 8)}
+Base volume    ${formatNumber(item.volumeBase, 4)} ${html(symbol)}
+Quote volume   ${formatCompactUsd(item.volumeUsd)}
+Trades         ${formatNumber(item.trades, 0)}
+Source         Binance Spot
+Updated        ${html(formatTime(item.timestamp))}</code></pre>`,
+    item.stale ? '<blockquote>⚠️ آخرین رکورد این نماد از Snapshot قبلی نگه داشته شده است.</blockquote>' : '',
+    '<blockquote>معادل IRR برآوردی است و از نرخ USDT/IRR نوبیتکس استفاده می‌کند؛ قیمت جهانی معادل قیمت خریدوفروش در صرافی ایرانی نیست.</blockquote>'
+  ].filter(Boolean).join('\n\n');
 }
 
 function generateGoldMessage(data, env) {
@@ -519,6 +659,7 @@ Day high  ${formatDualPrice(coin.high, usdtIrrRate)}
 Day low   ${formatDualPrice(coin.low, usdtIrrRate)}
 Volume    ${formatNumber(coin.volume, 4)} ${html(symbol)}</code></pre>`,
     '<blockquote>معادل دلاری تخمینی و بر پایه نرخ USDT/IRR همین Snapshot است.</blockquote>',
+    data?.globalCrypto?.[symbol] ? `<blockquote>🌍 <b>مقایسه بازار جهانی</b>\nقیمت Binance: <code>$${formatNumber(data.globalCrypto[symbol].last, numeric(data.globalCrypto[symbol].last) < 0.01 ? 8 : 4)}</code> · تغییر جهانی: <b>${formatPercent(data.globalCrypto[symbol].change)}</b>\nحجم جهانی ۲۴ساعت: <code>${formatCompactUsd(data.globalCrypto[symbol].volumeUsd)}</code> · معاملات: <code>${formatNumber(data.globalCrypto[symbol].trades, 0)}</code></blockquote>` : '',
     stale || isDataStale({ timestamp: coin.fetchedAt }, env) ? '<blockquote>⚠️ اطلاعات این دارایی ممکن است قدیمی باشد.</blockquote>' : '',
     '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>'
   ].filter(Boolean).join('\n\n');
@@ -764,7 +905,7 @@ async function requestRefreshForUser(message, env) {
 }
 
 async function commandChart(message, symbol, period, token) {
-  const supportedSymbols = new Set(['BTC', 'ETH', 'USDT', 'NOT', 'GOLD', 'DOLLAR']);
+  const supportedSymbols = new Set([...GLOBAL_CRYPTOS, 'USDT', 'NOT', 'GOLD', 'DOLLAR']);
   const supportedPeriods = new Set(['24h', '7d', '30d']);
   if (!supportedSymbols.has(symbol) || !supportedPeriods.has(period)) {
     await sendMessage(message.chat.id, `${getChartHelpMessage()}\n\n⚠️ <b>نماد یا بازه معتبر نیست.</b>`, token);
@@ -845,6 +986,26 @@ async function handleCommand(message, command, env) {
     case 'help':
       await sendMessage(chatId, getHelpMessage(), token);
       return;
+    case 'crypto':
+    case 'coins': {
+      const data = await fetchLatestData();
+      if (!data) { await sendMessage(chatId, '⚠️ دادهٔ رمزارزها فعلاً در دسترس نیست.', token); return; }
+      await sendMessage(chatId, generateCryptoMessage(data), token);
+      return;
+    }
+    case 'macro':
+    case 'market': {
+      const data = await fetchLatestData();
+      if (!data) { await sendMessage(chatId, '⚠️ داده‌های بازار در دسترس نیستند.', token); return; }
+      await sendMessage(chatId, generateMacroMessage(data), token);
+      return;
+    }
+    case 'sentiment': {
+      const data = await fetchLatestData();
+      if (!data) { await sendMessage(chatId, '⚠️ دادهٔ احساسات بازار در دسترس نیست.', token); return; }
+      await sendMessage(chatId, generateSentimentMessage(data), token);
+      return;
+    }
     case 'chart':
       if (args.length < 2) { await sendMessage(chatId, getChartHelpMessage(), token); return; }
       await commandChart(message, args[0].toUpperCase(), args[1].toLowerCase(), token);
@@ -921,7 +1082,7 @@ async function handleCommand(message, command, env) {
       }
       const stale = isDataStale(data, env);
       const status = stale ? '🔴 قدیمی' : data.hasError ? '🟠 در دسترس با خطای جزئی' : '🟢 به‌روز';
-      const staleAssets = [...Object.entries(data.prices || {}), ...Object.entries(data.market || {})].filter(([, item]) => item?.stale).map(([symbol]) => symbol);
+      const staleAssets = [...Object.entries(data.prices || {}), ...Object.entries(data.market || {}), ...Object.entries(data.globalCrypto || {})].filter(([, item]) => item?.stale).map(([symbol]) => symbol);
       const body = [
         '🩺 <b>ArzPulse · وضعیت سیستم</b>',
         `<blockquote>وضعیت داده: <b>${status}</b>\nآخرین Snapshot: <code>${html(formatTime(data.timestamp))}</code>\nسن داده: <code>${html(ageText(data.timestamp))}</code>\nحد آستانهٔ کهنگی: <code>${formatNumber(currentStaleMinutes(env), 0)} دقیقه</code></blockquote>`,
@@ -967,11 +1128,15 @@ Updated     ${html(formatTime(data.timestamp))}</code></pre>`,
       ].filter(Boolean).join('\n\n'), token);
       return;
     }
-    case 'btc': case 'eth': case 'usdt': case 'not': {
+    case 'btc': case 'eth': case 'usdt': case 'not': case 'bnb': case 'sol': case 'xrp': case 'ada': case 'doge': case 'trx': case 'link': case 'avax': case 'dot': case 'ltc': case 'bch': case 'shib': case 'uni': case 'near': case 'sui': case 'xlm': case 'etc': case 'atom': case 'apt': case 'fil': case 'arb': case 'op': case 'hbar': case 'inj': case 'aave': case 'pepe': {
       const symbol = command.name.toUpperCase();
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, `⚠️ دادهٔ ${symbol} در دسترس نیست.`, token); return; }
-      await sendMessage(chatId, generateSingleAssetMessage(data.prices?.[symbol], getSymbolName(symbol), symbol, env, data), token);
+      if (data.prices?.[symbol] && [data.prices[symbol].lastPrice, data.prices[symbol].bestBuy, data.prices[symbol].bestSell].some(positive)) {
+        await sendMessage(chatId, generateSingleAssetMessage(data.prices[symbol], getSymbolName(symbol), symbol, env, data), token);
+      } else {
+        await sendMessage(chatId, generateGlobalCryptoSingleMessage(symbol, data, env), token);
+      }
       return;
     }
     default:
@@ -1104,6 +1269,43 @@ async function diagnosticDetails(env) {
   return health;
 }
 
+async function handlePublicRootTrigger(env) {
+  // The deployed public root URL is intentionally a trigger endpoint as well as
+  // a health response. A short KV cooldown prevents repeated visits from flooding
+  // GitHub Actions; scheduled five-minute runs do not depend on this lock.
+  try {
+    const lock = await requestRefreshLock(env);
+    if (!lock.acquired) {
+      return jsonResponse({
+        ...safeHealth(env),
+        workflowDispatch: {
+          ok: true,
+          dispatched: false,
+          reason: 'recent-refresh-lock',
+          retryAfterSeconds: lock.remaining
+        }
+      });
+    }
+    await dispatchGitHubUpdate(env);
+    return jsonResponse({
+      ...safeHealth(env),
+      workflowDispatch: {
+        ok: true,
+        dispatched: true,
+        workflow: String(env.GITHUB_WORKFLOW || 'update-prices.yml'),
+        ref: String(env.GITHUB_REF || 'main'),
+        message: 'GitHub Actions workflow_dispatch accepted; the workflow runs asynchronously.'
+      }
+    });
+  } catch (error) {
+    console.error('[root-trigger] failed:', error?.stack || error);
+    return jsonResponse({
+      ...safeHealth(env),
+      workflowDispatch: { ok: false, dispatched: false, error: error.message }
+    }, 502);
+  }
+}
+
 async function handleAdminEndpoint(request, env, route) {
   if (!authorizedAdminRequest(request, env)) return jsonResponse({ error: 'unauthorized', message: 'Configure ADMIN_SECRET and send it via x-admin-secret or Authorization: Bearer.' }, env.ADMIN_SECRET ? 401 : 503);
   if (route === '/diagnostics') return jsonResponse(await diagnosticDetails(env));
@@ -1158,7 +1360,11 @@ export default {
       return new Response('OK', { status: 200, headers: { 'Cache-Control': 'no-store' } });
     }
 
-    if (url.pathname === '/' || url.pathname === '/health' || url.pathname === '/test') {
+    if (url.pathname === '/') {
+      if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
+      return handlePublicRootTrigger(env);
+    }
+    if (url.pathname === '/health' || url.pathname === '/test') {
       return jsonResponse(safeHealth(env));
     }
     if (url.pathname === '/diagnostics' || url.pathname === '/check' || url.pathname === '/send' || url.pathname === '/trigger') {
@@ -1168,8 +1374,15 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    // The separate `arzpulse-market-updater` Worker owns the 5-minute GitHub workflow
-    // dispatch. This bot's Cron only sends the configured channel digest hourly.
-    ctx.waitUntil(sendAutoUpdates(env).catch((error) => console.error('[scheduled] failed:', error?.stack || error)));
+    // This is the existing public `arzpulse-bot` Worker: it now dispatches the
+    // market-data workflow every five minutes while preserving hourly channel reports.
+    if (event?.cron === '*/5 * * * *') {
+      ctx.waitUntil(dispatchGitHubUpdate(env)
+        .then(() => console.log('[scheduled] GitHub workflow dispatch accepted for', `${env.GITHUB_OWNER || 'mehrdadmb2'}/${env.GITHUB_REPO || 'ArzPulse'}`, env.GITHUB_WORKFLOW || 'update-prices.yml'))
+        .catch((error) => console.error('[scheduled] market workflow dispatch failed:', error?.stack || error)));
+      return;
+    }
+    // Keep the already configured hourly Telegram channel digest unchanged.
+    ctx.waitUntil(sendAutoUpdates(env).catch((error) => console.error('[scheduled] channel report failed:', error?.stack || error)));
   }
 };

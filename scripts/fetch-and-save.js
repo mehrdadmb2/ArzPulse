@@ -8,6 +8,13 @@ const https = require('node:https');
 
 const BASE_URL = 'https://apiv2.nobitex.ir';
 const YAHOO = 'https://query1.finance.yahoo.com';
+const BINANCE_DATA = 'https://data-api.binance.vision';
+const BINANCE_FUTURES = 'https://fapi.binance.com';
+const FEAR_GREED_URL = 'https://api.alternative.me/fng/?limit=8';
+const GLOBAL_CRYPTO_SYMBOLS = [
+  'BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH',
+  'SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE'
+];
 const DATA_DIR = path.join(__dirname, '..', 'docs', 'data');
 const HISTORY_DIR = path.join(DATA_DIR, 'history');
 const LATEST_PATH = path.join(DATA_DIR, 'latest.json');
@@ -133,6 +140,172 @@ async function fetchYahoo(symbol) {
   };
 }
 
+async function fetchBinanceCryptoBatch(symbols) {
+  const pairs = symbols.map((symbol) => `${symbol}USDT`);
+  const url = `${BINANCE_DATA}/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(pairs))}`;
+  const payload = await fetchJSON(url);
+  const rows = Array.isArray(payload) ? payload : [payload];
+  const byPair = new Map(rows.filter((row) => row && row.symbol).map((row) => [row.symbol, row]));
+  const out = {};
+  for (const symbol of symbols) {
+    const row = byPair.get(`${symbol}USDT`);
+    if (!row || !validPositive(row.lastPrice)) continue;
+    out[symbol] = {
+      symbol, pair: `${symbol}USDT`, last: num(row.lastPrice), priceUSD: num(row.lastPrice),
+      change: num(row.priceChangePercent), high: num(row.highPrice), low: num(row.lowPrice),
+      open: num(row.openPrice), weightedAverage: num(row.weightedAvgPrice),
+      bid: num(row.bidPrice), ask: num(row.askPrice),
+      volumeBase: num(row.volume), volumeUsd: num(row.quoteVolume), trades: num(row.count),
+      timestamp: row.closeTime ? new Date(Number(row.closeTime)).toISOString() : new Date().toISOString(),
+      fetchedAt: new Date().toISOString(), source: 'Binance Spot', stale: false
+    };
+  }
+  if (!Object.keys(out).length) throw new Error('Binance returned no usable ticker rows');
+  return out;
+}
+
+async function fetchGlobalCrypto(previous, attemptedAt, errors) {
+  const result = {};
+  let successes = 0;
+  // Small batches limit request weight and isolate pairs that may be unavailable.
+  for (let index = 0; index < GLOBAL_CRYPTO_SYMBOLS.length; index += 7) {
+    const batch = GLOBAL_CRYPTO_SYMBOLS.slice(index, index + 7);
+    try {
+      Object.assign(result, await fetchBinanceCryptoBatch(batch));
+      successes += 1;
+    } catch (batchError) {
+      console.warn(`↪️ Binance batch ${batch.join(',')}: ${batchError.message}; retrying symbols separately.`);
+      for (const symbol of batch) {
+        try {
+          Object.assign(result, await fetchBinanceCryptoBatch([symbol]));
+          successes += 1;
+        } catch (error) {
+          errors.push(`Binance ${symbol}: ${error.message}`);
+          const old = previous?.[symbol];
+          if (old && validPositive(old.last)) result[symbol] = { ...old, stale: true, lastCheckedAt: attemptedAt, lastError: String(error.message).slice(0, 160) };
+        }
+      }
+    }
+  }
+  for (const symbol of GLOBAL_CRYPTO_SYMBOLS) {
+    if (result[symbol]) continue;
+    const old = previous?.[symbol];
+    if (old && validPositive(old.last)) result[symbol] = { ...old, stale: true, lastCheckedAt: attemptedAt };
+  }
+  if (successes === 0 && !Object.keys(result).length) errors.push('Binance global crypto: no data available');
+  return { data: result, successes };
+}
+
+async function fetchFearGreed(previous, attemptedAt) {
+  try {
+    const json = await fetchJSON(FEAR_GREED_URL);
+    const rows = Array.isArray(json?.data) ? json.data : [];
+    if (!rows.length || !Number.isFinite(Number(rows[0].value))) throw new Error('Fear & Greed response has no usable index');
+    return {
+      value: Number(rows[0].value), classification: String(rows[0].value_classification || 'Unknown'),
+      timestamp: rows[0].timestamp ? new Date(Number(rows[0].timestamp) * 1000).toISOString() : attemptedAt,
+      yesterday: rows[1] ? { value: Number(rows[1].value), classification: String(rows[1].value_classification || 'Unknown') } : null,
+      weekAgo: rows[7] ? { value: Number(rows[7].value), classification: String(rows[7].value_classification || 'Unknown') } : null,
+      source: 'Alternative.me', sourceUrl: 'https://alternative.me/crypto/fear-and-greed-index/', fetchedAt: attemptedAt, stale: false
+    };
+  } catch (error) {
+    if (previous && Number.isFinite(Number(previous.value))) return { ...previous, stale: true, lastCheckedAt: attemptedAt, lastError: String(error.message).slice(0, 160) };
+    throw error;
+  }
+}
+
+async function fetchGlobalCryptoStats(previous, attemptedAt) {
+  let lastError;
+  const endpoints = [
+    async () => {
+      const json = await fetchJSON('https://api.coingecko.com/api/v3/global');
+      const data = json?.data;
+      if (!data?.total_market_cap?.usd) throw new Error('CoinGecko global response missing total market cap');
+      return {
+        totalMarketCapUsd: num(data.total_market_cap.usd), totalVolume24hUsd: num(data.total_volume?.usd),
+        btcDominance: num(data.market_cap_percentage?.btc), ethDominance: num(data.market_cap_percentage?.eth),
+        marketCapChange24h: num(data.market_cap_change_percentage_24h_usd),
+        activeCryptocurrencies: num(data.active_cryptocurrencies), markets: num(data.markets),
+        timestamp: attemptedAt, fetchedAt: attemptedAt, source: 'CoinGecko Global', sourceUrl: 'https://www.coingecko.com/', stale: false
+      };
+    },
+    async () => {
+      const json = await fetchJSON('https://api.alternative.me/v1/global/');
+      const data = json?.data && !Array.isArray(json.data) ? json.data : json;
+      if (!data?.total_market_cap_usd) throw new Error('Alternative.me global endpoint missing total market cap');
+      return {
+        totalMarketCapUsd: num(data.total_market_cap_usd), totalVolume24hUsd: num(data.total_24h_volume_usd),
+        btcDominance: num(data.bitcoin_percentage_of_market_cap), ethDominance: null,
+        marketCapChange24h: null, activeCryptocurrencies: num(data.active_currencies), markets: num(data.active_markets),
+        timestamp: data.last_updated ? new Date(Number(data.last_updated) * 1000).toISOString() : attemptedAt,
+        fetchedAt: attemptedAt, source: 'Alternative.me Global', sourceUrl: 'https://alternative.me/crypto/api/', stale: false
+      };
+    }
+  ];
+  for (const call of endpoints) {
+    try { return await call(); }
+    catch (error) { lastError = error; }
+  }
+  if (previous && validPositive(previous.totalMarketCapUsd)) return { ...previous, stale: true, lastCheckedAt: attemptedAt, lastError: String(lastError?.message || 'No global stats source available').slice(0, 160) };
+  throw lastError || new Error('No global crypto stats source available');
+}
+
+async function fetchDerivatives(previous, attemptedAt, errors) {
+  const result = { BTC: null, ETH: null, source: 'Binance USD-M Futures', fetchedAt: attemptedAt };
+  try {
+    const rows = await fetchJSON(`${BINANCE_FUTURES}/fapi/v1/premiumIndex`);
+    const list = Array.isArray(rows) ? rows : [rows];
+    for (const symbol of ['BTC', 'ETH']) {
+      const row = list.find((item) => item?.symbol === `${symbol}USDT`);
+      if (!row) continue;
+      result[symbol] = {
+        symbol: `${symbol}USDT`, markPrice: num(row.markPrice), indexPrice: num(row.indexPrice),
+        fundingRate: num(row.lastFundingRate), nextFundingTime: row.nextFundingTime ? new Date(Number(row.nextFundingTime)).toISOString() : null,
+        timestamp: row.time ? new Date(Number(row.time)).toISOString() : attemptedAt,
+        source: 'Binance USD-M Futures', stale: false
+      };
+    }
+  } catch (error) {
+    errors.push(`Binance futures funding: ${error.message}`);
+  }
+  try {
+    const oi = await fetchJSON(`${BINANCE_FUTURES}/fapi/v1/openInterest?symbol=BTCUSDT`);
+    if (result.BTC) {
+      result.BTC.openInterestContracts = num(oi.openInterest);
+      result.BTC.openInterestUsd = num(oi.openInterest) * num(result.BTC.markPrice);
+      result.BTC.openInterestTimestamp = oi.time ? new Date(Number(oi.time)).toISOString() : attemptedAt;
+    }
+  } catch (error) {
+    errors.push(`Binance BTC open interest: ${error.message}`);
+  }
+  for (const symbol of ['BTC', 'ETH']) {
+    if (result[symbol]) continue;
+    const old = previous?.[symbol];
+    if (old) result[symbol] = { ...old, stale: true, lastCheckedAt: attemptedAt };
+  }
+  if (!result.BTC && !result.ETH) throw new Error('No usable futures funding data');
+  return result;
+}
+
+async function fetchMarketContext(previous, attemptedAt, errors) {
+  const [sentimentResult, globalResult, cryptoResult, derivativesResult] = await Promise.allSettled([
+    fetchFearGreed(previous?.fearGreed, attemptedAt),
+    fetchGlobalCryptoStats(previous?.global, attemptedAt),
+    fetchGlobalCrypto(previous?.globalCrypto, attemptedAt, errors),
+    fetchDerivatives(previous?.derivatives, attemptedAt, errors)
+  ]);
+  const context = {};
+  let successes = 0;
+  if (sentimentResult.status === 'fulfilled') { context.fearGreed = sentimentResult.value; successes += 1; }
+  else { errors.push(`Fear & Greed: ${sentimentResult.reason?.message || 'request failed'}`); if (previous?.fearGreed) context.fearGreed = { ...previous.fearGreed, stale: true, lastCheckedAt: attemptedAt }; }
+  if (globalResult.status === 'fulfilled') { context.global = globalResult.value; successes += 1; }
+  else { errors.push(`Global crypto stats: ${globalResult.reason?.message || 'request failed'}`); if (previous?.global) context.global = { ...previous.global, stale: true, lastCheckedAt: attemptedAt }; }
+  if (cryptoResult.status === 'fulfilled') { context.globalCrypto = cryptoResult.value.data; successes += cryptoResult.value.successes > 0 ? 1 : 0; }
+  if (derivativesResult.status === 'fulfilled') { context.derivatives = derivativesResult.value; successes += 1; }
+  else { errors.push(`Derivatives: ${derivativesResult.reason?.message || 'request failed'}`); if (previous?.derivatives) context.derivatives = previous.derivatives; }
+  return { context, successes };
+}
+
 function fallbackRecord(previous, defaults, attemptedAt, errorMessage) {
   if (previous && typeof previous === 'object') {
     return { ...previous, stale: true, lastCheckedAt: attemptedAt, lastError: String(errorMessage).slice(0, 180) };
@@ -202,7 +375,7 @@ function compactDailySnapshots(rows, maximum = MAX_SNAPSHOTS_PER_DAY) {
   return sampled;
 }
 
-function buildHistoryRow(now, prices, gold18K, dollarPrice, market) {
+function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto) {
   const row = { time: now };
   const put = (key, value, stale = false) => {
     if (!stale && validPositive(value)) row[key] = Number(value);
@@ -214,6 +387,11 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market) {
   put('GOLD18K', gold18K, prices.XAUT?.stale || prices.USDT?.stale);
   put('DOLLAR', dollarPrice, prices.USDT?.stale);
   for (const [key, value] of Object.entries(market)) put(key, value?.last, value?.stale);
+  const usdtRate = num(dollarPrice);
+  for (const [key, value] of Object.entries(globalCrypto || {})) {
+    // Store approximate IRR values so existing charts/history need no new schema.
+    if (!Number.isFinite(row[key]) && !value?.stale && validPositive(value?.last) && validPositive(usdtRate)) row[key] = num(value.last) * usdtRate;
+  }
   return row;
 }
 
@@ -270,13 +448,19 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market) {
     }
   }
 
+  const successfulPriceSources = successfulSources;
+  const contextResult = await fetchMarketContext({ ...(previous?.marketContext || {}), globalCrypto: previous?.globalCrypto || previous?.marketContext?.globalCrypto }, attemptedAt, errors);
+  const marketContext = contextResult.context;
+  const globalCrypto = marketContext.globalCrypto || {};
+  successfulSources += contextResult.successes;
+
   const hasAnyPreviousData = Boolean(previous && (previous.timestamp || previous.prices || previous.market));
-  const topLevelTimestamp = successfulSources > 0 ? attemptedAt : (previous?.timestamp || attemptedAt);
+  const topLevelTimestamp = successfulPriceSources > 0 ? attemptedAt : (previous?.timestamp || attemptedAt);
   const latest = {
-    version: 5,
+    version: 6,
     timestamp: topLevelTimestamp,
     attemptTimestamp: attemptedAt,
-    lastGoodTimestamp: successfulSources > 0 ? attemptedAt : (previous?.lastGoodTimestamp || previous?.timestamp || null),
+    lastGoodTimestamp: successfulPriceSources > 0 ? attemptedAt : (previous?.lastGoodTimestamp || previous?.timestamp || null),
     prices, gold18K, usdtPrice: usdt, dollarPrice,
     goldChange: num(prices.XAUT?.change), dollarChange: num(prices.USDT?.change),
     derivedStale: {
@@ -284,6 +468,8 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market) {
       dollar: Boolean(prices.USDT?.stale)
     },
     market,
+    globalCrypto,
+    marketContext: { fearGreed: marketContext.fearGreed || null, global: marketContext.global || null, derivatives: marketContext.derivatives || null },
     hasError: errors.length > 0,
     errorCount: errors.length,
     errorDetails: errors,
@@ -293,7 +479,7 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market) {
 
   // If every upstream source failed and we have a prior snapshot, keep the prior
   // published snapshot time. This prevents stale fallback values looking fresh.
-  if (successfulSources === 0 && hasAnyPreviousData) {
+  if (successfulPriceSources === 0 && hasAnyPreviousData) {
     latest.timestamp = previous.timestamp || previous.lastGoodTimestamp || null;
   }
   writeJSONAtomic(LATEST_PATH, latest);
@@ -307,25 +493,27 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market) {
   const kept = Array.isArray(history)
     ? history.filter((item) => Number.isFinite(Date.parse(item?.time)) && Date.parse(item.time) >= cutoffMs)
     : [];
-  const row = buildHistoryRow(attemptedAt, prices, gold18K, dollarPrice, market);
+  const row = buildHistoryRow(attemptedAt, prices, gold18K, dollarPrice, market, globalCrypto);
   if (Object.keys(row).length > 1) kept.push(row);
   const compactedHistory = compactDailySnapshots(kept, MAX_SNAPSHOTS_PER_DAY);
   writeJSONAtomic(dailyFile, compactedHistory);
 
   const meta = {
-    version: 5, lastAttempt: attemptedAt, lastUpdate: latest.timestamp,
+    version: 6, lastAttempt: attemptedAt, lastUpdate: latest.timestamp,
     retentionDays: HISTORY_KEEP_DAYS, gold18K, usdtPrice: usdt, dollarPrice,
     marketSummary: Object.fromEntries(Object.entries(market).map(([key, item]) => [key, {
       last: item.last, change: item.change, delayed: Boolean(item.delayed), stale: Boolean(item.stale), timestamp: item.timestamp || null
     }])),
     hasError: errors.length > 0, errorCount: errors.length, errors,
+    globalCryptoCount: Object.values(globalCrypto).filter((item) => validPositive(item?.last) && !item?.stale).length,
+    contextSummary: { fearGreed: marketContext.fearGreed?.value ?? null, totalMarketCapUsd: marketContext.global?.totalMarketCapUsd ?? null, btcDominance: marketContext.global?.btcDominance ?? null },
     successfulSources, successfulLocalSources
   };
   writeJSONAtomic(path.join(DATA_DIR, 'meta.json'), meta);
   cleanupHistoryFiles(new Date(attemptedAt));
 
   console.log(`✅ Updated latest.json and ${today}.json; successful=${successfulSources}; failed=${errors.length}.`);
-  if (successfulSources === 0) {
+  if (successfulPriceSources === 0) {
     console.error('❌ All upstream requests failed. Snapshot timestamp was preserved to avoid presenting stale values as fresh.');
     // Snapshot/meta are useful diagnostics, but let Actions report a failed refresh.
     process.exitCode = 1;

@@ -4,13 +4,14 @@ This folder is the **Telegram bot Worker only**. It is separate from `../worker/
 
 ## Features
 
-- Existing market commands: `/start`, `/help`, `/prices`, `/gold`, `/dollar`, `/btc`, `/eth`, `/usdt`, `/not`, `/status`, `/chart`, `/chartall`.
+- Market commands: `/start`, `/help`, `/prices`, `/gold`, `/dollar`, `/btc`, `/eth`, `/usdt`, `/not`, `/crypto`, `/coins`, `/macro`, `/market`, `/sentiment`, `/status`, `/chart`, `/chartall`. Major global crypto commands such as `/sol`, `/bnb`, `/xrp`, `/doge`, `/link`, `/avax`, `/dot` and others are supported when present in the latest snapshot.
 - Group/channel reporting using the existing `SETTINGS_KV` key named `channels` (compatibility preserved).
 - `/setchannel` and `/stopchannel` require a chat administrator; `/refresh` requires a numeric user ID listed in `BOT_ADMIN_IDS`.
 - Telegram HTML formatting: bold headings, `<pre><code>` monospace data, and `<blockquote>` status notes; invalid HTML has a controlled plain-text fallback.
-- Historical charts via QuickChart's POST API and binary photo upload; `/chartall` attempts one Telegram media group to reduce round trips.
+- Historical charts via QuickChart's POST API and binary photo upload; `/chartall` attempts one Telegram media group to reduce round trips. The collector also appends history values for supported major cryptos.
 - Fast webhook acknowledgement, optional Telegram webhook secret validation, command/update error logs, a bounded manual-refresh lock, and protected diagnostic endpoints.
 - Public `/health` (also `/` and `/test`) only exposes configuration booleans, never secret values.
+- Market context commands expose global market cap/volume, BTC dominance, Alternative.me Fear & Greed sentiment, Binance Spot market breadth, BTC/ETH futures funding, BTC open interest and macro market changes.
 
 ## Required Worker bindings
 

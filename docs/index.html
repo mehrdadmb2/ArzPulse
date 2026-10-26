@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/app.css?v=10">
+  <link rel="stylesheet" href="assets/app.css?v=11">
   <link rel="stylesheet" href="assets/page-insights-widget.css?v=1">
 
   <!-- GitHub Page Insights: ArzPulse traffic / visitor analytics -->
@@ -24,7 +24,7 @@
       appVersion: 'ArzPulse'
     });
   </script>
-  <script src="assets/app.js?v=10" defer></script>
+  <script src="assets/app.js?v=11" defer></script>
   <script src="assets/page-insights.js?v=1" defer></script>
   <script src="assets/page-insights-widget.js?v=1" defer></script>
 </head>
@@ -224,6 +224,48 @@
     </section>
 
 
+
+    <section class="market-intelligence glass" id="marketIntelligence" aria-labelledby="marketIntelligenceTitle">
+      <div class="section-row">
+        <div>
+          <div class="eyebrow">GLOBAL DRIVERS</div>
+          <h2 id="marketIntelligenceTitle" data-i18n="marketDrivers">Market drivers & sentiment</h2>
+          <p class="section-lead" data-i18n="marketDriversLead">Global crypto breadth, positioning, sentiment and macro context. Indicators are informative, not predictions.</p>
+        </div>
+        <div class="context-status"><span class="status-led ok"></span><b id="contextStatus">Loading context…</b><small id="contextUpdated">—</small></div>
+      </div>
+      <div class="intelligence-grid">
+        <article class="intel-card fear-greed-card">
+          <div class="intel-card-head"><span data-i18n="fearGreed">Fear & Greed</span><a href="https://alternative.me/crypto/fear-and-greed-index/" target="_blank" rel="noopener" aria-label="Fear and Greed source">↗</a></div>
+          <div class="fear-greed-main"><strong id="fearGreedValue">—</strong><span id="fearGreedLabel">—</span></div>
+          <div class="fear-greed-track"><span id="fearGreedMeter"></span></div>
+          <div class="intel-foot"><span id="fearGreedDiff">—</span><small id="fearGreedUpdated">—</small></div>
+          <small class="source-note" data-i18n="sentimentSource">Source: Alternative.me · daily sentiment index</small>
+        </article>
+        <article class="intel-card">
+          <div class="intel-card-head"><span data-i18n="globalCap">Total crypto market cap</span><span class="intel-symbol">Σ</span></div>
+          <strong class="intel-value" id="globalCapValue">—</strong>
+          <div class="intel-foot"><span data-i18n="capChange">Market cap 24h</span><b id="capChangeValue">—</b></div>
+        </article>
+        <article class="intel-card">
+          <div class="intel-card-head"><span data-i18n="globalVolume">24h global volume</span><span class="intel-symbol">↔</span></div>
+          <strong class="intel-value" id="globalVolumeValue">—</strong>
+          <div class="intel-foot"><span data-i18n="btcDominance">BTC dominance</span><b id="btcDominanceValue">—</b></div>
+        </article>
+        <article class="intel-card breadth-card">
+          <div class="intel-card-head"><span data-i18n="cryptoBreadth">Global crypto breadth</span><span class="intel-symbol">◈</span></div>
+          <strong class="intel-value" id="cryptoBreadthValue">—</strong>
+          <small id="cryptoBreadthNote">—</small>
+          <div class="mover-row" id="cryptoTopMovers"></div>
+          <div class="mover-row" id="cryptoBottomMovers"></div>
+        </article>
+        <article class="intel-card funding-card">
+          <div class="intel-card-head"><span data-i18n="fundingRates">Perpetual funding</span><span class="intel-symbol">ƒ</span></div>
+          <div id="fundingRows" class="funding-list"><div class="funding-row"><span>BTC</span><b>—</b><small>—</small></div><div class="funding-row"><span>ETH</span><b>—</b><small>—</small></div></div>
+          <small class="source-note" data-i18n="contextDisclaimer">Funding and open interest describe derivatives positioning; neither predicts price direction on its own.</small>
+        </article>
+      </div>
+    </section>
 
     <section class="analytics-layout" id="analytics">
       <article class="chart-card glass">

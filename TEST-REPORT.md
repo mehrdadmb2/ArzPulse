@@ -1,23 +1,27 @@
-# ArzPulse recovery package — local verification report
+# ArzPulse Market Intelligence Upgrade — Test Report
 
-Date: 2026-10-13
+Date: 2026-10-26
 
-## Passed
+## Automated checks
+- `node --check scripts/fetch-and-save.js`: passed.
+- `node --check docs/assets/app.js`: passed.
+- `node --check telegram-bot/index.js`: passed.
+- `npm run check` in `telegram-bot`: passed.
+- `npm test` in `telegram-bot`: 9/9 passed, including mocked `/crypto` and `/macro` command tests.
+- HTML/app selector cross-check: all `$('#...')` IDs used by `app.js` are present in `docs/index.html` (88 selectors checked).
+- Local HTML assets: all referenced local files exist; Page Insights remains near the end of the page before the footer.
+- Mocked collector run: passed; generated schema version 6 with 28 crypto tickers and `fearGreed`, `global`, `derivatives`, including ETH dominance.
+- HTML script/style path checks: all local referenced assets exist.
 
-- `node --check telegram-bot/index.js`
-- `npm run check` in `telegram-bot/`
-- `npm test` in `telegram-bot/`: 7/7 tests passed
-- `node --check scripts/fetch-and-save.js`
-- `node --check worker/index.js`
-- `node --check docs/assets/app.js`
-- `node --check docs/assets/page-insights.js`
-- `node --check docs/assets/page-insights-widget.js`
-- Market updater Worker smoke checks: `/health` 200, GET `/trigger` 405, unauthenticated POST `/trigger` 401
-- TOML parse checks for `worker/wrangler.toml` and `telegram-bot/wrangler.toml.example`
-- YAML parse checks for both GitHub Actions workflows
-- HTML check: no duplicate IDs; exactly one Page Insights mount; mount is near the bottom, before the footer
-- No `.ps1` files are included
+## Scope of live verification
+External data providers could not be reached from this build environment. Therefore Binance, Alternative.me, CoinGecko, Yahoo Finance availability, quotas and current live response payloads have not been verified from the deployment environment. The Collector uses explicit parsing, per-source failure isolation and stale-value flags; validate the first real GitHub Actions collection in its logs.
 
-## Not testable locally
+## Added data
+- Global spot crypto ticker snapshot for a curated list of 28 assets.
+- Alternative.me Fear & Greed and previous/day-week values when the endpoint provides them.
+- Global crypto market cap, 24h volume, BTC/ETH dominance, 24h market-cap change, active crypto and market counts from CoinGecko Global API, with Alternative.me fallback.
+- BTC/ETH perpetual futures funding and BTC open-interest estimate from Binance USD-M Futures.
+- Website market context panel and extra global-quote data in asset details.
+- Telegram `/crypto`, `/coins`, `/macro`, `/market`, `/sentiment`, expanded asset commands, and wider chart symbol support.
 
-This environment does not have the user's live Cloudflare secrets, actual KV namespace ID, Telegram bot token, GitHub token, or access to deploy to the user's Cloudflare account. The live webhook, scheduled trigger, KV quota, Telegram permissions, and GitHub repository permissions must be verified after deployment using the steps in `RECOVERY-AND-DEPLOYMENT-FA.md`.
+No real-time network/API success is claimed by the local tests.

@@ -10,6 +10,32 @@
     ETH:{name:'Ethereum',fa:'اتریوم',short:'ETH',cat:'crypto',icon:'Ξ',color:'98,126,234',global:false, aliases:['ETH','ethereum']},
     USDT:{name:'Tether',fa:'تتر',short:'USDT',cat:'crypto',icon:'₮',color:'38,190,150',global:false, aliases:['USDT','usdt']},
     NOT:{name:'Notcoin',fa:'نات‌کوین',short:'NOT',cat:'crypto',icon:'N',color:'171,150,255',global:false, aliases:['NOT','not']},
+    BNB:{name:'BNB Chain',fa:'بایننس کوین',short:'BNB',cat:'crypto',icon:'◆',color:'243,184,74',global:false, aliases:['bnb','BNB']},
+    SOL:{name:'Solana',fa:'سولانا',short:'SOL',cat:'crypto',icon:'◎',color:'143,102,255',global:false, aliases:['sol','SOL']},
+    XRP:{name:'XRP',fa:'ریپل',short:'XRP',cat:'crypto',icon:'✕',color:'82,190,235',global:false, aliases:['xrp','XRP']},
+    ADA:{name:'Cardano',fa:'کاردانو',short:'ADA',cat:'crypto',icon:'₳',color:'48,110,215',global:false, aliases:['ada','ADA']},
+    DOGE:{name:'Dogecoin',fa:'دوج‌کوین',short:'DOGE',cat:'crypto',icon:'Ð',color:'197,164,94',global:false, aliases:['doge','DOGE']},
+    TRX:{name:'TRON',fa:'ترون',short:'TRX',cat:'crypto',icon:'T',color:'239,58,77',global:false, aliases:['trx','TRX']},
+    LINK:{name:'Chainlink',fa:'چین‌لینک',short:'LINK',cat:'crypto',icon:'⬡',color:'48,104,214',global:false, aliases:['link','LINK']},
+    AVAX:{name:'Avalanche',fa:'آوالانچ',short:'AVAX',cat:'crypto',icon:'▲',color:'232,65,84',global:false, aliases:['avax','AVAX']},
+    DOT:{name:'Polkadot',fa:'پولکادات',short:'DOT',cat:'crypto',icon:'●',color:'230,65,153',global:false, aliases:['dot','DOT']},
+    LTC:{name:'Litecoin',fa:'لایت‌کوین',short:'LTC',cat:'crypto',icon:'Ł',color:'164,178,192',global:false, aliases:['ltc','LTC']},
+    BCH:{name:'Bitcoin Cash',fa:'بیت‌کوین کش',short:'BCH',cat:'crypto',icon:'Ƀ',color:'134,196,108',global:false, aliases:['bch','BCH']},
+    SHIB:{name:'Shiba Inu',fa:'شیبا اینو',short:'SHIB',cat:'crypto',icon:'S',color:'243,112,132',global:false, aliases:['shib','SHIB']},
+    UNI:{name:'Uniswap',fa:'یونی‌سواپ',short:'UNI',cat:'crypto',icon:'🦄',color:'255,0,122',global:false, aliases:['uni','UNI']},
+    NEAR:{name:'NEAR Protocol',fa:'نیر',short:'NEAR',cat:'crypto',icon:'N',color:'91,200,188',global:false, aliases:['near','NEAR']},
+    SUI:{name:'Sui',fa:'سویی',short:'SUI',cat:'crypto',icon:'S',color:'88,172,255',global:false, aliases:['sui','SUI']},
+    XLM:{name:'Stellar',fa:'استلار',short:'XLM',cat:'crypto',icon:'✦',color:'117,111,235',global:false, aliases:['xlm','XLM']},
+    ETC:{name:'Ethereum Classic',fa:'اتریوم کلاسیک',short:'ETC',cat:'crypto',icon:'Ξ',color:'62,112,170',global:false, aliases:['etc','ETC']},
+    ATOM:{name:'Cosmos',fa:'کازموس',short:'ATOM',cat:'crypto',icon:'⚛',color:'98,164,221',global:false, aliases:['atom','ATOM']},
+    APT:{name:'Aptos',fa:'آپتوس',short:'APT',cat:'crypto',icon:'A',color:'66,171,244',global:false, aliases:['apt','APT']},
+    FIL:{name:'Filecoin',fa:'فایل‌کوین',short:'FIL',cat:'crypto',icon:'F',color:'0,133,255',global:false, aliases:['fil','FIL']},
+    ARB:{name:'Arbitrum',fa:'آربیتروم',short:'ARB',cat:'crypto',icon:'A',color:'43,116,220',global:false, aliases:['arb','ARB']},
+    OP:{name:'Optimism',fa:'آپتیمیسم',short:'OP',cat:'crypto',icon:'O',color:'255,4,32',global:false, aliases:['op','OP']},
+    HBAR:{name:'Hedera',fa:'هدرا',short:'HBAR',cat:'crypto',icon:'H',color:'130,89,214',global:false, aliases:['hbar','HBAR']},
+    INJ:{name:'Injective',fa:'اینجکتیو',short:'INJ',cat:'crypto',icon:'I',color:'0,179,255',global:false, aliases:['inj','INJ']},
+    AAVE:{name:'Aave',fa:'آوه',short:'AAVE',cat:'crypto',icon:'A',color:'176,85,207',global:false, aliases:['aave','AAVE']},
+    PEPE:{name:'Pepe',fa:'پپه',short:'PEPE',cat:'crypto',icon:'P',color:'67,181,129',global:false, aliases:['pepe','PEPE']},
     GOLD:{name:'18K Gold',fa:'طلای ۱۸ عیار',short:'GOLD',cat:'commodity',icon:'Au',color:'245,197,91',global:false, aliases:['GOLD','gold18K']},
     DOLLAR:{name:'USD / USDT',fa:'دلار / تتر',short:'USD',cat:'index',icon:'$',color:'126,177,255',global:false, aliases:['DOLLAR','USD']},
     BRENT:{name:'Brent Crude',fa:'نفت برنت',short:'BRENT',cat:'commodity',icon:'Br',color:'78,221,179',global:true, aliases:['BRENT']},
@@ -21,9 +47,10 @@
     DXY:{name:'US Dollar Index',fa:'شاخص دلار',short:'DXY',cat:'index',icon:'D',color:'190,155,255',global:true, aliases:['DXY']}
   };
 
-  const DEFAULT_ORDER = ['BTC','ETH','USDT','NOT','GOLD','DOLLAR','BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY'];
-  const OVERVIEW_ORDER = ['BTC','GOLD','DOLLAR','BRENT','XAUUSD','SP500'];
-  const CHARTABLE = ['BTC','ETH','USDT','NOT','GOLD','DOLLAR','BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY'];
+  const CRYPTO_ORDER = ['BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH','SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE','USDT','NOT'];
+  const DEFAULT_ORDER = [...CRYPTO_ORDER,'GOLD','DOLLAR','BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY'];
+  const OVERVIEW_ORDER = ['BTC','SOL','GOLD','DOLLAR','BRENT','XAUUSD'];
+  const CHARTABLE = ['BTC','ETH','SOL','BNB','XRP','ADA','GOLD','DOLLAR','BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY'];
 
   const I18N = {
     en:{
@@ -32,6 +59,7 @@
       heroText:'A dense, responsive terminal for crypto, local rates, commodities and global indices — with clear context, live status and a high-signal visual system.',
       coverage:'Coverage',trackedAssets:'tracked assets',exploreMarkets:'Explore markets',share:'Share',dataLayer:'GitHub data layer',
       updateSchedule:'Updated by automation',galaxyCaption:'Interactive market pulse',overviewTitle:'Fast market view',
+      marketDrivers:'Market drivers & sentiment',marketDriversLead:'Global crypto breadth, positioning, sentiment and macro context. Indicators are informative, not predictions.',fearGreed:'Fear & Greed',globalCap:'Total crypto market cap',globalVolume:'24h global volume',btcDominance:'BTC / ETH dominance',capChange:'Market cap 24h',cryptoBreadth:'Global crypto breadth',fundingRates:'Perpetual funding',openInterest:'BTC open interest',positiveNegative:'Advance / decline',sentimentSource:'Source: Alternative.me · daily sentiment index',contextDisclaimer:'Funding and open interest describe derivatives positioning; neither predicts price direction on its own.',
       filterMarket:'Market',all:'All',crypto:'Crypto',commodities:'Commodities',indices:'Indices',unit:'Unit',comfortable:'Comfortable',compact:'Compact',
       marketStatusTitle:'Market status',marketStatusLead:'A compact view of breadth, momentum, pressure and data freshness.',pulseScoreLabel:'Pulse score',
       breadth:'Market breadth',momentum:'Momentum',volatility:'Volatility',dataHealth:'Data health',avgChange:'Average change',
@@ -54,6 +82,7 @@
       heroText:'ترمینالی متراکم و واکنش‌گرا برای رمزارز، نرخ‌های داخلی، کالاها و شاخص‌های جهانی؛ با وضعیت لحظه‌ای و اطلاعات قابل استفاده.',
       coverage:'پوشش',trackedAssets:'دارایی تحت رصد',exploreMarkets:'مشاهده بازارها',share:'اشتراک‌گذاری',dataLayer:'لایه داده GitHub',
       updateSchedule:'به‌روزرسانی خودکار',galaxyCaption:'نبض تعاملی بازار',overviewTitle:'نمای سریع بازار',
+      marketDrivers:'محرک‌ها و احساسات بازار',marketDriversLead:'عرض بازار جهانی کریپتو، موقعیت قراردادها، احساسات و شاخص‌های کلان. این شاخص‌ها اطلاعاتی‌اند، نه پیش‌بینی.',fearGreed:'ترس و طمع',globalCap:'ارزش کل بازار کریپتو',globalVolume:'حجم جهانی ۲۴ ساعته',btcDominance:'دامیننس BTC / ETH',capChange:'تغییر ارزش بازار ۲۴ ساعت',cryptoBreadth:'عرض بازار جهانی کریپتو',fundingRates:'فاندینگ قراردادهای دائمی',openInterest:'موقعیت باز بیت‌کوین',positiveNegative:'صعودی / نزولی',sentimentSource:'منبع: Alternative.me · شاخص روزانه احساسات',contextDisclaimer:'فاندینگ و موقعیت باز رفتار بازار مشتقه را نشان می‌دهند و به‌تنهایی جهت قیمت را پیش‌بینی نمی‌کنند.',
       filterMarket:'بازار',all:'همه',crypto:'کریپتو',commodities:'کالاها',indices:'شاخص‌ها',unit:'واحد',comfortable:'راحت',compact:'فشرده',
       marketStatusTitle:'وضعیت بازار',marketStatusLead:'نمایی فشرده از عرض بازار، مومنتوم، فشار و تازگی داده.',pulseScoreLabel:'امتیاز نبض',
       breadth:'عرض بازار',momentum:'مومنتوم',volatility:'نوسان',dataHealth:'سلامت داده',avgChange:'میانگین تغییر',
@@ -128,6 +157,52 @@
     if(Math.abs(v)>=1e3) return `${(v/1e3).toFixed(1)}K`;
     return num(v);
   };
+  function formatUSD(value){
+    const v=Number(value); if(!Number.isFinite(v)||v===0) return '—';
+    if(Math.abs(v)>=1e12) return `$${(v/1e12).toFixed(2)}T`;
+    if(Math.abs(v)>=1e9) return `$${(v/1e9).toFixed(2)}B`;
+    if(Math.abs(v)>=1e6) return `$${(v/1e6).toFixed(2)}M`;
+    return `$${new Intl.NumberFormat('en-US',{maximumFractionDigits:v<1?6:2}).format(v)}`;
+  }
+
+  function renderMarketContext(){
+    const c=latest?.marketContext||{};
+    const fg=c.fearGreed;
+    const global=c.global;
+    const crypto=Object.entries(latest?.globalCrypto||{}).map(([symbol,x])=>({symbol,...x})).filter(x=>Number.isFinite(Number(x.change))&&!x.stale);
+    const up=crypto.filter(x=>Number(x.change)>0).length, down=crypto.filter(x=>Number(x.change)<0).length;
+    const top=[...crypto].sort((a,b)=>Number(b.change)-Number(a.change)).slice(0,3);
+    const bottom=[...crypto].sort((a,b)=>Number(a.change)-Number(b.change)).slice(0,3);
+    const fearValue=fg&&Number.isFinite(Number(fg.value))?Number(fg.value):null;
+    $('#fearGreedValue').textContent=fearValue===null?'—':`${fearValue}/100`;
+    $('#fearGreedLabel').textContent=fg?`${fg.classification||'—'}${fg.stale?' · '+(lang==='fa'?'قدیمی':'stale'):''}`:'—';
+    $('#fearGreedMeter').style.left=`${fearValue===null?0:Math.max(0,Math.min(100,fearValue))}%`;
+    $('#fearGreedMeter').style.width=fearValue===null?'0':'3px';
+    $('#fearGreedDiff').textContent=fg?.yesterday&&fearValue!==null?`${fearValue-Number(fg.yesterday.value)>0?'+':''}${(fearValue-Number(fg.yesterday.value)).toFixed(0)} ${lang==='fa'?'نسبت به دیروز':'vs yesterday'}`:'—';
+    $('#fearGreedUpdated').textContent=fg?.timestamp?relativeTime(fg.timestamp):'—';
+    $('#globalCapValue').textContent=global?formatUSD(global.totalMarketCapUsd):'—';
+    $('#globalVolumeValue').textContent=global?formatUSD(global.totalVolume24hUsd):'—';
+    $('#btcDominanceValue').textContent=global?.btcDominance!=null?`BTC ${Number(global.btcDominance).toFixed(2)}% · ETH ${global?.ethDominance!=null?`${Number(global.ethDominance).toFixed(2)}%`:'—'}`:'—';
+    $('#capChangeValue').textContent=global?.marketCapChange24h!=null&&Number.isFinite(Number(global.marketCapChange24h))?formatPct(global.marketCapChange24h):'—';
+    $('#capChangeValue').className=`intel-value ${cls(global?.marketCapChange24h)}`;
+    $('#cryptoBreadthValue').textContent=crypto.length?`${up} / ${down}`:'—';
+    $('#cryptoBreadthNote').textContent=crypto.length?`${crypto.length} ${lang==='fa'?'نماد معتبر':'valid symbols'} · ${lang==='fa'?'هم‌اکنون':'now'}`:'—';
+    $('#cryptoTopMovers').innerHTML=top.length?top.map(x=>`<span class="mover-chip"><b>${escapeHtml(x.symbol)}</b><i class="up">${formatPct(x.change)}</i></span>`).join(''):'<span class="subtle">—</span>';
+    $('#cryptoBottomMovers').innerHTML=bottom.length?bottom.map(x=>`<span class="mover-chip"><b>${escapeHtml(x.symbol)}</b><i class="down">${formatPct(x.change)}</i></span>`).join(''):'<span class="subtle">—</span>';
+    const derivatives=c.derivatives||{};
+    $('#fundingRows').innerHTML=['BTC','ETH'].map(symbol=>{
+      const item=derivatives[symbol];
+      const rate=Number(item?.fundingRate);
+      const funding=Number.isFinite(rate)?`${rate>0?'+':''}${(rate*100).toFixed(4)}%`:'—';
+      const oi=symbol==='BTC'&&Number(item?.openInterestUsd)>0?formatUSD(item.openInterestUsd):'—';
+      return `<div class="funding-row"><span>${symbol}</span><b class="${cls(rate)}">${funding}</b><small>${symbol==='BTC'?(lang==='fa'?'موقعیت باز':'Open interest')+': '+oi:(item?.nextFundingTime?relativeTime(item.nextFundingTime):'')}</small></div>`;
+    }).join('');
+    const times=[fg?.timestamp,global?.timestamp,derivatives?.fetchedAt].filter(Boolean).map(Date.parse).filter(Number.isFinite);
+    $('#contextUpdated').textContent=times.length?relativeTime(new Date(Math.min(...times)).toISOString()):'—';
+    const hasContext=Boolean(fg||global||crypto.length||derivatives.BTC||derivatives.ETH);
+    $('#contextStatus').textContent=hasContext?(fg?.stale||global?.stale?'Partial · stale data':'Sources connected'):'Waiting for context data';
+  }
+
   const escapeHtml = s => String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
   const cls = n => Number(n)>0?'up':Number(n)<0?'down':'neutral';
 
@@ -159,16 +234,29 @@
 
   function getAsset(key){
     if(!latest) return null;
+    const globalQuote = latest.globalCrypto?.[key] || null;
     if(key==='GOLD'){
       const x=normalizeLocal(latest.prices?.XAUT);
-      return {...(x||{}),last:Number(latest.gold18K||0),change:Number(latest.goldChange||0),timestamp:latest.timestamp,source:'Nobitex'};
+      return {...(x||{}),last:Number(latest.gold18K||0),change:Number(latest.goldChange||0),timestamp:latest.timestamp,source:'Nobitex · derived from XAUT/USDT',globalQuote:null};
     }
     if(key==='DOLLAR'){
       const x=normalizeLocal(latest.prices?.USDT);
-      return {...(x||{}),last:Number(latest.dollarPrice || latest.usdtPrice || x?.last || 0),change:Number(latest.dollarChange ?? x?.change ?? 0),timestamp:latest.timestamp,source:'Nobitex'};
+      return {...(x||{}),last:Number(latest.dollarPrice || latest.usdtPrice || x?.last || 0),change:Number(latest.dollarChange ?? x?.change ?? 0),timestamp:latest.timestamp,source:'Nobitex USDT/IRR',globalQuote:null};
     }
-    if(latest.prices?.[key]) return {...normalizeLocal(latest.prices[key]),source:'Nobitex'};
-    if(latest.market?.[key]) return {...normalizeGlobal(latest.market[key]),source:'Yahoo Finance'};
+    if(latest.prices?.[key]) return {...normalizeLocal(latest.prices[key]),source:'Nobitex',globalQuote};
+    if(latest.market?.[key]) return {...normalizeGlobal(latest.market[key]),source:latest.market[key]?.source || 'Yahoo Finance'};
+    if(globalQuote && Number(globalQuote.last)>0){
+      const rate=Number(latest.usdtPrice || latest.dollarPrice || latest.prices?.USDT?.bestSell || 0);
+      const fx=Number.isFinite(rate)&&rate>0?rate:0;
+      const toLocal=(value)=>Number(value||0)*fx;
+      return {
+        last:toLocal(globalQuote.last), high:toLocal(globalQuote.high), low:toLocal(globalQuote.low),
+        volume:Number(globalQuote.volumeBase||0), bestBuy:toLocal(globalQuote.bid), bestSell:toLocal(globalQuote.ask),
+        change:Number(globalQuote.change||0), timestamp:globalQuote.timestamp || latest.timestamp, delayed:false,
+        source:fx?'Binance Spot · estimated IRR':'Binance Spot · USD', quoteCurrency:fx?'IRR':'USD',
+        globalQuote, globalVolumeUsd:Number(globalQuote.volumeUsd||0), tradeCount:Number(globalQuote.trades||0)
+      };
+    }
     return null;
   }
 
@@ -254,7 +342,7 @@
   }
 
   function allKeys(){
-    return DEFAULT_ORDER.filter(k=>getAsset(k));
+    return [...new Set([...DEFAULT_ORDER,...Object.keys(latest?.globalCrypto||{})])].filter(k=>META[k]&&getAsset(k));
   }
 
   function renderAll(){
@@ -264,6 +352,7 @@
     renderOverview();
     renderMarkets();
     renderStatus();
+    renderMarketContext();
     renderChartControls();
     renderChart();
     renderStats();
@@ -366,7 +455,7 @@
     const buyText=buy?escapeHtml(formatPrice(key,buy)):'—';
     const sellText=sell?escapeHtml(formatPrice(key,sell)):'—';
     const global=isGlobal(key);
-    const source=global?'Yahoo Finance':'Nobitex';
+    const source=a.source || (global?'Yahoo Finance':'Nobitex');
     return `<article class="market-card interactive" data-key="${key}" style="--asset:${color}" tabindex="0">
       <span class="accent-line"></span>
       <div class="market-head">
@@ -381,12 +470,13 @@
         <div class="meta-box"><span>${T('spread')}</span><b>${spread?escapeHtml(formatPrice(key,spread)):'—'}</b></div>
       </div>
       <div class="card-spark">${sparkSVG(getSeries(key),`rgb(${color})`)}</div>
-      <div class="card-footer"><span class="asset-source"><i class="source-bullet"></i>${source}</span><span>${a.delayed?T('delayed'):a.timestamp?relativeTime(a.timestamp):'—'}</span></div>
+      ${a.globalQuote?`<div class="global-quote-line"><span>Global ${escapeHtml(formatUSD(a.globalQuote.last))}</span><span>Vol ${escapeHtml(compactNumber(a.globalQuote.volumeUsd))} USD</span></div>`:''}
+      <div class="card-footer"><span class="asset-source"><i class="source-bullet"></i>${source}</span><span>${a.delayed||a.globalQuote?.stale?T('delayed'):a.timestamp?relativeTime(a.timestamp):'—'}</span></div>
     </article>`;
   }
 
   function renderMarkets(){
-    const keys=DEFAULT_ORDER.filter(k=>getAsset(k)).filter(k=>activeFilter==='all'||META[k].cat===activeFilter);
+    const keys=allKeys().filter(k=>activeFilter==='all'||META[k].cat===activeFilter);
     $('#marketGrid').innerHTML=keys.map(marketCard).join('') || `<div class="notice glass"><div>${T('noData')}</div></div>`;
     $$('#marketGrid [data-fav]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleWatch(b.dataset.fav)}));
     $$('#marketGrid [data-key]').forEach(card=>{
@@ -453,11 +543,11 @@
     $('#largestMove').textContent=maxMove&&maxMove.v?`${META[maxMove.k].short} ${formatPct(getAsset(maxMove.k).change)}`:'—';
     const good=keys.filter(k=>getAsset(k)?.last).length;
     const errors=Number(latest?.errorDetails?.length||0);
-    const health=keys.length?Math.round((good/DEFAULT_ORDER.length)*100 - errors*4):0;
+    const health=keys.length?Math.round((good/keys.length)*100 - errors*2):0;
     $('#healthPercent').textContent=keys.length?`${Math.max(0,Math.min(100,health))}%`:'—';
     $('#healthLabel').textContent=health>=80?T('fresh'):T('stale');
     $('#freshness').textContent=latest?.timestamp?relativeTime(latest.timestamp):'—';
-    $('#sourceCount').textContent=new Set(keys.map(k=>isGlobal(k)?'Yahoo':'Nobitex')).size || '—';
+    $('#sourceCount').textContent=new Set(keys.map(k=>getAsset(k)?.source?.includes('Binance')?'Binance':isGlobal(k)?'Yahoo':'Nobitex')).size || '—';
     $('#errorCount').textContent=errors;
     const leaders=keys.map(k=>({k,change:Number(getAsset(k)?.change||0)})).sort((a,b)=>b.change-a.change).slice(0,3);
     $('#leaderList').innerHTML=leaders.length?leaders.map(x=>`<div class="leader"><div class="leader-name"><i>${META[x.k].icon}</i><span>${escapeHtml(lang==='en'?META[x.k].name:META[x.k].fa)}</span></div><small class="${cls(x.change)}">${formatPct(x.change)}</small></div>`).join(''):'<span class="subtle">—</span>';
@@ -549,7 +639,9 @@
     $('#detailChange').textContent=formatPct(a.change);
     const high=a.high?formatPrice(key,a.high):'—', low=a.low?formatPrice(key,a.low):'—', vol=a.volume?compactNumber(a.volume):'—';
     const spread=(a.bestBuy&&a.bestSell)?formatPrice(key,a.bestSell-a.bestBuy):'—';
-    const rows=[[T('last'),formatPrice(key,a.last)],[T('high'),high],[T('low'),low],[T('volume'),vol],[T('bestBuy'),a.bestBuy?formatPrice(key,a.bestBuy):'—'],[T('bestSell'),a.bestSell?formatPrice(key,a.bestSell):'—'],[T('spread'),spread],[T('source'),a.source||'—'],[T('updated'),a.timestamp?relativeTime(a.timestamp):'—']];
+    const rows=[[T('last'),formatPrice(key,a.last)],[T('high'),high],[T('low'),low],[T('volume'),vol],[T('bestBuy'),a.bestBuy?formatPrice(key,a.bestBuy):'—'],[T('bestSell'),a.bestSell?formatPrice(key,a.bestSell):'—'],[T('spread'),spread]];
+    if(a.globalQuote){ rows.push([lang==='fa'?'قیمت جهانی (USD)':'Global price (USD)',formatUSD(a.globalQuote.last)]); rows.push([lang==='fa'?'تغییر جهانی ۲۴ساعت':'Global 24h change',formatPct(a.globalQuote.change)]); rows.push([lang==='fa'?'حجم جهانی ۲۴ساعت':'Global 24h volume',`$${compactNumber(a.globalQuote.volumeUsd)}`]); rows.push([lang==='fa'?'تعداد معاملات':'Trade count',compactNumber(a.globalQuote.trades)]); rows.push([lang==='fa'?'میانگین وزنی (USD)':'Weighted avg (USD)',formatUSD(a.globalQuote.weightedAverage)]); }
+    rows.push([T('source'),a.source||'—'],[T('updated'),a.timestamp?relativeTime(a.timestamp):'—']);
     $('#detailGrid').innerHTML=rows.map(([k,v])=>`<div class="detail-stat"><span>${escapeHtml(k)}</span><b>${escapeHtml(v)}</b></div>`).join('');
     updateDetailWatch();
     $('#detailPanel').hidden=false;

@@ -94,3 +94,80 @@ test('unknown paths return 404 and do not expose secrets', async () => {
   const body = await response.text();
   assert.equal(body.includes('never-leak'), false);
 });
+
+test('new /crypto command returns expanded global crypto data from snapshot', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const snapshot = {
+    timestamp: new Date().toISOString(),
+    usdtPrice: 900000,
+    prices: { USDT: { lastPrice: 900000, bestBuy: 899000, bestSell: 901000, change: 0.3 } },
+    globalCrypto: {
+      BTC: { last: 65000, change: 2.2, high: 66000, low: 63000, volumeUsd: 21000000000, volumeBase: 320000, trades: 1200000, timestamp: new Date().toISOString(), source: 'Binance Spot' },
+      SOL: { last: 145, change: -1.4, high: 151, low: 142, volumeUsd: 2200000000, volumeBase: 15000000, trades: 220000, timestamp: new Date().toISOString(), source: 'Binance Spot' }
+    }
+  };
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) {
+      return new Response(JSON.stringify(snapshot), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    if (url.startsWith('https://api.telegram.org/botfake-token/')) {
+      telegramCalls.push(JSON.parse(init.body));
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 92, chat: { id: 42 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in /crypto test: ${url}`);
+  };
+  try {
+    const { ctx, tasks } = ctxRecorder();
+    const response = await bot.fetch(new Request('https://worker.test/webhook', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'test-secret' },
+      body: JSON.stringify({ update_id: 991001, message: { text: '/crypto', chat: { id: 42, type: 'private' }, from: { id: 42 } } })
+    }), { TELEGRAM_BOT_TOKEN: 'fake-token', TELEGRAM_WEBHOOK_SECRET: 'test-secret' }, ctx);
+    assert.equal(response.status, 200);
+    await Promise.all(tasks);
+    assert.ok(telegramCalls.some((call) => /Global Crypto Board/.test(call.text)));
+    assert.ok(telegramCalls.some((call) => /BTC/.test(call.text) && /SOL/.test(call.text)));
+    assert.ok(telegramCalls.some((call) => /Binance Spot/.test(call.text)));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('new /macro command includes sentiment, global metrics and derivative context', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const snapshot = {
+    timestamp: new Date().toISOString(),
+    prices: { USDT: { lastPrice: 900000, bestSell: 900000 } },
+    market: { DXY: { last: 103.2, change: -0.4 }, SP500: { last: 6100, change: 0.5 }, BRENT: { last: 71.3, change: -1.1 } },
+    globalCrypto: { BTC: { last: 65000, change: 2.2 }, SOL: { last: 145, change: -1.4 } },
+    marketContext: {
+      fearGreed: { value: 62, classification: 'Greed', yesterday: { value: 55, classification: 'Greed' }, timestamp: new Date().toISOString() },
+      global: { totalMarketCapUsd: 2300000000000, totalVolume24hUsd: 89000000000, btcDominance: 54.2, marketCapChange24h: 1.3 },
+      derivatives: { BTC: { fundingRate: 0.0001, markPrice: 65020, indexPrice: 64990, openInterestUsd: 18000000000 }, ETH: { fundingRate: -0.00005, markPrice: 3200, indexPrice: 3198 } }
+    }
+  };
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify(snapshot), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.startsWith('https://api.telegram.org/botfake-token/')) {
+      telegramCalls.push(JSON.parse(init.body));
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 93, chat: { id: 42 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in /macro test: ${url}`);
+  };
+  try {
+    const { ctx, tasks } = ctxRecorder();
+    const response = await bot.fetch(new Request('https://worker.test/webhook', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'test-secret' },
+      body: JSON.stringify({ update_id: 991002, message: { text: '/macro', chat: { id: 42, type: 'private' }, from: { id: 42 } } })
+    }), { TELEGRAM_BOT_TOKEN: 'fake-token', TELEGRAM_WEBHOOK_SECRET: 'test-secret' }, ctx);
+    assert.equal(response.status, 200);
+    await Promise.all(tasks);
+    const text = telegramCalls.map((call) => call.text).join('\n');
+    assert.match(text, /Market Drivers/);
+    assert.match(text, /Fear &amp; Greed|Fear & Greed/);
+    assert.match(text, /BTC dominance/);
+    assert.match(text, /open interest/i);
+    assert.match(text, /DXY/);
+  } finally { globalThis.fetch = originalFetch; }
+});

@@ -373,3 +373,19 @@ If you find this project useful, please give it a ⭐ on GitHub!
 - Register the Telegram webhook at `https://arzpulse-bot.game-developer-mb.workers.dev/webhook` with the same `TELEGRAM_WEBHOOK_SECRET` configured in Cloudflare.
 - The `github-page-insights` widget is integrated into the dashboard and is intentionally displayed near the bottom of the page, immediately before the footer.
 - Full manual PowerShell deployment and troubleshooting instructions: [`RECOVERY-AND-DEPLOYMENT-FA.md`](RECOVERY-AND-DEPLOYMENT-FA.md). No `.ps1` installer is required.
+
+
+## Market Intelligence Extension
+
+The current collector additionally enriches `docs/data/latest.json` with a `globalCrypto` map and `marketContext` summary. The dashboard shows global market capitalization/volume, BTC dominance, Fear & Greed, breadth and derivatives context, while the bot adds `/crypto`, `/coins`, `/macro`, `/market`, and `/sentiment`.
+
+### Sources and interpretation
+
+- Local crypto / USDT / XAUT pairs: Nobitex.
+- Major global crypto spot tickers: Binance public market-data endpoints (price, 24h change/high/low, weighted average, quote volume, base volume, bid/ask and trade count).
+- Crypto sentiment: [Alternative.me Fear & Greed Index](https://alternative.me/crypto/fear-and-greed-index/) — source attribution is included in the UI and bot.
+- Global crypto capitalization, volume and dominance: CoinGecko Global API, with optional Alternative.me global fallback.
+- Funding / open interest: Binance USD-M Futures public endpoints.
+- Brent, WTI, gold, silver, S&P 500, Nasdaq and DXY: Yahoo Finance chart endpoint; quotes may be delayed.
+
+For tokens without an available local market pair, the dashboard and bot show an estimated IRR equivalent calculated as global USD quote × the snapshot's Nobitex USDT/IRR rate. This is not a local exchange bid/ask price. Funding, Fear & Greed, market cap, dominance and open interest are context indicators, not investment advice or standalone forecasts. If a source fails, the collector preserves a previous value with a `stale` flag rather than inventing values.
