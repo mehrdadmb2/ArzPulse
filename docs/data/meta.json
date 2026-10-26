@@ -1,75 +1,71 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-26T18:35:18.565Z",
-  "lastUpdate": "2026-10-26T18:35:18.565Z",
+  "lastAttempt": "2026-10-26T18:40:20.543Z",
+  "lastUpdate": "2026-10-26T18:40:20.543Z",
   "retentionDays": 30,
   "gold18K": 262445928,
   "usdtPrice": 2703690,
   "dollarPrice": 2703690,
   "marketSummary": {
     "BRENT": {
-      "last": 110.83999633789062,
-      "change": -5.037701183445103,
+      "last": 110.66999816894531,
+      "change": -5.183347317070365,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "WTI": {
-      "last": 101.9000015258789,
-      "change": -1.3266148559321,
+      "last": 101.75,
+      "change": -1.471866652925334,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4030.800048828125,
-      "change": 0.5713752100191772,
+      "last": 4031.89990234375,
+      "change": 0.5988173503526177,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 54.07500076293945,
-      "change": 0.6777051957895502,
+      "last": 54.10499954223633,
+      "change": 0.7335574050484034,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "SP500": {
-      "last": 7679.759765625,
-      "change": 0.735597356535266,
+      "last": 7679.8701171875,
+      "change": 0.7370448406893175,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T13:30:00.000Z"
     },
     "NASDAQ": {
-      "last": 26202.548828125,
-      "change": 0.9524397902827979,
+      "last": 26207.484375,
+      "change": 0.971455325832368,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T13:30:00.000Z"
     },
     "DXY": {
-      "last": 101.93000030517578,
-      "change": 0.11786931486072103,
+      "last": 101.9209976196289,
+      "change": 0.10902668077491451,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 3,
-  "errors": [
-    "Binance futures funding: HTTP 451 from upstream",
-    "Binance BTC open interest: HTTP 451 from upstream",
-    "Derivatives: No usable futures funding data"
-  ],
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 50,
-    "totalMarketCapUsd": 2704984638494.132,
-    "btcDominance": 59.43905735899588
+    "totalMarketCapUsd": 2708312764001.687,
+    "btcDominance": 59.448546952924715
   },
-  "successfulSources": 15,
+  "successfulSources": 16,
   "successfulLocalSources": 5
 }
