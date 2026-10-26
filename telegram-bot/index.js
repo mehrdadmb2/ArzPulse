@@ -16,6 +16,14 @@ const HTTP_TIMEOUT_MS = 3500;
 const REFRESH_LOCK_KEY = 'bot:refresh-lock:v1';
 const REFRESH_LOCK_SECONDS = 240;
 const CHANNELS_KEY = 'channels'; // Keep the existing KV key for backwards compatibility.
+const ALERT_SUBSCRIBERS_KEY = 'alerts:subscribers:v1';
+const ALERT_STATE_KEY = 'alerts:state:v2'; // Consolidated rolling state reduces KV writes on each five-minute tick.
+const ALERT_SNAPSHOT_KEY = 'alerts:last-snapshot:v1'; // Read only for one-time legacy migration.
+const ALERT_HISTORY_KEY = 'alerts:history:v1'; // Read only for one-time legacy migration.
+const ALERT_COOLDOWNS_KEY = 'alerts:cooldowns:v1';
+const MAX_ALERT_RECIPIENTS = 100;
+const ALERT_MAX_EVENTS_PER_RUN = 6;
+const ALERT_SNAPSHOT_MAX_AGE_MS = 20 * 60 * 1000;
 const GLOBAL_CRYPTOS = ['BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH','SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE'];
 const GLOBAL_CRYPTO_NAMES = { BTC:'بیت‌کوین', ETH:'اتریوم', BNB:'بایننس کوین', SOL:'سولانا', XRP:'ریپل', ADA:'کاردانو', DOGE:'دوج‌کوین', TRX:'ترون', LINK:'چین‌لینک', AVAX:'آوالانچ', DOT:'پولکادات', LTC:'لایت‌کوین', BCH:'بیت‌کوین کش', SHIB:'شیبا اینو', UNI:'یونی‌سواپ', NEAR:'نیر', SUI:'سویی', XLM:'استلار', ETC:'اتریوم کلاسیک', ATOM:'کازموس', APT:'آپتوس', FIL:'فایل‌کوین', ARB:'آربیتروم', OP:'آپتیمیسم', HBAR:'هدرا', INJ:'اینجکتیو', AAVE:'آوه', PEPE:'پپه' };
 
@@ -321,6 +329,463 @@ async function saveChannelSettings(env, channels) {
   await env.SETTINGS_KV.put(CHANNELS_KEY, JSON.stringify(normalized));
 }
 
+async function getAlertPreferences(env) {
+  if (!env.SETTINGS_KV) throw new Error('SETTINGS_KV binding is missing');
+  try {
+    const value = await env.SETTINGS_KV.get(ALERT_SUBSCRIBERS_KEY, { type: 'json' });
+    if (!value) return {};
+    if (Array.isArray(value)) return Object.fromEntries(value.map((id) => [String(id), { enabled: true, level: 'medium' }]));
+    if (typeof value !== 'object') throw new Error('Alert preferences are not a JSON object');
+    return value;
+  } catch (error) {
+    console.error('[alerts:kv] preferences read failed:', error.message);
+    throw new Error(`Could not read alert preferences from KV: ${error.message}`);
+  }
+}
+
+async function saveAlertPreferences(env, preferences) {
+  if (!env.SETTINGS_KV) throw new Error('SETTINGS_KV binding is missing');
+  const normalized = {};
+  for (const [id, value] of Object.entries(preferences || {}).slice(0, MAX_ALERT_RECIPIENTS * 2)) {
+    if (!/^-?\d+$/.test(String(id)) || !value || typeof value !== 'object') continue;
+    const level = ['low', 'medium', 'high'].includes(value.level) ? value.level : 'medium';
+    normalized[String(id)] = { enabled: value.enabled !== false, level, updatedAt: value.updatedAt || new Date().toISOString() };
+  }
+  await env.SETTINGS_KV.put(ALERT_SUBSCRIBERS_KEY, JSON.stringify(normalized));
+}
+
+function alertLevelNumber(level) {
+  return ({ low: 1, medium: 2, high: 3 })[String(level || 'medium').toLowerCase()] || 2;
+}
+
+async function getAlertRecipients(env) {
+  if (!env.SETTINGS_KV || !env.TELEGRAM_BOT_TOKEN) return [];
+  const [channels, preferences] = await Promise.all([getChannelSettings(env), getAlertPreferences(env)]);
+  const recipients = new Map();
+  for (const chatId of channels) {
+    const preference = preferences[String(chatId)];
+    if (preference?.enabled === false) continue;
+    recipients.set(String(chatId), { chatId: String(chatId), level: preference?.level || 'medium', kind: 'channel' });
+  }
+  for (const [chatId, preference] of Object.entries(preferences)) {
+    if (!/^-?\d+$/.test(chatId) || preference?.enabled !== true) continue;
+    recipients.set(chatId, { chatId, level: preference.level || 'medium', kind: 'subscriber' });
+  }
+  return [...recipients.values()].slice(0, MAX_ALERT_RECIPIENTS);
+}
+
+function makeAlertSnapshot(data) {
+  const metrics = {};
+  const attemptedAt = data?.timestamp || new Date().toISOString();
+  const addPrice = (id, symbol, item, kind, currency, name) => {
+    if (!item || item.stale) return;
+    const price = numeric(item.lastPrice ?? item.latest ?? item.last ?? item.price ?? item.close);
+    if (!positive(price)) return;
+    metrics[id] = {
+      id, symbol, name: name || symbol, kind, currency, price,
+      change24: Number.isFinite(Number(item.change)) ? Number(item.change) : null,
+      high: numeric(item.high ?? item.dayHigh ?? item.highPrice),
+      low: numeric(item.low ?? item.dayLow ?? item.lowPrice),
+      volume: numeric(item.volume ?? item.volumeUsd ?? item.quoteVolume),
+      volumeUsd: numeric(item.volumeUsd ?? item.quoteVolume),
+      trades: numeric(item.trades ?? item.count),
+      source: String(item.source || (kind === 'crypto' ? 'Global crypto' : kind === 'local' ? 'Local market' : 'Market data')),
+      timestamp: item.fetchedAt || item.timestamp || attemptedAt
+    };
+  };
+  for (const [symbol, item] of Object.entries(data?.prices || {})) {
+    const cat = ['USDT', 'XAUT', 'BTC', 'ETH', 'NOT'].includes(symbol) ? (['BTC', 'ETH', 'NOT'].includes(symbol) ? 'crypto' : 'local') : 'local';
+    addPrice(`local:${symbol}`, symbol, item, cat, 'IRR', `${getSymbolName(symbol)} · بازار داخلی`);
+  }
+  for (const [symbol, item] of Object.entries(data?.market || {})) {
+    addPrice(`market:${symbol}`, symbol, item, ['BRENT', 'WTI', 'XAUUSD', 'SILVER'].includes(symbol) ? 'commodity' : 'index', 'USD', getSymbolName(symbol));
+  }
+  for (const [symbol, item] of Object.entries(data?.globalCrypto || {})) {
+    addPrice(`global:${symbol}`, symbol, item, 'crypto', 'USD', `${GLOBAL_CRYPTO_NAMES[symbol] || symbol} · بازار جهانی`);
+  }
+
+  const context = data?.marketContext || {};
+  const indicators = {};
+  const global = context.global;
+  if (global && !global.stale && positive(global.totalMarketCapUsd)) {
+    indicators.marketCap = { value: numeric(global.totalMarketCapUsd), change24: numeric(global.marketCapChange24h), timestamp: global.timestamp || global.fetchedAt || attemptedAt, source: global.source || 'Global crypto stats' };
+  }
+  const fg = context.fearGreed;
+  if (fg && !fg.stale && Number.isFinite(Number(fg.value))) {
+    indicators.fearGreed = { value: numeric(fg.value), classification: String(fg.classification || 'Unknown'), timestamp: fg.timestamp || fg.fetchedAt || attemptedAt, source: fg.source || 'Alternative.me' };
+  }
+  const derivatives = context.derivatives || {};
+  for (const symbol of ['BTC', 'ETH']) {
+    const item = derivatives[symbol];
+    if (!item || item.stale) continue;
+    if (Number.isFinite(Number(item.fundingRate))) indicators[`${symbol.toLowerCase()}Funding`] = { value: numeric(item.fundingRate), timestamp: item.timestamp || item.fetchedAt || attemptedAt, source: item.source || 'Binance USD-M Futures' };
+    if (symbol === 'BTC' && positive(item.openInterestUsd)) indicators.btcOpenInterest = { value: numeric(item.openInterestUsd), timestamp: item.openInterestTimestamp || item.timestamp || attemptedAt, source: item.source || 'Binance USD-M Futures' };
+  }
+  const crypto = Object.values(data?.globalCrypto || {}).filter((item) => item && !item.stale && Number.isFinite(Number(item.change)) && positive(item.last));
+  const up = crypto.filter((item) => Number(item.change) >= 2).length;
+  const down = crypto.filter((item) => Number(item.change) <= -2).length;
+  const total = crypto.length;
+  const breadth = { total, up, down, upShare: total ? up / total : 0, downShare: total ? down / total : 0, timestamp: attemptedAt };
+  return { timestamp: attemptedAt, metrics, indicators, breadth };
+}
+
+function getAlertMoveThreshold(metric, env) {
+  if (metric.kind === 'crypto') return numeric(env.ALERT_CRYPTO_MOVE_PCT) || 0.85;
+  if (metric.kind === 'local') return numeric(env.ALERT_LOCAL_MOVE_PCT) || 0.45;
+  return numeric(env.ALERT_MACRO_MOVE_PCT) || 0.55;
+}
+
+function getAlertDailyThreshold(metric) {
+  if (metric.kind === 'crypto') return 3;
+  if (metric.kind === 'local') return 1.5;
+  return 1.25;
+}
+
+function alertImpactText(metric, direction, type) {
+  if (type === 'funding') return metric.symbol === 'BTC' || metric.symbol === 'ETH'
+    ? 'Funding بسیار مثبت معمولاً به معنی هزینهٔ بیشتر نگهداری موقعیت لانگ است؛ Funding منفی می‌تواند برعکس باشد. این شاخص به‌تنهایی جهت بازار را پیش‌بینی نمی‌کند.'
+    : 'Funding یک شاخص موقعیت‌گیری بازار مشتقه است و به‌تنهایی جهت بعدی قیمت را تعیین نمی‌کند.';
+  if (type === 'open-interest') return 'افزایش Open Interest یعنی ارزش/حجم قراردادهای باز بیشتر شده؛ بدون ترکیب با قیمت و حجم، مشخص نمی‌کند کدام سمت معامله‌گران غالب است.';
+  if (type === 'sentiment') return 'تغییر سریع احساسات می‌تواند با افزایش نوسان و تغییر رفتار معامله‌گران همراه شود؛ شاخص ترس‌وطمع سیگنال قطعی خریدوفروش نیست.';
+  if (type === 'breadth') return 'هم‌جهت شدن تعداد زیادی از رمزارزها می‌تواند نشانهٔ حرکت فراگیر بازار باشد و ریسک هم‌بستگی سبد را افزایش دهد.';
+  if (type === 'market-cap') return 'تغییر قابل‌توجه ارزش کل بازار به‌معنای حرکت در سطح کلان است؛ ترکیب آن با حجم، دامیننس و نقدشوندگی مهم است.';
+  if (metric.kind === 'local') return 'این حرکت می‌تواند قیمت‌گذاری ریالی و معادل دلاری دارایی را جابه‌جا کند. نرخ تبدیل بر پایهٔ USDT/IRR پروژه تخمینی است و لزوماً نرخ اسکناس آزاد نیست.';
+  if (metric.kind === 'commodity' || metric.kind === 'index') return 'این حرکت می‌تواند بر دارایی‌های مرتبط و جوّ ریسک بازار اثر بگذارد؛ ساعت معاملاتی، تأخیر منبع و سایر عوامل کلان را هم بررسی کن.';
+  return direction === 'down'
+    ? 'افت سریع می‌تواند با افزایش نوسان، لیکوییدیشن یا تغییر جریان نقدینگی همراه شود؛ برای نتیجه‌گیری، حجم، دامیننس و بازار مشتقه را هم بررسی کن.'
+    : 'جهش سریع می‌تواند با افزایش نوسان و ریسک دنبال‌کردن حرکت همراه شود؛ حجم، نقدشوندگی و داده‌های مشتقه را کنار قیمت بسنج.';
+}
+
+function buildAlertEvents(previous, current, env = {}) {
+  const events = [];
+  const priorMetrics = previous?.metrics || {};
+  for (const [id, metric] of Object.entries(current.metrics || {})) {
+    const before = priorMetrics[id];
+    if (!before || !positive(before.price) || !positive(metric.price)) continue;
+    const move = ((metric.price - before.price) / before.price) * 100;
+    const absMove = Math.abs(move);
+    const threshold = getAlertMoveThreshold(metric, env);
+    if (absMove >= threshold) {
+      const severity = absMove >= Math.max(threshold * 3.2, metric.kind === 'crypto' ? 2.8 : 1.8) ? 3 : absMove >= threshold * 1.8 ? 2 : 1;
+      events.push({
+        id: `shock:${id}`, cooldownKey: `move:${id}`, type: 'shock', severity,
+        title: `${metric.name} (${metric.symbol}) · ${move >= 0 ? 'جهش صعودی' : 'افت سریع'}`,
+        symbol: metric.symbol, metric, move, beforePrice: before.price,
+        direction: move >= 0 ? 'up' : 'down', previousTimestamp: previous.timestamp,
+        impact: alertImpactText(metric, move >= 0 ? 'up' : 'down', 'price-move')
+      });
+      continue;
+    }
+    const dailyThreshold = getAlertDailyThreshold(metric);
+    const priorDaily = Number(before.change24);
+    const nowDaily = Number(metric.change24);
+    const priorValid = before.change24 != null && Number.isFinite(priorDaily), nowValid = metric.change24 != null && Number.isFinite(nowDaily);
+    if (priorValid && nowValid && Math.abs(nowDaily) >= dailyThreshold && Math.abs(priorDaily) < dailyThreshold) {
+      const severity = Math.abs(nowDaily) >= dailyThreshold * 2 ? 3 : 2;
+      events.push({
+        id: `daily:${id}:${nowDaily >= 0 ? 'up' : 'down'}`, cooldownKey: `daily:${id}`, type: 'daily-threshold', severity,
+        title: `${metric.name} (${metric.symbol}) · عبور از آستانهٔ تغییر روزانه`,
+        symbol: metric.symbol, metric, move: null, dailyChange: nowDaily,
+        direction: nowDaily >= 0 ? 'up' : 'down', previousTimestamp: previous.timestamp,
+        impact: alertImpactText(metric, nowDaily >= 0 ? 'up' : 'down', 'daily-threshold')
+      });
+    }
+  }
+
+  const oldIndicators = previous?.indicators || {};
+  const indicators = current.indicators || {};
+  const oldFg = oldIndicators.fearGreed, fg = indicators.fearGreed;
+  if (oldFg && fg && Math.abs(Number(fg.value) - Number(oldFg.value)) >= 15) {
+    const delta = Number(fg.value) - Number(oldFg.value);
+    events.push({ id: 'sentiment:shift', cooldownKey: 'sentiment:shift', type: 'sentiment', severity: Math.abs(delta) >= 25 ? 3 : 2,
+      title: 'تغییر شدید شاخص ترس و طمع', symbol: 'F&G', move: delta, metric: { name: 'Fear & Greed', symbol: 'F&G', kind: 'indicator', price: fg.value, source: fg.source, currency: 'points' },
+      details: `مقدار شاخص از ${formatNumber(oldFg.value, 0)} به ${formatNumber(fg.value, 0)} رسیده است (${delta > 0 ? '+' : ''}${formatNumber(delta, 0)} واحد).`, impact: alertImpactText({ symbol: 'F&G' }, '', 'sentiment') });
+  }
+  const oldCap = oldIndicators.marketCap, cap = indicators.marketCap;
+  if (oldCap && cap && Math.abs(Number(cap.change24)) >= 3 && Math.abs(Number(oldCap.change24)) < 3) {
+    const delta = Number(cap.change24);
+    events.push({ id: 'market-cap:threshold', cooldownKey: 'market-cap:threshold', type: 'market-cap', severity: Math.abs(delta) >= 5 ? 3 : 2,
+      title: 'عبور تغییر ارزش کل بازار از ۳٪', symbol: 'TOTAL', metric: { name: 'ارزش کل بازار کریپتو', symbol: 'TOTAL', kind: 'indicator', price: cap.value, change24: delta, source: cap.source, currency: 'USD' }, dailyChange: delta,
+      direction: delta >= 0 ? 'up' : 'down', impact: alertImpactText({}, '', 'market-cap') });
+  }
+  for (const symbol of ['BTC', 'ETH']) {
+    const key = `${symbol.toLowerCase()}Funding`;
+    const before = oldIndicators[key], item = indicators[key];
+    if (before && item && Math.abs(Number(item.value)) >= 0.0005 && Math.abs(Number(before.value)) < 0.0005) {
+      const rate = Number(item.value);
+      events.push({ id: `funding:${symbol}`, cooldownKey: `funding:${symbol}`, type: 'funding', severity: Math.abs(rate) >= 0.001 ? 3 : 2,
+        title: `${symbol} · نرخ Funding غیرعادی`, symbol, metric: { name: `${symbol} Funding`, symbol, kind: 'indicator', price: rate, source: item.source, currency: 'funding' },
+        details: `نرخ Funding به ${(rate * 100).toFixed(4)}٪ رسیده است.`, impact: alertImpactText({ symbol }, '', 'funding') });
+    }
+  }
+  const oldOi = oldIndicators.btcOpenInterest, oi = indicators.btcOpenInterest;
+  if (oldOi && oi && positive(oldOi.value)) {
+    const move = (Number(oi.value) - Number(oldOi.value)) / Number(oldOi.value) * 100;
+    if (Math.abs(move) >= 8) events.push({ id: 'open-interest:btc', cooldownKey: 'open-interest:btc', type: 'open-interest', severity: Math.abs(move) >= 12 ? 3 : 2,
+      title: `BTC · تغییر سریع Open Interest`, symbol: 'BTC', move, metric: { name: 'BTC Open Interest', symbol: 'BTC', kind: 'indicator', price: oi.value, source: oi.source, currency: 'USD' },
+      impact: alertImpactText({ symbol: 'BTC' }, '', 'open-interest') });
+  }
+  const breadth = current.breadth, priorBreadth = previous?.breadth;
+  if (breadth && breadth.total >= 12) {
+    const side = breadth.upShare >= 0.75 ? 'up' : breadth.downShare >= 0.75 ? 'down' : null;
+    const oldSide = priorBreadth?.upShare >= 0.75 ? 'up' : priorBreadth?.downShare >= 0.75 ? 'down' : null;
+    if (side && side !== oldSide) {
+      const count = side === 'up' ? breadth.up : breadth.down;
+      events.push({ id: 'market-breadth:extreme', cooldownKey: 'market-breadth:extreme', type: 'breadth', severity: 2,
+        title: side === 'up' ? 'عرض بازار: صعود فراگیر رمزارزها' : 'عرض بازار: افت فراگیر رمزارزها', symbol: 'BREADTH', direction: side,
+        details: `${count} از ${breadth.total} رمزارز معتبر تغییر روزانهٔ ${side === 'up' ? 'حداقل +۲٪' : 'حداکثر −۲٪'} داشته‌اند.`, impact: alertImpactText({}, side, 'breadth') });
+    }
+  }
+  return events.sort((a, b) => b.severity - a.severity || Math.abs(Number(b.move || b.dailyChange || 0)) - Math.abs(Number(a.move || a.dailyChange || 0)));
+}
+
+function buildWindowMoveEvents(current, history, env = {}) {
+  const windows = [
+    { key: '15m', label: '۱۵ دقیقه', ms: 15 * 60 * 1000, tolerance: 8 * 60 * 1000, cooldownMinutes: 25, thresholds: { crypto: 1.75, local: 0.9, commodity: 0.8, index: 0.8 } },
+    { key: '1h', label: '۱ ساعت', ms: 60 * 60 * 1000, tolerance: 20 * 60 * 1000, cooldownMinutes: 60, thresholds: { crypto: 3.1, local: 1.7, commodity: 1.4, index: 1.4 } },
+    { key: '6h', label: '۶ ساعت', ms: 6 * 60 * 60 * 1000, tolerance: 45 * 60 * 1000, cooldownMinutes: 120, thresholds: { crypto: 5.5, local: 3.2, commodity: 2.5, index: 2.5 } }
+  ];
+  const now = Date.parse(current?.timestamp || '');
+  if (!Number.isFinite(now)) return [];
+  const events = [];
+  for (const window of windows) {
+    const targetAge = window.ms;
+    const candidate = (history || []).map((snapshot) => ({ snapshot, age: now - Date.parse(snapshot?.timestamp || '') }))
+      .filter((row) => Number.isFinite(row.age) && row.age > 0 && Math.abs(row.age - targetAge) <= window.tolerance)
+      .sort((a, b) => Math.abs(a.age - targetAge) - Math.abs(b.age - targetAge))[0]?.snapshot;
+    if (!candidate) continue;
+    for (const [id, metric] of Object.entries(current.metrics || {})) {
+      const before = candidate.metrics?.[id];
+      if (!before || !positive(before.price) || !positive(metric.price)) continue;
+      const move = (Number(metric.price) - Number(before.price)) / Number(before.price) * 100;
+      const threshold = window.thresholds[metric.kind] ?? window.thresholds.index;
+      if (Math.abs(move) < threshold) continue;
+      const severity = Math.abs(move) >= threshold * 2 ? 3 : Math.abs(move) >= threshold * 1.35 ? 2 : 1;
+      events.push({
+        id: `window:${id}:${window.key}`, cooldownKey: `window:${id}:${window.key}`, type: 'window-move', severity,
+        title: `${metric.name} (${metric.symbol}) · حرکت ${move >= 0 ? 'صعودی' : 'نزولی'} ${window.label} اخیر`,
+        symbol: metric.symbol, metric, move, beforePrice: before.price, direction: move >= 0 ? 'up' : 'down',
+        periodLabel: window.label, periodKey: window.key, cooldownMinutes: window.cooldownMinutes,
+        impact: alertImpactText(metric, move >= 0 ? 'up' : 'down', 'price-move')
+      });
+    }
+  }
+  return events;
+}
+
+function combinePriceMoveEvents(events) {
+  const combined = [];
+  const byAssetAndDirection = new Map();
+  for (const event of events) {
+    const isPriceMove = ['shock', 'window-move'].includes(event.type) && event.metric?.id && ['up', 'down'].includes(event.direction);
+    if (!isPriceMove) { combined.push({ ...event, cooldownKeys: [event.cooldownKey].filter(Boolean) }); continue; }
+    const key = `${event.metric.id}:${event.direction}`;
+    const existing = byAssetAndDirection.get(key);
+    const moveInfo = event.type === 'window-move'
+      ? { periodLabel: event.periodLabel, move: event.move, beforePrice: event.beforePrice, cooldownKey: event.cooldownKey }
+      : null;
+    if (!existing) {
+      const first = { ...event, cooldownKeys: [event.cooldownKey].filter(Boolean), windowMoves: moveInfo ? [moveInfo] : [] };
+      byAssetAndDirection.set(key, first);
+      combined.push(first);
+      continue;
+    }
+    // Keep a sudden-move event as the primary explanation; attach timeframe
+    // moves to it so one asset does not generate a burst of nearly identical alerts.
+    if (event.type === 'shock' && existing.type !== 'shock') {
+      const at = combined.indexOf(existing);
+      const promoted = { ...event, severity: Math.max(existing.severity, event.severity), cooldownKeys: [...existing.cooldownKeys], windowMoves: [...existing.windowMoves] };
+      if (event.cooldownKey && !promoted.cooldownKeys.includes(event.cooldownKey)) promoted.cooldownKeys.push(event.cooldownKey);
+      if (at >= 0) combined[at] = promoted;
+      byAssetAndDirection.set(key, promoted);
+      continue;
+    }
+    if (event.cooldownKey && !existing.cooldownKeys.includes(event.cooldownKey)) existing.cooldownKeys.push(event.cooldownKey);
+    if (moveInfo && !existing.windowMoves.some((row) => row.periodLabel === moveInfo.periodLabel)) existing.windowMoves.push(moveInfo);
+    existing.severity = Math.max(existing.severity, event.severity);
+    if (event.impact && !existing.impact) existing.impact = event.impact;
+  }
+  return combined;
+}
+
+function buildAlertMessage(event, data) {
+  const level = event.severity >= 3 ? '🚨 بحرانی' : event.severity === 2 ? '⚠️ مهم' : '🔎 رصد';
+  const sign = event.direction === 'up' ? '🟢' : event.direction === 'down' ? '🔴' : '🟠';
+  const lines = [`${level} <b>ArzPulse · هشدار خودکار بازار</b>`, `${sign} <b>${html(event.title)}</b>`];
+  if (event.details) lines.push(`<blockquote>${html(event.details)}</blockquote>`);
+  const metric = event.metric;
+  const rows = [];
+  if (metric?.price != null && positive(metric.price)) {
+    let shownPrice;
+    if (metric.currency === 'IRR') {
+      const rate = getUsdtIrrRate(data);
+      shownPrice = `${formatPrice(metric.price)} ریال${rate > 0 ? ` · ${formatUsd(metric.price, rate)}` : ''}`;
+    } else if (metric.currency === 'USD') shownPrice = `$${formatNumber(metric.price, metric.price < 1 ? 8 : 2)}`;
+    else if (metric.currency === 'funding') shownPrice = `${(Number(metric.price) * 100).toFixed(4)}٪`;
+    else if (metric.currency === 'points') shownPrice = `${formatNumber(metric.price, 0)} از ۱۰۰`;
+    else shownPrice = formatNumber(metric.price, 2);
+    rows.push(`قیمت/مقدار فعلی   ${shownPrice}`);
+  }
+  if (event.move != null && event.type === 'shock') rows.push(`تغییر از Snapshot قبلی   ${event.move > 0 ? '+' : ''}${formatNumber(event.move, 2)}٪`);
+  if (event.type === 'window-move' && !event.windowMoves?.length && event.move != null) rows.push(`تغییر بازهٔ ${event.periodLabel}   ${event.move > 0 ? '+' : ''}${formatNumber(event.move, 2)}٪`);
+  for (const move of event.windowMoves || []) rows.push(`تغییر ${move.periodLabel} اخیر   ${move.move > 0 ? '+' : ''}${formatNumber(move.move, 2)}٪`);
+  if (event.move != null && event.type === 'open-interest') rows.push(`تغییر Open Interest   ${event.move > 0 ? '+' : ''}${formatNumber(event.move, 2)}٪`);
+  if (event.dailyChange != null) rows.push(`تغییر ۲۴ساعته   ${event.dailyChange > 0 ? '+' : ''}${formatNumber(event.dailyChange, 2)}٪`);
+  if (metric?.high && metric?.low && metric.high > metric.low) rows.push(`بازهٔ روز   ${formatNumber(metric.low, 4)} — ${formatNumber(metric.high, 4)}`);
+  if (metric?.volumeUsd > 0) rows.push(`حجم ۲۴ساعت   ${formatCompactUsd(metric.volumeUsd)}`);
+  else if (metric?.volume > 0) rows.push(`حجم   ${formatNumber(metric.volume, 2)}`);
+  if (metric?.trades > 0) rows.push(`تعداد معاملات   ${formatNumber(metric.trades, 0)}`);
+  if (metric?.source) rows.push(`منبع   ${html(metric.source)}`);
+  if (metric?.timestamp || data?.timestamp) rows.push(`Snapshot   ${html(formatTime(metric.timestamp || data.timestamp))}`);
+  if (rows.length) lines.push(`<pre><code>${rows.join('\n')}</code></pre>`);
+  if (event.impact) lines.push(`<blockquote><b>برداشت بازار</b>
+${html(event.impact)}</blockquote>`);
+  const context = data?.marketContext || {};
+  const global = context.global;
+  if (global && (global.btcDominance != null || global.ethDominance != null)) {
+    lines.push(`<blockquote>کانتکست: دامیننس BTC ${global.btcDominance != null ? `${formatNumber(global.btcDominance, 2)}٪` : '—'} · ETH ${global.ethDominance != null ? `${formatNumber(global.ethDominance, 2)}٪` : '—'} · ارزش کل بازار ${positive(global.totalMarketCapUsd) ? formatCompactUsd(global.totalMarketCapUsd) : '—'}</blockquote>`);
+  }
+  lines.push('<i>هشدار از داده‌های Snapshot ساخته شده است و توصیهٔ خرید یا فروش نیست. تأخیر منبع و نقدشوندگی را بررسی کن.</i>');
+  return lines.join('\n\n');
+}
+
+async function processAutomaticAlerts(env) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.SETTINGS_KV) {
+    console.warn('[alerts] TELEGRAM_BOT_TOKEN or SETTINGS_KV is missing; automatic alerts skipped.');
+    return { sent: 0, reason: 'configuration-missing' };
+  }
+  const data = await fetchLatestData();
+  if (!data || isDataStale(data, { ...env, DATA_STALE_MINUTES: String(Math.min(20, currentStaleMinutes(env))) })) {
+    console.warn('[alerts] fresh market snapshot unavailable; retaining previous baseline.');
+    return { sent: 0, reason: 'snapshot-unavailable-or-stale' };
+  }
+  const current = makeAlertSnapshot(data);
+  let previous = null;
+  let cooldowns = {};
+  let alertHistory = [];
+  try {
+    const [state, storedCooldowns] = await Promise.all([
+      env.SETTINGS_KV.get(ALERT_STATE_KEY, { type: 'json' }),
+      env.SETTINGS_KV.get(ALERT_COOLDOWNS_KEY, { type: 'json' })
+    ]);
+    cooldowns = storedCooldowns && typeof storedCooldowns === 'object' ? storedCooldowns : {};
+    if (state && state.version === 2 && state.snapshot) {
+      previous = state.snapshot;
+      alertHistory = Array.isArray(state.history) ? state.history : [];
+    } else {
+      // Migrate the split v1 keys only if the consolidated v2 state is not present.
+      // This keeps existing deployments' baselines and rolling history intact.
+      [previous, alertHistory] = await Promise.all([
+        env.SETTINGS_KV.get(ALERT_SNAPSHOT_KEY, { type: 'json' }),
+        env.SETTINGS_KV.get(ALERT_HISTORY_KEY, { type: 'json' })
+      ]);
+      if (!Array.isArray(alertHistory)) alertHistory = [];
+    }
+  } catch (error) {
+    console.error('[alerts:kv] baseline read failed:', error.message);
+    throw new Error(`Automatic alerts paused because KV read failed: ${error.message}`);
+  }
+  const snapshotGap = previous?.timestamp ? Date.parse(current.timestamp) - Date.parse(previous.timestamp) : 0;
+  const gapTooLong = !Number.isFinite(snapshotGap) || snapshotGap <= 0 || snapshotGap > ALERT_SNAPSHOT_MAX_AGE_MS;
+  const hasNewSnapshot = !previous?.timestamp || Date.parse(current.timestamp) > Date.parse(previous.timestamp);
+  if (!hasNewSnapshot) return { sent: 0, reason: 'snapshot-unchanged' };
+  if (!previous || gapTooLong) {
+    await env.SETTINGS_KV.put(ALERT_STATE_KEY, JSON.stringify({ version: 2, snapshot: current, history: [current] }));
+    console.log(`[alerts] baseline ${previous ? 'reset after long gap' : 'seeded'} at ${current.timestamp}; no initial alerts sent.`);
+    return { sent: 0, reason: previous ? 'baseline-reset' : 'baseline-seeded' };
+  }
+
+  const historyCutoff = Date.parse(current.timestamp) - (6 * 60 * 60 * 1000 + 50 * 60 * 1000);
+  const retainedHistory = alertHistory.filter((snapshot) => {
+    const stamp = Date.parse(snapshot?.timestamp || '');
+    return Number.isFinite(stamp) && stamp >= historyCutoff && stamp < Date.parse(current.timestamp);
+  });
+  const nextHistory = [...retainedHistory, current].slice(-80);
+  const events = [...buildAlertEvents(previous, current, env), ...buildWindowMoveEvents(current, retainedHistory, env)]
+    .sort((a, b) => b.severity - a.severity || Math.abs(Number(b.move || b.dailyChange || 0)) - Math.abs(Number(a.move || a.dailyChange || 0)))
+    .slice(0, ALERT_MAX_EVENTS_PER_RUN * 8);
+  const persistBaseline = async () => env.SETTINGS_KV.put(
+    ALERT_STATE_KEY,
+    JSON.stringify({ version: 2, snapshot: current, history: nextHistory })
+  );
+  if (!events.length) {
+    await persistBaseline();
+    return { sent: 0, reason: 'no-threshold-crossings' };
+  }
+  const now = Date.now();
+  const cooldownMs = Math.max(15, Math.min(240, Number.parseInt(env.ALERT_COOLDOWN_MINUTES || '25', 10) || 25)) * 60 * 1000;
+  const readyRaw = events.filter((event) => now - Number(cooldowns[event.cooldownKey] || 0) >= Math.max(cooldownMs, Number(event.cooldownMinutes || 0) * 60 * 1000));
+  if (!readyRaw.length) {
+    await persistBaseline();
+    return { sent: 0, reason: 'cooldown' };
+  }
+  const ready = combinePriceMoveEvents(readyRaw)
+    .sort((a, b) => b.severity - a.severity || Math.abs(Number(b.move || b.dailyChange || 0)) - Math.abs(Number(a.move || a.dailyChange || 0)))
+    .slice(0, ALERT_MAX_EVENTS_PER_RUN);
+  const recipients = await getAlertRecipients(env);
+  if (!recipients.length) {
+    // Keep the baseline current when no destinations exist; enabling alerts later
+    // must not deliver a backlog of historical moves.
+    await persistBaseline();
+    console.log('[alerts] thresholds crossed but no alert destinations are enabled. Use /alertson in a private chat or keep a /setchannel destination enabled.');
+    return { sent: 0, reason: 'no-recipients' };
+  }
+  const eligibleEvents = ready.filter((event) => recipients.some((recipient) => event.severity >= alertLevelNumber(recipient.level)));
+  if (!eligibleEvents.length) {
+    await persistBaseline();
+    return { sent: 0, reason: 'filtered-by-recipient-level' };
+  }
+
+  let sendCount = 0;
+  const newCooldowns = { ...cooldowns };
+  for (const event of eligibleEvents) {
+    const message = buildAlertMessage(event, data);
+    let delivered = 0;
+    for (const recipient of recipients) {
+      if (event.severity < alertLevelNumber(recipient.level)) continue;
+      try {
+        const result = await sendMessage(recipient.chatId, message, env.TELEGRAM_BOT_TOKEN);
+        if (result) { delivered += 1; sendCount += 1; }
+      } catch (error) {
+        console.error(`[alerts] send failed for ${recipient.chatId} (${event.id}):`, error.message);
+      }
+    }
+    if (delivered > 0) for (const key of (event.cooldownKeys || [event.cooldownKey]).filter(Boolean)) newCooldowns[key] = now;
+  }
+  // Retain only active cooldown entries; avoid unbounded KV growth.
+  for (const [key, value] of Object.entries(newCooldowns)) if (now - Number(value || 0) > 7 * 86400000) delete newCooldowns[key];
+  const cooldownsJson = JSON.stringify(newCooldowns);
+  if (cooldownsJson !== JSON.stringify(cooldowns)) await env.SETTINGS_KV.put(ALERT_COOLDOWNS_KEY, cooldownsJson);
+  // If every send failed, leave the previous baseline in place so the same alert
+  // can be retried on the next scheduled run instead of silently disappearing.
+  if (sendCount > 0) await persistBaseline();
+  console.log(`[alerts] ${sendCount} alert message(s) sent from ${eligibleEvents.length} eligible event(s) to ${recipients.length} destination(s).`);
+  return { sent: sendCount, events: eligibleEvents.length };
+}
+
+function alertsHelpMessage(preference, isChannel) {
+  const enabled = preference?.enabled === true || (isChannel && preference?.enabled !== false);
+  const level = ['low', 'medium', 'high'].includes(preference?.level) ? preference.level : 'medium';
+  const levelFa = ({ low: 'همه هشدارها', medium: 'مهم و بحرانی', high: 'فقط بحرانی' })[level];
+  return [
+    '🛰 <b>ArzPulse · تنظیم هشدارهای خودکار</b>',
+    `<blockquote>وضعیت این چت: <b>${enabled ? 'فعال' : 'غیرفعال'}</b> · حساسیت: <b>${levelFa}</b></blockquote>`,
+    '<b>چه چیزی هشدار می‌دهد؟</b>',
+    '• جهش/افت غیرمعمول بین Snapshotها با زمان، قیمت، تغییر، حجم، منبع و توضیح ریسک',
+    '• عبور تغییر ۲۴ساعته از آستانهٔ مهم',
+    '• تغییر شدید Fear & Greed یا ارزش کل بازار',
+    '• Funding غیرعادی، تغییر سریع Open Interest و حرکت فراگیر رمزارزها',
+    '',
+    `<pre><code>/alertson          فعال‌سازی برای این چت
+/alertsoff         غیرفعال‌سازی هشدار این چت
+/alertlevel low    همه هشدارها
+/alertlevel medium مهم و بحرانی
+/alertlevel high   فقط بحرانی
+/alerts            وضعیت و راهنما</code></pre>`,
+    '<blockquote>هشدارها با مقایسهٔ Snapshotهای متوالی، آستانه‌های قابل تنظیم و وقفهٔ ضدتکرار ساخته می‌شوند. دادهٔ کهنه باعث تولید هشدار قیمت نمی‌شود. هشدار بازار توصیهٔ سرمایه‌گذاری نیست.</blockquote>'
+  ].join('\n');
+}
+
 function parseCommand(text) {
   const match = String(text || '').trim().match(/^\/([a-z0-9_]+)(?:@[a-z0-9_]+)?(?:\s+([\s\S]*))?$/i);
   if (!match) return null;
@@ -376,6 +841,8 @@ function getWelcomeMessage() {
 /crypto   فهرست رمزارزهای جهانی
 /macro    شاخص‌های کلان و محرک‌های بازار
 /sentiment ترس‌وطمع و احساسات بازار
+/alerts   تنظیم هشدار خودکار
+/alertson فعال‌سازی هشدار
 /chart    راهنمای نمودار
 /chartall نمودارهای منتخب
 /refresh  درخواست آپدیت دستی
@@ -401,7 +868,11 @@ function getHelpMessage() {
 /status
 /crypto   رمزارزهای بیشتر + حجم و تغییر جهانی
 /macro    احساسات، دامیننس، فاندینگ و شاخص‌های کلان
-/sentiment شاخص ترس و طمع</code></pre>`,
+/sentiment شاخص ترس و طمع
+/alerts   وضعیت و تنظیم هشدار خودکار
+/alertson فعال‌سازی هشدار
+/alertsoff غیرفعال‌سازی هشدار
+/alertlevel low|medium|high سطح حساسیت</code></pre>`,
     '<b>نمودارهای تاریخی</b>',
     `<pre><code>/chart BTC 24h
 /chart SOL 7d
@@ -1006,6 +1477,52 @@ async function handleCommand(message, command, env) {
       await sendMessage(chatId, generateSentimentMessage(data), token);
       return;
     }
+    case 'alerts': {
+      if (!env.SETTINGS_KV) { await sendMessage(chatId, '⚠️ ذخیره‌سازی هشدارها تنظیم نشده است؛ Binding با نام <code>SETTINGS_KV</code> لازم است.', token); return; }
+      try {
+        const preferences = await getAlertPreferences(env);
+        const preference = preferences[String(chatId)];
+        const channels = await getChannelSettings(env);
+        await sendMessage(chatId, alertsHelpMessage(preference, channels.includes(String(chatId))), token);
+      } catch (error) { await sendMessage(chatId, `❌ خواندن تنظیمات هشدار ناموفق بود.\n<blockquote>${html(error.message)}</blockquote>`, token); }
+      return;
+    }
+    case 'alertson':
+    case 'alertsoff': {
+      if (!env.SETTINGS_KV) { await sendMessage(chatId, '⚠️ ذخیره‌سازی هشدارها تنظیم نشده است؛ Binding با نام <code>SETTINGS_KV</code> لازم است.', token); return; }
+      if (message.chat.type !== 'private' && !await isChatAdmin(message, env)) {
+        await sendMessage(chatId, '🔐 برای تغییر هشدارهای گروه، دستور را مدیر گروه اجرا کند.', token); return;
+      }
+      try {
+        const preferences = await getAlertPreferences(env);
+        const old = preferences[String(chatId)] || {};
+        const enabled = command.name === 'alertson';
+        preferences[String(chatId)] = { enabled, level: ['low', 'medium', 'high'].includes(old.level) ? old.level : 'medium', updatedAt: new Date().toISOString() };
+        await saveAlertPreferences(env, preferences);
+        await sendMessage(chatId, enabled
+          ? '✅ <b>هشدارهای خودکار فعال شدند.</b>\n<blockquote>از این پس هشدارهای مهم قیمت، بازار، ترس‌وطمع، Funding و Open Interest در این چت ارسال می‌شوند. برای تنظیم حساسیت <code>/alertlevel</code> را بفرست.</blockquote>'
+          : '🛑 <b>هشدارهای خودکار این چت غیرفعال شدند.</b>\n<blockquote>اگر این چت قبلاً گزارش ساعتی دریافت می‌کرد، آن گزارش مستقل از هشدارها باقی می‌ماند.</blockquote>', token);
+      } catch (error) { await sendMessage(chatId, `❌ ذخیره تنظیمات هشدار ناموفق بود.\n<blockquote>${html(error.message)}</blockquote>`, token); }
+      return;
+    }
+    case 'alertlevel': {
+      if (!env.SETTINGS_KV) { await sendMessage(chatId, '⚠️ Binding با نام <code>SETTINGS_KV</code> لازم است.', token); return; }
+      const level = String(args[0] || '').toLowerCase();
+      if (!['low', 'medium', 'high'].includes(level)) {
+        await sendMessage(chatId, 'برای تنظیم حساسیت یکی از این گزینه‌ها را بفرست: <code>/alertlevel low</code>، <code>/alertlevel medium</code> یا <code>/alertlevel high</code>.', token); return;
+      }
+      if (message.chat.type !== 'private' && !await isChatAdmin(message, env)) {
+        await sendMessage(chatId, '🔐 برای تغییر حساسیت هشدارهای گروه، دستور را مدیر گروه اجرا کند.', token); return;
+      }
+      try {
+        const preferences = await getAlertPreferences(env);
+        preferences[String(chatId)] = { enabled: true, level, updatedAt: new Date().toISOString() };
+        await saveAlertPreferences(env, preferences);
+        const label = ({ low: 'همه هشدارها', medium: 'هشدارهای مهم و بحرانی', high: 'فقط هشدارهای بحرانی' })[level];
+        await sendMessage(chatId, `✅ حساسیت هشدار تنظیم شد: <b>${label}</b>.\n<blockquote>هشدارها برای این چت فعال هستند. برای توقف از <code>/alertsoff</code> استفاده کن.</blockquote>`, token);
+      } catch (error) { await sendMessage(chatId, `❌ ذخیره سطح هشدار ناموفق بود.\n<blockquote>${html(error.message)}</blockquote>`, token); }
+      return;
+    }
     case 'chart':
       if (args.length < 2) { await sendMessage(chatId, getChartHelpMessage(), token); return; }
       await commandChart(message, args[0].toUpperCase(), args[1].toLowerCase(), token);
@@ -1374,12 +1891,15 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    // This is the existing public `arzpulse-bot` Worker: it now dispatches the
-    // market-data workflow every five minutes while preserving hourly channel reports.
+    // The existing public `arzpulse-bot` Worker dispatches GitHub Actions and
+    // independently evaluates Telegram alert thresholds every five minutes.
     if (event?.cron === '*/5 * * * *') {
-      ctx.waitUntil(dispatchGitHubUpdate(env)
+      const dispatchTask = dispatchGitHubUpdate(env)
         .then(() => console.log('[scheduled] GitHub workflow dispatch accepted for', `${env.GITHUB_OWNER || 'mehrdadmb2'}/${env.GITHUB_REPO || 'ArzPulse'}`, env.GITHUB_WORKFLOW || 'update-prices.yml'))
-        .catch((error) => console.error('[scheduled] market workflow dispatch failed:', error?.stack || error)));
+        .catch((error) => console.error('[scheduled] market workflow dispatch failed:', error?.stack || error));
+      const alertTask = processAutomaticAlerts(env)
+        .catch((error) => console.error('[scheduled] automatic alerts failed:', error?.stack || error));
+      ctx.waitUntil(Promise.allSettled([dispatchTask, alertTask]));
       return;
     }
     // Keep the already configured hourly Telegram channel digest unchanged.

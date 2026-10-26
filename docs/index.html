@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050b12">
-  <meta name="description" content="ArzPulse — interactive market terminal for crypto, gold, oil and global markets.">
+  <meta name="description" content="ArzPulse — interactive crypto, local rates, commodities and global market terminal with sentiment, derivatives context and market signal radar.">
   <meta name="color-scheme" content="dark light">
   <title>ArzPulse | Market Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/app.css?v=11">
+  <link rel="stylesheet" href="assets/app.css?v=13">
   <link rel="stylesheet" href="assets/page-insights-widget.css?v=1">
 
   <!-- GitHub Page Insights: ArzPulse traffic / visitor analytics -->
@@ -24,7 +24,7 @@
       appVersion: 'ArzPulse'
     });
   </script>
-  <script src="assets/app.js?v=11" defer></script>
+  <script src="assets/app.js?v=13" defer></script>
   <script src="assets/page-insights.js?v=1" defer></script>
   <script src="assets/page-insights-widget.js?v=1" defer></script>
 </head>
@@ -265,6 +265,18 @@
           <small class="source-note" data-i18n="contextDisclaimer">Funding and open interest describe derivatives positioning; neither predicts price direction on its own.</small>
         </article>
       </div>
+    </section>
+
+    <section class="signal-radar glass" id="signalRadar" aria-labelledby="signalRadarTitle">
+      <div class="section-row">
+        <div>
+          <div class="eyebrow">AUTOMATED MARKET RADAR</div>
+          <h2 id="signalRadarTitle" data-i18n="marketSignalsTitle">Market signal radar</h2>
+          <p class="section-lead" data-i18n="marketSignalsLead">Rule-based watch signals from sudden moves, breadth, sentiment and derivatives. These are monitoring cues, not predictions.</p>
+        </div>
+        <div class="signal-radar-status"><span class="status-led ok"></span><b id="signalSummary">—</b></div>
+      </div>
+      <div class="signal-grid" id="signalGrid" aria-live="polite"></div>
     </section>
 
     <section class="analytics-layout" id="analytics">

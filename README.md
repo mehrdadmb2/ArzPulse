@@ -5,9 +5,6 @@
 [![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white)](https://github.com/mehrdadmb2/ArzPulse/actions)
 [![Cloudflare Workers](https://img.shields.io/badge/Deployed%20on-Cloudflare%20Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://arzpulse-bot.game-developer-mb.workers.dev)
 [![GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-222222?style=flat-square&logo=github&logoColor=white)](https://mehrdadmb2.github.io/ArzPulse)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/mehrdadmb2/ArzPulse/pulls)
 [![Telegram Bot](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ArzPulseBot)
@@ -18,7 +15,7 @@
 
 ---
 
-> **Professional real-time cryptocurrency, gold, and dollar price monitoring system for the Iranian market** – fetching live prices from Nobitex, storing historical data, providing a modern dashboard, and a powerful Telegram bot with advanced charting capabilities.
+> **ArzPulse is a market-intelligence dashboard and Telegram alert system** for Iranian local markets, global cryptocurrencies, commodities, indices, sentiment and derivatives context — with historical data, per-asset visual identities and configurable event-driven alerts.
 
 **🇬🇧 English** | **🇮🇷 فارسی**
 
@@ -28,12 +25,12 @@
 
 **ArzPulse** is a complete, zero-cost price intelligence platform that:
 
-- 📊 Fetches real-time prices for **BTC**, **ETH**, **USDT**, **NOT**, and **Gold (18K)** from **Nobitex**
+- 📊 Tracks Iranian-market prices plus a broad global crypto watchlist (including BTC, ETH, BNB, SOL, XRP and more)
 - 🏆 Calculates Gold price per gram using **XAUT/USDT** and **USDT/IRR** exchange rates
 - 💵 Displays **Dollar (USD)** price based on USDT/IRR rate
 - 💾 Stores historical data **inside the GitHub repository** (no external database needed)
-- 🤖 Provides a **Telegram bot** with multiple commands, professional charts, and auto-send to channels
-- 🌐 Serves a **modern, glassmorphism UI dashboard** with animated background and interactive charts
+- 🤖 Provides a Telegram bot with expanded crypto/macro commands, alert subscriptions and detailed automatic event alerts
+- 🌐 Serves a responsive **market terminal** with individually themed asset cards, crypto logos, sparklines, market drivers and signal radar
 - ⏱️ Auto-updates every **5 minutes** via the Cloudflare market-updater Worker dispatching GitHub Actions
 - 📈 **24-hour, weekly, and monthly charts** for all assets
 - 🔄 **Automatic channel updates** – send price reports to Telegram channels every hour through a separate Cloudflare Worker
@@ -43,14 +40,16 @@
 ## ✨ Features | ویژگی‌ها
 
 ### 🌐 Website (Dashboard)
-- Real-time price cards with buy/sell/last prices, 24h change, volume, high/low
+- Distinct asset-card themes with coin logos or accessible fallbacks, per-token colors, market-specific backgrounds, sparklines and daily range position
 - **Gold price** (18K per gram) with USDT reference
 - **Dollar price** (USD/IRR) based on USDT rate
 - **Interactive charts** (24h, 7d, 30d) with Chart.js
 - **Currency toggle** – switch between IRR (Rial) and USD
-- **Glassmorphism UI** with animated particle background
+- **Glassmorphism UI**, animated ambience, hover-reactive cards and richer market-status panels
 - **Fully responsive** – works on mobile, tablet, and desktop
-- **Fallback mechanism** – if Nobitex API fails, uses cached data
+- **Market signal radar** – flags notable crypto moves, broad market direction, extreme Fear & Greed, global market-cap changes, futures funding and macro moves
+- **Market drivers** – total market cap/volume, BTC/ETH dominance, sentiment, BTC open interest, futures funding and cross-asset context
+- **Data resilience** – stale-source markers and preserved prior snapshots when a provider temporarily fails
 
 ### 🤖 Telegram Bot
 **Core Commands:**
@@ -61,6 +60,11 @@
 - `/start` – Welcome message with command list
 - `/help` – Full help guide
 - `/status` – Show last update status
+- `/crypto` – Global crypto board with USD prices, IRR estimates, daily changes and volume
+- `/macro` – Macro assets, market cap, BTC/ETH dominance, sentiment and derivatives context
+- `/sentiment` – Fear & Greed and broader market sentiment
+- `/alerts`, `/alertson`, `/alertsoff` – Manage automatic alert subscriptions
+- `/alertlevel low|medium|high` – Select alert sensitivity
 
 **Advanced Charting:**
 - `/chart [SYMBOL] [PERIOD]` – Get professional chart
@@ -73,11 +77,28 @@
 - `/setchannel` – Set current channel/group for auto-updates
 - `/stopchannel` – Stop auto-updates to current channel/group
 - **Auto-send** – Every hour, prices are automatically sent to configured channels
+- **Smart alerts** – sudden price shocks, rolling 15-minute/1-hour/6-hour moves, daily threshold crossings, Fear & Greed jumps, market-cap moves, funding, open interest and broad-market breadth
+- **Alert cooldowns** – merge same-asset moves into one detailed message and limit repeated notifications
 
 **Smart Features:**
 - **Countdown timer** – When data is stale, the bot triggers GitHub Action and shows a live countdown (45 seconds)
 - **HTML formatting** – Bold, italic, code blocks, strikethrough, underline, and links
 - **Multi-currency display** – Prices shown in both IRR and USD
+
+
+### 🛰️ Smart Alerts & Market Context
+- The existing five-minute Worker schedule compares fresh snapshots; the first run seeds a baseline without emitting false initial alerts.
+- Sudden moves are compared across consecutive snapshots and rolling **15-minute, 1-hour and 6-hour** windows.
+- Alerts also monitor 24-hour threshold crossings, Fear & Greed changes, total crypto market-cap movements, BTC/ETH funding, BTC open interest and market breadth.
+- Alert messages include severity, asset, movement, period, current value, available 24-hour volume/range/trade count, source, timestamp and explanatory market context.
+- `/alerts` shows the configuration help; use `/alertson` in a private chat and `/alertlevel low`, `/alertlevel medium` or `/alertlevel high` to choose sensitivity. Registered channel destinations can use `/alertsoff` to disable alerts without disabling hourly reports.
+- Defaults are designed as monitoring thresholds, not trading signals. Provider delays, market liquidity and independent confirmation still matter.
+
+### 🎨 Asset-specific UI
+- Crypto cards use individual color palettes, layered backgrounds, logo treatments, watermarks, range bars and sparklines.
+- The market signal radar highlights unusual moves, broad crypto direction, sentiment extremes, derivatives positioning and large macro-market changes.
+- The dashboard refreshes the latest JSON snapshot every five minutes, while historical charts use the repository history files.
+- GitHub Page Insights remains integrated near the bottom of the page.
 
 ### 📦 Data Storage
 - All price data stored as JSON files inside the repository (`docs/data/`)
@@ -97,12 +118,12 @@
 
 | Component | Technology |
 |-----------|------------|
-| **Frontend** | HTML5 + CSS3 + JavaScript (Vanilla) + Chart.js + Font Awesome |
+| **Frontend** | HTML5 + CSS3 + vanilla JavaScript + inline SVG charts |
 | **Hosting** | GitHub Pages (docs/ folder) |
 | **Data Storage** | GitHub repository (JSON files) |
 | **CI/CD** | GitHub Actions (cron + workflow_dispatch) |
 | **Telegram Bot** | Cloudflare Workers (JavaScript) |
-| **State Storage** | Cloudflare KV (for channel settings) |
+| **State Storage** | Cloudflare KV (channel settings, alert preferences, alert history and cooldowns) |
 | **Price Source** | Nobitex REST API |
 | **Chart Generation** | QuickChart.io API |
 | **Typography** | Vazirmatn (Persian) + System UI (English) |

@@ -59,7 +59,7 @@
       heroText:'A dense, responsive terminal for crypto, local rates, commodities and global indices — with clear context, live status and a high-signal visual system.',
       coverage:'Coverage',trackedAssets:'tracked assets',exploreMarkets:'Explore markets',share:'Share',dataLayer:'GitHub data layer',
       updateSchedule:'Updated by automation',galaxyCaption:'Interactive market pulse',overviewTitle:'Fast market view',
-      marketDrivers:'Market drivers & sentiment',marketDriversLead:'Global crypto breadth, positioning, sentiment and macro context. Indicators are informative, not predictions.',fearGreed:'Fear & Greed',globalCap:'Total crypto market cap',globalVolume:'24h global volume',btcDominance:'BTC / ETH dominance',capChange:'Market cap 24h',cryptoBreadth:'Global crypto breadth',fundingRates:'Perpetual funding',openInterest:'BTC open interest',positiveNegative:'Advance / decline',sentimentSource:'Source: Alternative.me · daily sentiment index',contextDisclaimer:'Funding and open interest describe derivatives positioning; neither predicts price direction on its own.',
+      marketDrivers:'Market drivers & sentiment',marketDriversLead:'Global crypto breadth, positioning, sentiment and macro context. Indicators are informative, not predictions.',marketSignalsTitle:'Market signal radar',marketSignalsLead:'Rule-based watch signals from sudden moves, breadth, sentiment and derivatives. These are monitoring cues, not predictions.',noHighSignals:'No high-threshold conditions are active. Markets are being monitored.',signalCritical:'Critical',signalWarning:'Important',signalWatch:'Watch',signalSource:'Source',signalUpdated:'Updated',signalMove:'24h move',fearGreed:'Fear & Greed',globalCap:'Total crypto market cap',globalVolume:'24h global volume',btcDominance:'BTC / ETH dominance',capChange:'Market cap 24h',cryptoBreadth:'Global crypto breadth',fundingRates:'Perpetual funding',openInterest:'BTC open interest',positiveNegative:'Advance / decline',sentimentSource:'Source: Alternative.me · daily sentiment index',contextDisclaimer:'Funding and open interest describe derivatives positioning; neither predicts price direction on its own.',
       filterMarket:'Market',all:'All',crypto:'Crypto',commodities:'Commodities',indices:'Indices',unit:'Unit',comfortable:'Comfortable',compact:'Compact',
       marketStatusTitle:'Market status',marketStatusLead:'A compact view of breadth, momentum, pressure and data freshness.',pulseScoreLabel:'Pulse score',
       breadth:'Market breadth',momentum:'Momentum',volatility:'Volatility',dataHealth:'Data health',avgChange:'Average change',
@@ -82,7 +82,7 @@
       heroText:'ترمینالی متراکم و واکنش‌گرا برای رمزارز، نرخ‌های داخلی، کالاها و شاخص‌های جهانی؛ با وضعیت لحظه‌ای و اطلاعات قابل استفاده.',
       coverage:'پوشش',trackedAssets:'دارایی تحت رصد',exploreMarkets:'مشاهده بازارها',share:'اشتراک‌گذاری',dataLayer:'لایه داده GitHub',
       updateSchedule:'به‌روزرسانی خودکار',galaxyCaption:'نبض تعاملی بازار',overviewTitle:'نمای سریع بازار',
-      marketDrivers:'محرک‌ها و احساسات بازار',marketDriversLead:'عرض بازار جهانی کریپتو، موقعیت قراردادها، احساسات و شاخص‌های کلان. این شاخص‌ها اطلاعاتی‌اند، نه پیش‌بینی.',fearGreed:'ترس و طمع',globalCap:'ارزش کل بازار کریپتو',globalVolume:'حجم جهانی ۲۴ ساعته',btcDominance:'دامیننس BTC / ETH',capChange:'تغییر ارزش بازار ۲۴ ساعت',cryptoBreadth:'عرض بازار جهانی کریپتو',fundingRates:'فاندینگ قراردادهای دائمی',openInterest:'موقعیت باز بیت‌کوین',positiveNegative:'صعودی / نزولی',sentimentSource:'منبع: Alternative.me · شاخص روزانه احساسات',contextDisclaimer:'فاندینگ و موقعیت باز رفتار بازار مشتقه را نشان می‌دهند و به‌تنهایی جهت قیمت را پیش‌بینی نمی‌کنند.',
+      marketDrivers:'محرک‌ها و احساسات بازار',marketDriversLead:'عرض بازار جهانی کریپتو، موقعیت قراردادها، احساسات و شاخص‌های کلان. این شاخص‌ها اطلاعاتی‌اند، نه پیش‌بینی.',marketSignalsTitle:'رادار سیگنال بازار',marketSignalsLead:'هشدارهای قاعده‌محور بر اساس جهش قیمت، عرض بازار، احساسات و مشتقات؛ این‌ها ابزار رصد هستند، نه پیش‌بینی.',noHighSignals:'در حال حاضر شرط هشدار قوی فعالی دیده نمی‌شود؛ پایش بازار ادامه دارد.',signalCritical:'بحرانی',signalWarning:'مهم',signalWatch:'رصد',signalSource:'منبع',signalUpdated:'به‌روزرسانی',signalMove:'تغییر ۲۴ساعته',fearGreed:'ترس و طمع',globalCap:'ارزش کل بازار کریپتو',globalVolume:'حجم جهانی ۲۴ ساعته',btcDominance:'دامیننس BTC / ETH',capChange:'تغییر ارزش بازار ۲۴ ساعت',cryptoBreadth:'عرض بازار جهانی کریپتو',fundingRates:'فاندینگ قراردادهای دائمی',openInterest:'موقعیت باز بیت‌کوین',positiveNegative:'صعودی / نزولی',sentimentSource:'منبع: Alternative.me · شاخص روزانه احساسات',contextDisclaimer:'فاندینگ و موقعیت باز رفتار بازار مشتقه را نشان می‌دهند و به‌تنهایی جهت قیمت را پیش‌بینی نمی‌کنند.',
       filterMarket:'بازار',all:'همه',crypto:'کریپتو',commodities:'کالاها',indices:'شاخص‌ها',unit:'واحد',comfortable:'راحت',compact:'فشرده',
       marketStatusTitle:'وضعیت بازار',marketStatusLead:'نمایی فشرده از عرض بازار، مومنتوم، فشار و تازگی داده.',pulseScoreLabel:'امتیاز نبض',
       breadth:'عرض بازار',momentum:'مومنتوم',volatility:'نوسان',dataHealth:'سلامت داده',avgChange:'میانگین تغییر',
@@ -163,6 +163,56 @@
     if(Math.abs(v)>=1e9) return `$${(v/1e9).toFixed(2)}B`;
     if(Math.abs(v)>=1e6) return `$${(v/1e6).toFixed(2)}M`;
     return `$${new Intl.NumberFormat('en-US',{maximumFractionDigits:v<1?6:2}).format(v)}`;
+  }
+
+  function renderSignalRadar(){
+    const grid=$('#signalGrid'); if(!grid) return;
+    const signals=[];
+    const crypto=Object.entries(latest?.globalCrypto||{}).map(([symbol,item])=>({symbol,...item})).filter(x=>!x.stale&&Number(x.last)>0&&Number.isFinite(Number(x.change)));
+    const movers=crypto.filter(x=>Math.abs(Number(x.change))>=5).sort((a,b)=>Math.abs(Number(b.change))-Math.abs(Number(a.change))).slice(0,3);
+    if(movers.length){
+      for(const item of movers){
+        const meta=META[item.symbol]||{name:item.symbol,fa:item.symbol,short:item.symbol,color:'89,216,255'};
+        const move=Number(item.change),severity=Math.abs(move)>=9?'critical':'warning';
+        signals.push({key:`mover-${item.symbol}`,symbol:item.symbol,color:meta.color,severity,title:`${lang==='fa'?meta.fa:meta.name} · ${move>0?(lang==='fa'?'جهش روزانه':'Daily surge'):(lang==='fa'?'افت روزانه':'Daily drop')}`,value:formatPct(move),body:lang==='fa'?`تغییر ۲۴ساعته از آستانه ${Math.abs(move)>=9?'۹٪':'۵٪'} عبور کرده است. حجم معاملات و وضعیت بازار مشتقه را هم بررسی کن.`:`The 24h move crossed the ${Math.abs(move)>=9?'9%':'5%'} watch threshold. Check volume and derivatives context as well.`,source:item.source||'Binance Spot',extra:Number(item.volumeUsd)>0?`${formatUSD(item.last)} · ${formatUSD(item.volumeUsd)} volume`:`${formatUSD(item.last)}`});
+      }
+    }
+    const total=crypto.length,up=crypto.filter(x=>Number(x.change)>=2).length,down=crypto.filter(x=>Number(x.change)<=-2).length;
+    if(total>=12 && Math.max(up,down)/total>=.75){
+      const downSide=down>up, color=downSide?'255,113,133':'57,217,166';
+      signals.push({key:'market-breadth',symbol:'BREADTH',color,severity:'critical',title:lang==='fa'?(downSide?'افت فراگیر بازار کریپتو':'صعود فراگیر بازار کریپتو'):(downSide?'Broad crypto sell-off':'Broad crypto rally'),value:`${downSide?down:up}/${total}`,body:lang==='fa'?`${Math.round(Math.max(up,down)/total*100)}٪ از رمزارزهای معتبر تغییر روزانه بیش از ۲٪ در یک جهت دارند؛ احتمال هم‌بستگی سبد بالاتر است.`:`${Math.round(Math.max(up,down)/total*100)}% of tracked coins have daily moves beyond 2% in the same direction; portfolio correlation risk may be elevated.`,source:'ArzPulse · breadth calculation',extra:`${up} ↑ · ${down} ↓`});
+    }
+    const context=latest?.marketContext||{};
+    const fg=context.fearGreed;
+    if(fg&&!fg.stale&&(Number(fg.value)<=20||Number(fg.value)>=80)){
+      const fearful=Number(fg.value)<=20;
+      signals.push({key:'fear-greed',symbol:'F&G',color:fearful?'255,113,133':'245,197,91',severity:'warning',title:lang==='fa'?(fearful?'ترس شدید در احساسات بازار':'طمع شدید در احساسات بازار'):(fearful?'Extreme fear sentiment':'Extreme greed sentiment'),value:`${Number(fg.value)}/100`,body:lang==='fa'?'این شاخص رفتار احساسی بازار را نشان می‌دهد و نباید به تنهایی مبنای تصمیم خرید و فروش قرار گیرد.':'Sentiment is at an extreme. This indicator is not a standalone buy/sell signal.',source:fg.source||'Alternative.me',extra:fg.classification||'—'});
+    }
+    const global=context.global;
+    if(global&&!global.stale&&Math.abs(Number(global.marketCapChange24h))>=3){
+      const change=Number(global.marketCapChange24h);
+      signals.push({key:'market-cap',symbol:'TOTAL',color:change>=0?'57,217,166':'255,113,133',severity:Math.abs(change)>=5?'critical':'warning',title:lang==='fa'?'حرکت قابل‌توجه ارزش کل کریپتو':'Material move in total crypto market cap',value:formatPct(change),body:lang==='fa'?'تغییر ارزش کل بازار را همراه حجم جهانی و دامیننس BTC/ETH بررسی کن؛ این شاخص به‌تنهایی جهت بازار را مشخص نمی‌کند.':'Check this alongside global volume and BTC/ETH dominance; this metric alone does not determine market direction.',source:global.source||'Global crypto stats',extra:formatUSD(global.totalMarketCapUsd)});
+    }
+    const derivatives=context.derivatives||{};
+    for(const symbol of ['BTC','ETH']){
+      const item=derivatives[symbol]; const rate=Number(item?.fundingRate);
+      if(item&&!item.stale&&Number.isFinite(rate)&&Math.abs(rate)>=.0005){
+        const color=rate>=0?'243,184,74':'98,126,234';
+        signals.push({key:`funding-${symbol}`,symbol,color,severity:Math.abs(rate)>=.001?'critical':'warning',title:`${symbol} · ${lang==='fa'?'فاندینگ غیرعادی':'Unusual funding'}`,value:`${(rate*100).toFixed(4)}%`,body:lang==='fa'?(rate>0?'نرخ مثبت یعنی لانگ‌ها معمولاً به شورت‌ها پرداخت می‌کنند. هزینه موقعیت‌گیری را بررسی کن.':'نرخ منفی می‌تواند نشان‌دهنده فشار موقعیت‌های شورت باشد؛ جهت بعدی قیمت قطعی نیست.'):(rate>0?'Positive funding typically means longs pay shorts. Check positioning costs.':'Negative funding can indicate short-side pressure; it does not guarantee the next price move.'),source:item.source||'Binance USD-M Futures',extra:item.nextFundingTime?relativeTime(item.nextFundingTime):'—'});
+      }
+    }
+    for(const key of ['BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY']){
+      const item=latest?.market?.[key];
+      if(!item||item.stale||!Number.isFinite(Number(item.change))||Math.abs(Number(item.change))<1.5) continue;
+      const meta=META[key];
+      signals.push({key:`macro-${key}`,symbol:key,color:meta?.color||'89,216,255',severity:Math.abs(Number(item.change))>=3?'critical':'warning',title:`${lang==='fa'?(meta?.fa||key):(meta?.name||key)} · ${lang==='fa'?'حرکت کلان':'Macro move'}`,value:formatPct(item.change),body:lang==='fa'?'تغییر این شاخص می‌تواند فضای ریسک و دارایی‌های مرتبط را تحت تأثیر قرار دهد؛ به زمان و تأخیر داده دقت کن.':'This instrument may influence related markets and risk sentiment. Check market hours and potential data delay.',source:item.source||'Yahoo Finance',extra:formatUSD(item.last)});
+    }
+    const priority={critical:3,warning:2,watch:1};
+    signals.sort((a,b)=>(priority[b.severity]||0)-(priority[a.severity]||0)||Math.abs(Number.parseFloat(String(b.value).replace('%',''))||0)-Math.abs(Number.parseFloat(String(a.value).replace('%',''))||0));
+    const selected=signals.slice(0,8);
+    const stamp=latest?.timestamp?relativeTime(latest.timestamp):'—';
+    $('#signalSummary').textContent=selected.length?(lang==='fa'?`${selected.length} وضعیت قابل‌توجه بر اساس آخرین Snapshot · داده: ${stamp}`:`${selected.length} notable conditions from latest snapshot · data: ${stamp}`):T('noHighSignals');
+    grid.innerHTML=selected.length?selected.map(signal=>`<article class="signal-card ${signal.severity}" style="--signal:${signal.color}" data-signal="${escapeHtml(signal.key)}"><div class="signal-card-head"><span class="signal-emblem">${escapeHtml(signal.symbol)}</span><span class="signal-severity ${signal.severity}">${signal.severity==='critical'?T('signalCritical'):signal.severity==='warning'?T('signalWarning'):T('signalWatch')}</span></div><h3>${escapeHtml(signal.title)}</h3><strong class="signal-value">${escapeHtml(signal.value)}</strong><p>${escapeHtml(signal.body)}</p><div class="signal-extra"><span>${escapeHtml(signal.extra||'—')}</span><span>${escapeHtml(signal.source||T('signalSource'))}</span></div></article>`).join(''):`<article class="signal-card signal-idle"><div class="signal-card-head"><span class="signal-emblem">✓</span><span class="signal-severity watch">${lang==='fa'?'پایش فعال':'Monitoring'}</span></div><h3>${T('noHighSignals')}</h3><p>${lang==='fa'?'سیگنال بر پایهٔ آستانه‌های تعریف‌شده‌ای که نیاز به توجه فوری داشته باشد شناسایی نشد.':'No monitored threshold currently requires immediate attention.'}</p><div class="signal-extra"><span>${lang==='fa'?'آخرین Snapshot':'Last snapshot'}</span><span>${escapeHtml(stamp)}</span></div></article>`;
   }
 
   function renderMarketContext(){
@@ -305,6 +355,16 @@
     }
   }
 
+  async function refreshLatestSnapshot(){
+    try{
+      const data=await fetchJSON(DATA_URL);
+      if(!data || typeof data!=='object') return;
+      latest=data;
+      renderAll();
+      setHealth(true);
+    }catch(error){ console.warn('[refresh] latest snapshot refresh failed:',error?.message||error); }
+  }
+
   function normalizeHistoryPayload(payload){
     if(Array.isArray(payload)) return payload.flatMap(row=>Array.isArray(row)?normalizeHistoryPayload(row):[row]);
     if(Array.isArray(payload?.data)) return normalizeHistoryPayload(payload.data);
@@ -353,6 +413,7 @@
     renderMarkets();
     renderStatus();
     renderMarketContext();
+    renderSignalRadar();
     renderChartControls();
     renderChart();
     renderStats();
@@ -444,6 +505,13 @@
     return Array.from({length:6},()=>`<div class="overview-tile"><div class="overview-tile-top"><span>Loading</span><span>—</span></div><div class="overview-tile-price">—</div><div class="overview-tile-bottom"><span>—</span><span>—</span></div><div class="overview-spark"></div></div>`).join('');
   }
 
+  const COIN_LOGO_BASE='https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color';
+  function coinLogoMarkup(key,m){
+    if(m.cat!=='crypto') return `<span class="asset-brand-mark non-crypto"><span class="asset-symbol-fallback">${escapeHtml(m.icon)}</span></span>`;
+    const imageSymbol=({XBT:'btc',USDT:'usdt'})[key]||key.toLowerCase();
+    return `<span class="asset-brand-mark"><span class="asset-symbol-fallback">${escapeHtml(m.icon)}</span><img data-coin-logo src="${COIN_LOGO_BASE}/${imageSymbol}.png" alt="${escapeHtml(m.short)} logo" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>`;
+  }
+
   function marketCard(key){
     const a=getAsset(key); if(!a||!a.last) return '';
     const m=META[key], color=m.color, favorite=watchlist.includes(key);
@@ -452,32 +520,46 @@
     const price=escapeHtml(formatPrice(key,a.last));
     const highText=high?escapeHtml(formatPrice(key,high)):'—';
     const lowText=low?escapeHtml(formatPrice(key,low)):'—';
-    const buyText=buy?escapeHtml(formatPrice(key,buy)):'—';
-    const sellText=sell?escapeHtml(formatPrice(key,sell)):'—';
-    const global=isGlobal(key);
+    const global=isGlobal(key), isCrypto=m.cat==='crypto';
     const source=a.source || (global?'Yahoo Finance':'Nobitex');
-    return `<article class="market-card interactive" data-key="${key}" style="--asset:${color}" tabindex="0">
+    const rangeHigh=Number(a.globalQuote?.high||high), rangeLow=Number(a.globalQuote?.low||low);
+    const rangeLast=Number(a.globalQuote?.last||a.last);
+    const rangePct=rangeHigh>rangeLow?Math.max(0,Math.min(100,((rangeLast-rangeLow)/(rangeHigh-rangeLow))*100)):50;
+    const quote=a.globalQuote;
+    const badge=isCrypto?(quote?'GLOBAL + LOCAL':'CRYPTO'):(global?'GLOBAL':'LOCAL');
+    return `<article class="market-card interactive ${isCrypto?'crypto-card':'macro-card'} asset-${key.toLowerCase()}" data-key="${key}" data-watermark="${escapeHtml(m.icon)}" style="--asset:${color}" tabindex="0">
       <span class="accent-line"></span>
+      <div class="market-watermark" aria-hidden="true">${escapeHtml(m.icon)}</div>
       <div class="market-head">
-        <div class="asset-title"><span class="asset-icon">${m.icon}</span><span><b>${escapeHtml(lang==='en'?m.name:m.fa)}</b><small>${m.short} · ${global?T('global'):T('local')}</small></span></div>
-        <button class="favorite ${favorite?'active':''}" type="button" data-fav="${key}" aria-label="${T('watchlist')}">${favorite?'★':'☆'}</button>
+        <div class="asset-title">${coinLogoMarkup(key,m)}<span class="asset-copy"><b>${escapeHtml(lang==='en'?m.name:m.fa)}</b><small>${m.short} · ${global?T('global'):T('local')}</small></span></div>
+        <button class="favorite ${favorite?'active':''}" type="button" data-fav="${key}" aria-label="${T('watchlist')}" title="${T('watchlist')}">${favorite?'★':'☆'}</button>
       </div>
+      <div class="asset-badge-row"><span class="asset-class-badge">${badge}</span><span class="asset-class-note">${isCrypto?(lang==='fa'?'دارایی دیجیتال':'Digital asset'):(m.cat==='commodity'?(lang==='fa'?'کالا':'Commodity'):(lang==='fa'?'شاخص':'Index'))}</span></div>
       <div class="market-price"><strong>${price}</strong><span class="change ${cls(a.change)}">${formatPct(a.change)}</span></div>
+      ${quote?`<div class="crypto-reference-line"><span class="reference-label">GLOBAL SPOT</span><b>${escapeHtml(formatUSD(quote.last))}</b><span class="change ${cls(quote.change)}">${formatPct(quote.change)}</span></div>`:''}
       <div class="market-meta">
-        <div class="meta-box"><span>${T('high')}</span><b>${highText}</b></div>
-        <div class="meta-box"><span>${T('low')}</span><b>${lowText}</b></div>
-        <div class="meta-box"><span>${T('volume')}</span><b>${volume?compactNumber(volume):'—'}</b></div>
-        <div class="meta-box"><span>${T('spread')}</span><b>${spread?escapeHtml(formatPrice(key,spread)):'—'}</b></div>
+        <div class="meta-box"><span>${T('high')}</span><b>${quote?escapeHtml(formatUSD(quote.high)):highText}</b></div>
+        <div class="meta-box"><span>${T('low')}</span><b>${quote?escapeHtml(formatUSD(quote.low)):lowText}</b></div>
+        <div class="meta-box"><span>${quote?'GLOBAL VOL.':T('volume')}</span><b>${quote?escapeHtml(compactNumber(quote.volumeUsd)+' USD'):(volume?compactNumber(volume):'—')}</b></div>
+        <div class="meta-box"><span>${quote?'TRADES':T('spread')}</span><b>${quote?escapeHtml(compactNumber(quote.trades)):(spread?escapeHtml(formatPrice(key,spread)):'—')}</b></div>
       </div>
+      ${rangeHigh>rangeLow?`<div class="market-range"><div class="market-range-head"><span>${lang==='fa'?'محدوده روز':'24H RANGE'}</span><small>${rangePct.toFixed(0)}%</small></div><div class="market-range-track"><i style="width:${rangePct.toFixed(2)}%"></i><b style="left:${rangePct.toFixed(2)}%"></b></div></div>`:''}
       <div class="card-spark">${sparkSVG(getSeries(key),`rgb(${color})`)}</div>
-      ${a.globalQuote?`<div class="global-quote-line"><span>Global ${escapeHtml(formatUSD(a.globalQuote.last))}</span><span>Vol ${escapeHtml(compactNumber(a.globalQuote.volumeUsd))} USD</span></div>`:''}
-      <div class="card-footer"><span class="asset-source"><i class="source-bullet"></i>${source}</span><span>${a.delayed||a.globalQuote?.stale?T('delayed'):a.timestamp?relativeTime(a.timestamp):'—'}</span></div>
+      ${quote?`<div class="global-quote-line"><span>Weighted avg <b>${escapeHtml(formatUSD(quote.weightedAverage))}</b></span><span>Volume <b>${escapeHtml(compactNumber(quote.volumeUsd))}</b></span></div>`:''}
+      <div class="card-footer"><span class="asset-source"><i class="source-bullet"></i>${escapeHtml(source)}</span><span>${a.delayed||quote?.stale?T('delayed'):a.timestamp?relativeTime(a.timestamp):'—'}</span></div>
     </article>`;
   }
 
   function renderMarkets(){
     const keys=allKeys().filter(k=>activeFilter==='all'||META[k].cat===activeFilter);
     $('#marketGrid').innerHTML=keys.map(marketCard).join('') || `<div class="notice glass"><div>${T('noData')}</div></div>`;
+    $$('#marketGrid [data-coin-logo]').forEach(img=>{
+      const fallback=img.previousElementSibling;
+      img.addEventListener('load',()=>{if(fallback)fallback.hidden=true;},{once:true});
+      img.addEventListener('error',()=>{img.hidden=true;if(fallback)fallback.hidden=false;},{once:true});
+      if(img.complete && img.naturalWidth>0 && fallback)fallback.hidden=true;
+      if(img.complete && img.naturalWidth===0 && fallback)fallback.hidden=false;
+    });
     $$('#marketGrid [data-fav]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleWatch(b.dataset.fav)}));
     $$('#marketGrid [data-key]').forEach(card=>{
       card.addEventListener('click',e=>{if(!e.target.closest('[data-fav]'))openDetail(card.dataset.key)});
@@ -700,7 +782,7 @@
     $('#densityToggle').addEventListener('click',e=>{const b=e.target.closest('button[data-density]');if(!b)return;density=b.dataset.density;localStorage.setItem('arzpulse_density',density);setDensity()});
     $('#chartRangeControls').addEventListener('click',e=>{const b=e.target.closest('button[data-range]');if(!b)return;chartRange=b.dataset.range;renderChart()});
     addEventListener('scroll',()=>$('#scrollTopBtn').classList.toggle('show',scrollY>500),{passive:true});
-    setInterval(renderClock,1000); setInterval(()=>{ if(latest) renderAll(); },60000);
+    setInterval(renderClock,1000); setInterval(()=>{ if(latest) renderAll(); },60000); setInterval(refreshLatestSnapshot,300000);
   }
 
   function updateActiveNav(){

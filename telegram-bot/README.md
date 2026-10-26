@@ -81,6 +81,19 @@ Check `url`, `pending_update_count`, `last_error_date`, and `last_error_message`
 
 ## Storage / free-tier behavior
 
-The bot does **not** store price history in KV. `SETTINGS_KV` contains a single `channels` JSON list and a short-lived refresh lock (`expirationTtl`); this lock expires automatically. It is deliberately not allowed to purge old channel settings when quota is reached, because those are user configuration rather than disposable history. The price history is stored in the GitHub repository under `docs/data/history/` and is compacted/pruned by `scripts/fetch-and-save.js` and `update-prices.yml`.
+The bot does not store the website's full daily price history in KV; that remains in the GitHub repository under `docs/data/history/` and is compacted/pruned by `scripts/fetch-and-save.js` and `update-prices.yml`. `SETTINGS_KV` retains the existing `channels` JSON list and short-lived refresh lock, plus compact alert preferences, rolling alert snapshots (up to the 15-minute/1-hour/6-hour detection window), and cooldown metadata. The snapshot and rolling history share one `alerts:state:v2` value to reduce writes during five-minute checks; existing split v1 alert keys are read for backward-compatible migration and the legacy `channels` key is never overwritten by the alert system. It is deliberately not allowed to purge old channel settings when quota is reached, because those are user configuration rather than disposable history.
 
-Cloudflare KV Free has hard daily operation quotas. When a quota is exceeded, further operations of that type can fail until the reset; deleting arbitrary keys is not a reliable way to repair a write quota and could delete valuable channel configuration. See the official KV pricing and limits documentation linked in the root `BOT-RECOVERY-AND-UPGRADE.fa.md`.
+Cloudflare KV has daily operation limits on Free plans. The consolidated alert state avoids two separate snapshot/history writes each five-minute tick, and cooldown metadata is written only when it actually changes. When a quota is exceeded, further operations of that type can fail until reset; deleting arbitrary keys is not a reliable repair and could remove valuable channel configuration. See the official KV pricing and limits documentation linked in the root `BOT-RECOVERY-AND-UPGRADE.fa.md`.
+
+
+## Automatic market alerts
+
+The existing `*/5 * * * *` Cron invocation now performs two independent tasks: it dispatches the ArzPulse GitHub Actions workflow and evaluates the latest published snapshot for alert conditions. The hourly channel digest remains on `0 * * * *`.
+
+Private chats must opt in with `/alertson`. A chat already registered with `/setchannel` receives important/critical alerts by default unless that chat explicitly sends `/alertsoff`. Use `/alerts` for status/help, `/alertlevel low` for all matching signal levels, `/alertlevel medium` for important/critical signals, and `/alertlevel high` for critical signals only. For group destinations, only a chat administrator can change alert preferences.
+
+Detection rules include sudden moves between consecutive snapshots, new crossings of 24-hour move thresholds, extreme Fear & Greed shifts, total market-cap threshold crossings, BTC/ETH funding extremes, sharp BTC open-interest changes, and broad same-direction market breadth. Each alert contains price/measure, change, source and timestamp, with context and a risk note. A first run only seeds the comparison baseline. Stale published snapshots are not used for price-shock alerts, and an alert cooldown limits repeated notifications.
+
+Optional Worker vars: `ALERT_CRYPTO_MOVE_PCT` (default `0.85`), `ALERT_LOCAL_MOVE_PCT` (default `0.45`), `ALERT_MACRO_MOVE_PCT` (default `0.55`), and `ALERT_COOLDOWN_MINUTES` (default `25`). They may be set in the deployed Worker’s vars. Alert preferences, cooldowns and the last baseline are stored in the existing `SETTINGS_KV` namespace under new keys; the legacy `channels` key is not overwritten.
+
+The dashboard adds the Market Signal Radar and asset-specific market cards. Cryptocurrency logos are loaded from the open `spothq/cryptocurrency-icons` asset set with a text-symbol fallback if a remote icon is unavailable. Icons are decorative and do not affect market data collection.

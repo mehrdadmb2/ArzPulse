@@ -12,6 +12,10 @@ GITHUB_REPO = "ArzPulse"
 GITHUB_WORKFLOW = "update-prices.yml"
 GITHUB_REF = "main"
 DATA_STALE_MINUTES = "15"
+ALERT_CRYPTO_MOVE_PCT = "0.85"
+ALERT_LOCAL_MOVE_PCT = "0.45"
+ALERT_MACRO_MOVE_PCT = "0.55"
+ALERT_COOLDOWN_MINUTES = "25"
 # Set BOT_ADMIN_IDS in the Cloudflare dashboard (comma-separated numeric Telegram user IDs).
 
 [[kv_namespaces]]

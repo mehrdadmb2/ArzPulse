@@ -171,3 +171,140 @@ test('new /macro command includes sentiment, global metrics and derivative conte
     assert.match(text, /DXY/);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('alert commands store per-chat preferences in SETTINGS_KV', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const kvData = new Map();
+  const settingsKV = {
+    async get(key, options = {}) {
+      const raw = kvData.get(key);
+      if (raw == null) return null;
+      return options.type === 'json' ? JSON.parse(raw) : raw;
+    },
+    async put(key, value) { kvData.set(key, String(value)); }
+  };
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://api.telegram.org/botfake-token/')) {
+      const payload = JSON.parse(init.body); telegramCalls.push(payload);
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 101, chat: { id: 12345 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in alerts command test: ${url}`);
+  };
+  try {
+    const { ctx, tasks } = ctxRecorder();
+    const response = await bot.fetch(new Request('https://worker.test/webhook', {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'alert-test' },
+      body: JSON.stringify({ update_id: 992001, message: { text: '/alertlevel low', chat: { id: 12345, type: 'private' }, from: { id: 12345 } } })
+    }), { TELEGRAM_BOT_TOKEN: 'fake-token', TELEGRAM_WEBHOOK_SECRET: 'alert-test', SETTINGS_KV: settingsKV }, ctx);
+    assert.equal(response.status, 200);
+    await Promise.all(tasks);
+    const prefs = JSON.parse(kvData.get('alerts:subscribers:v1'));
+    assert.equal(prefs['12345'].enabled, true);
+    assert.equal(prefs['12345'].level, 'low');
+    assert.match(telegramCalls[0].text, /حساسیت هشدار تنظیم شد/);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('five-minute schedule emits a detailed price-shock alert with cooldown baseline', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const kvData = new Map([['channels', JSON.stringify(['4242'])]]);
+  const settingsKV = {
+    async get(key, options = {}) {
+      const raw = kvData.get(key);
+      if (raw == null) return null;
+      return options.type === 'json' ? JSON.parse(raw) : raw;
+    },
+    async put(key, value) { kvData.set(key, String(value)); }
+  };
+  let btc = 100;
+  let stamp = new Date(Date.now() - 5 * 60_000).toISOString();
+  let dayChange = 1;
+  const snapshot = () => ({
+    timestamp: stamp, usdtPrice: 900000, dollarPrice: 900000,
+    prices: { USDT: { lastPrice: 900000, bestBuy: 899000, bestSell: 901000, change: 0.1, source: 'Nobitex', fetchedAt: stamp } },
+    market: {},
+    globalCrypto: { BTC: { last: btc, change: dayChange, high: btc * 1.02, low: btc * 0.98, volumeUsd: 25000000000, trades: 1000000, timestamp: stamp, source: 'Binance Spot', stale: false } },
+    marketContext: { global: { totalMarketCapUsd: 2300000000000, btcDominance: 54, ethDominance: 18, source: 'CoinGecko', timestamp: stamp } }
+  });
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify(snapshot()), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.startsWith('https://api.github.com/repos/mehrdadmb2/ArzPulse/actions/workflows/update-prices.yml/dispatches')) return new Response(null, { status: 204 });
+    if (url.startsWith('https://api.telegram.org/botfake-token/sendMessage')) {
+      telegramCalls.push(JSON.parse(init.body));
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 78, chat: { id: 4242 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in scheduled alert test: ${url}`);
+  };
+  try {
+    const env = { TELEGRAM_BOT_TOKEN: 'fake-token', GITHUB_TOKEN: 'fake-github-token', SETTINGS_KV: settingsKV, DATA_STALE_MINUTES: '15' };
+    let state = ctxRecorder();
+    await bot.scheduled({ cron: '*/5 * * * *' }, env, state.ctx);
+    await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length, 0, 'first tick should only establish a baseline');
+    btc = 102; stamp = new Date().toISOString(); dayChange = 1.1;
+    state = ctxRecorder();
+    await bot.scheduled({ cron: '*/5 * * * *' }, env, state.ctx);
+    await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length, 1);
+    assert.match(telegramCalls[0].text, /هشدار خودکار بازار/);
+    assert.match(telegramCalls[0].text, /بیت‌کوین/);
+    assert.match(telegramCalls[0].text, /تغییر از Snapshot قبلی/);
+    assert.ok(kvData.has('alerts:state:v2'), 'rolling alert baseline and snapshots should use the consolidated KV state');
+    assert.ok(kvData.has('alerts:cooldowns:v1'));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('sudden move and timeframe move are combined into one detailed alert', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const kvData = new Map([['channels', JSON.stringify(['5252'])]]);
+  const settingsKV = {
+    async get(key, options = {}) {
+      const raw = kvData.get(key);
+      if (raw == null) return null;
+      return options.type === 'json' ? JSON.parse(raw) : raw;
+    },
+    async put(key, value) { kvData.set(key, String(value)); }
+  };
+  let btc = 100;
+  let stamp = new Date(Date.now() - 10 * 60_000).toISOString();
+  const snapshot = () => ({
+    timestamp: stamp, usdtPrice: 900000, dollarPrice: 900000,
+    prices: { USDT: { lastPrice: 900000, bestBuy: 899000, bestSell: 901000, change: 0.1, source: 'Nobitex', fetchedAt: stamp } },
+    market: {},
+    globalCrypto: { BTC: { last: btc, change: 1, high: btc * 1.02, low: btc * 0.98, volumeUsd: 25000000000, trades: 1000000, timestamp: stamp, source: 'Binance Spot', stale: false } },
+    marketContext: { global: { totalMarketCapUsd: 2300000000000, btcDominance: 54, ethDominance: 18, source: 'CoinGecko', timestamp: stamp } }
+  });
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify(snapshot()), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.startsWith('https://api.github.com/repos/mehrdadmb2/ArzPulse/actions/workflows/update-prices.yml/dispatches')) return new Response(null, { status: 204 });
+    if (url.startsWith('https://api.telegram.org/botfake-token/sendMessage')) {
+      telegramCalls.push(JSON.parse(init.body));
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 79, chat: { id: 5252 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in combined-alert test: ${url}`);
+  };
+  try {
+    const env = { TELEGRAM_BOT_TOKEN: 'fake-token', GITHUB_TOKEN: 'fake-github-token', SETTINGS_KV: settingsKV, DATA_STALE_MINUTES: '15' };
+    let state = ctxRecorder();
+    await bot.scheduled({ cron: '*/5 * * * *' }, env, state.ctx);
+    await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length, 0);
+    btc = 103;
+    stamp = new Date().toISOString();
+    state = ctxRecorder();
+    await bot.scheduled({ cron: '*/5 * * * *' }, env, state.ctx);
+    await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length, 1, 'shock and timeframe context should be combined instead of duplicated');
+    assert.match(telegramCalls[0].text, /تغییر از Snapshot قبلی/);
+    assert.match(telegramCalls[0].text, /تغییر ۱۵ دقیقه اخیر/);
+    const cooldowns = JSON.parse(kvData.get('alerts:cooldowns:v1'));
+    assert.ok(cooldowns['move:global:BTC']);
+    assert.ok(cooldowns['window:global:BTC:15m']);
+  } finally { globalThis.fetch = originalFetch; }
+});

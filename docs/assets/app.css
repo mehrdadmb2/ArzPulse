@@ -176,3 +176,104 @@ body.compact .market-card{padding:12px}body.compact .market-meta{gap:5px}body.co
 .light .intel-card{background:linear-gradient(145deg,rgba(22,82,120,.045),rgba(255,255,255,.72))}.light .intel-card-head{color:#536f80}.light .intel-foot{color:#647b8a}.light .funding-row,.light .mover-chip{background:rgba(10,40,62,.025)}
 @media(max-width:1100px){.intelligence-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.breadth-card,.funding-card{grid-column:span 1}}
 @media(max-width:640px){.market-intelligence{padding:14px}.market-intelligence .section-row{align-items:flex-start}.context-status{white-space:normal;min-width:104px}.intelligence-grid{grid-template-columns:1fr}.breadth-card,.funding-card{grid-column:auto}.intel-card{padding:14px}.funding-row{grid-template-columns:42px 78px minmax(0,1fr)}.global-quote-line{font-size:.5rem}}
+
+/* ArzPulse Advanced visual identity: asset-specific glows, token marks and ranges. */
+.market-card.crypto-card{
+  background:
+    radial-gradient(circle at 92% 5%,rgba(var(--asset),.20),transparent 34%),
+    radial-gradient(circle at 0% 95%,rgba(var(--asset),.10),transparent 38%),
+    linear-gradient(145deg,rgba(13,25,42,.96),rgba(5,12,22,.94));
+  border-color:rgba(var(--asset),.22);
+}
+body.light .market-card.crypto-card{background:radial-gradient(circle at 92% 5%,rgba(var(--asset),.18),transparent 34%),linear-gradient(145deg,rgba(255,255,255,.98),rgba(238,244,250,.97));}
+.market-card.macro-card{background:radial-gradient(circle at 100% 0%,rgba(var(--asset),.16),transparent 38%),linear-gradient(145deg,rgba(12,29,36,.94),rgba(6,15,24,.96));}
+body.light .market-card.macro-card{background:radial-gradient(circle at 100% 0%,rgba(var(--asset),.16),transparent 38%),linear-gradient(145deg,rgba(255,255,255,.98),rgba(241,246,249,.97));}
+.market-card .accent-line{z-index:3;height:3px;background:linear-gradient(90deg,transparent,rgba(var(--asset),.98),transparent);filter:drop-shadow(0 0 8px rgba(var(--asset),.45));}
+.market-card .market-watermark{position:absolute;right:8px;bottom:64px;z-index:0;pointer-events:none;font-size:clamp(5rem,9vw,8.3rem);font-weight:950;line-height:1;letter-spacing:-.1em;color:rgba(var(--asset),.075);transform:rotate(-12deg);text-shadow:0 0 35px rgba(var(--asset),.08);user-select:none;max-width:70%;overflow:hidden;white-space:nowrap}
+.market-card > :not(.market-watermark):not(.accent-line){position:relative;z-index:1}
+.asset-brand-mark{position:relative;display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;overflow:hidden;border-radius:15px;border:1px solid rgba(var(--asset),.35);background:linear-gradient(145deg,rgba(var(--asset),.2),rgba(var(--asset),.045));box-shadow:inset 0 1px 0 rgba(255,255,255,.11),0 7px 20px rgba(var(--asset),.09)}
+.asset-brand-mark:before{content:"";position:absolute;inset:3px;border:1px solid rgba(var(--asset),.13);border-radius:11px;pointer-events:none}
+.asset-brand-mark img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:contain;z-index:2;filter:drop-shadow(0 3px 5px rgba(0,0,0,.25));}
+.asset-symbol-fallback{position:relative;z-index:1;display:grid;place-items:center;width:100%;height:100%;color:rgb(var(--asset));font-size:1.18rem;font-weight:950;text-shadow:0 0 15px rgba(var(--asset),.25)}
+.asset-brand-mark.non-crypto{border-radius:14px;background:linear-gradient(145deg,rgba(var(--asset),.19),rgba(var(--asset),.035))}
+.asset-copy{min-width:0}.asset-copy b{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-badge-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;min-height:19px}
+.asset-class-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid rgba(var(--asset),.22);background:rgba(var(--asset),.075);border-radius:999px;color:rgb(var(--asset));font-size:.47rem;line-height:1.1;font-weight:900;letter-spacing:.09em}
+.asset-class-note{font-size:.5rem;color:#8197a9;text-align:end}
+.crypto-reference-line{display:flex;align-items:center;gap:8px;margin-top:9px;padding:8px 10px;border-radius:11px;border:1px solid rgba(var(--asset),.14);background:rgba(var(--asset),.045);min-width:0}
+.crypto-reference-line .reference-label{font-size:.48rem;font-weight:800;color:rgba(var(--asset),.9);letter-spacing:.07em;white-space:nowrap}.crypto-reference-line b{font-size:.65rem;font-variant-numeric:tabular-nums;white-space:nowrap}.crypto-reference-line .change{margin-inline-start:auto;font-size:.55rem;white-space:nowrap}
+.market-range{margin-top:11px;padding:9px 10px 8px;border-radius:12px;border:1px solid rgba(var(--asset),.10);background:rgba(255,255,255,.018)}
+.market-range-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#7890a3;font-size:.48rem;font-weight:800;letter-spacing:.07em}.market-range-head small{color:rgb(var(--asset));font-size:.5rem;font-weight:900}
+.market-range-track{position:relative;height:5px;margin-top:8px;border-radius:999px;background:linear-gradient(90deg,rgba(var(--asset),.11),rgba(var(--asset),.25));overflow:visible}.market-range-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,rgba(var(--asset),.5),rgb(var(--asset)));box-shadow:0 0 12px rgba(var(--asset),.26)}.market-range-track b{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;border:2px solid #fff;background:rgb(var(--asset));transform:translate(-50%,-50%);box-shadow:0 0 9px rgba(var(--asset),.55)}
+.market-card.crypto-card .card-spark{border-color:rgba(var(--asset),.10)}.market-card.crypto-card .global-quote-line{color:#87a3b4}.global-quote-line b{color:rgb(var(--asset));font-weight:900}
+.market-card .asset-source{max-width:72%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.market-card .card-footer{gap:8px}
+.market-card:hover .asset-brand-mark{transform:translateY(-2px) rotate(-3deg);box-shadow:0 10px 24px rgba(var(--asset),.2)}.asset-brand-mark{transition:transform .25s ease,box-shadow .25s ease}
+.market-card:focus-visible{outline:2px solid rgba(var(--asset),.75);outline-offset:3px}
+
+/* Signal radar */
+.signal-radar{margin-top:14px;padding:21px 20px;border-radius:25px;overflow:hidden;position:relative}
+.signal-radar:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(89,216,255,.45),rgba(168,150,255,.4),transparent);pointer-events:none}
+.signal-radar-status{display:flex;align-items:center;gap:8px;max-width:43%;color:#8ba3b5;font-size:.6rem;text-align:end;line-height:1.6}
+#signalSummary{font-weight:750}
+.signal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:15px}
+.signal-card{--signal:89,216,255;position:relative;isolation:isolate;overflow:hidden;min-width:0;padding:14px;border-radius:18px;border:1px solid rgba(var(--signal),.2);background:radial-gradient(circle at 100% 0,rgba(var(--signal),.13),transparent 45%),linear-gradient(145deg,rgba(13,25,41,.9),rgba(7,15,25,.92));transition:transform .22s,border-color .22s,box-shadow .22s}
+body.light .signal-card{background:radial-gradient(circle at 100% 0,rgba(var(--signal),.14),transparent 45%),linear-gradient(145deg,rgba(255,255,255,.96),rgba(239,245,250,.96))}
+.signal-card:after{content:"";position:absolute;z-index:-1;right:-30px;bottom:-60px;width:150px;height:150px;border:1px solid rgba(var(--signal),.11);border-radius:50%;box-shadow:0 0 0 17px rgba(var(--signal),.025),0 0 0 35px rgba(var(--signal),.02);pointer-events:none}
+.signal-card:hover{transform:translateY(-3px);border-color:rgba(var(--signal),.42);box-shadow:0 18px 45px rgba(0,0,0,.22),0 0 24px rgba(var(--signal),.07)}
+.signal-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.signal-emblem{display:inline-grid;place-items:center;min-width:38px;height:30px;padding:0 8px;border-radius:10px;background:rgba(var(--signal),.13);border:1px solid rgba(var(--signal),.22);color:rgb(var(--signal));font-size:.57rem;font-weight:950;letter-spacing:.02em}
+.signal-severity{padding:4px 7px;border-radius:999px;font-size:.48rem;font-weight:900;border:1px solid rgba(var(--signal),.22);background:rgba(var(--signal),.08);color:rgb(var(--signal))}.signal-severity.critical{--signal:255,113,133}.signal-severity.warning{--signal:245,197,91}.signal-severity.watch{--signal:89,216,255}
+.signal-card h3{font-size:.75rem;line-height:1.65;margin:12px 0 7px;min-height:2.1em;max-width:95%}.signal-value{display:block;font-size:1.55rem;line-height:1.2;letter-spacing:-.04em;color:rgb(var(--signal));font-variant-numeric:tabular-nums}
+.signal-card p{color:#91a6b8;font-size:.58rem;line-height:1.8;min-height:3.4em;margin:9px 0 12px}.signal-extra{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;padding-top:9px;border-top:1px solid rgba(var(--signal),.12);font-size:.49rem;color:#73899b}.signal-extra span:first-child{color:rgb(var(--signal));font-weight:800}.signal-extra span:last-child{max-width:60%;text-align:end;overflow-wrap:anywhere}
+.signal-card.critical{border-color:rgba(255,113,133,.34)}.signal-card.signal-idle{--signal:57,217,166}.signal-card.signal-idle h3{min-height:auto}
+@media(max-width:1100px){.signal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.signal-radar{padding:16px 13px}.signal-radar .section-row{align-items:flex-start;flex-direction:column}.signal-radar-status{max-width:100%;text-align:start}.signal-grid{grid-template-columns:1fr}.signal-card p{min-height:0}.market-card .market-watermark{font-size:6rem;right:2px;bottom:56px}.asset-class-note{max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crypto-reference-line{flex-wrap:wrap}.crypto-reference-line .change{margin-inline-start:auto}}
+[hidden]{display:none!important}
+
+/* Dedicated native palettes per asset: each card gets its own visual signature. */
+.market-card.asset-btc{background:radial-gradient(circle at 92% 7%,rgba(246,169,62,.24),transparent 34%),radial-gradient(circle at 0 100%,rgba(246,169,62,.10),transparent 42%),repeating-linear-gradient(135deg,transparent 0 22px,rgba(246,169,62,.025) 22px 23px),linear-gradient(145deg,#151d29,#080f18)}
+.market-card.asset-eth{background:radial-gradient(circle at 100% 0,rgba(98,126,234,.26),transparent 36%),radial-gradient(circle at 0 100%,rgba(151,121,255,.12),transparent 42%),linear-gradient(135deg,rgba(98,126,234,.045) 25%,transparent 25% 50%,rgba(98,126,234,.035) 50% 75%,transparent 75%),linear-gradient(145deg,#121a31,#080f1d)}
+.market-card.asset-usdt{background:radial-gradient(ellipse at 100% 10%,rgba(38,190,150,.24),transparent 36%),radial-gradient(ellipse at 0 100%,rgba(38,190,150,.1),transparent 48%),linear-gradient(145deg,#102823,#081713)}
+.market-card.asset-not{background:radial-gradient(circle at 94% 8%,rgba(171,150,255,.24),transparent 32%),radial-gradient(circle at 12% 96%,rgba(255,112,220,.11),transparent 40%),repeating-linear-gradient(90deg,transparent 0 27px,rgba(171,150,255,.025) 27px 28px),linear-gradient(145deg,#201834,#0d1020)}
+.market-card.asset-bnb{background:radial-gradient(circle at 95% 2%,rgba(243,184,74,.25),transparent 34%),repeating-linear-gradient(45deg,transparent 0 25px,rgba(243,184,74,.026) 25px 26px),linear-gradient(145deg,#262113,#101015)}
+.market-card.asset-sol{background:radial-gradient(circle at 100% 0,rgba(153,90,255,.26),transparent 35%),radial-gradient(circle at 0 100%,rgba(20,241,149,.14),transparent 43%),linear-gradient(155deg,rgba(153,90,255,.05),transparent 60%),linear-gradient(145deg,#17162c,#09131a)}
+.market-card.asset-xrp{background:radial-gradient(ellipse at 100% 0,rgba(82,190,235,.25),transparent 37%),radial-gradient(ellipse at 0 100%,rgba(82,190,235,.08),transparent 44%),repeating-linear-gradient(0deg,transparent 0 29px,rgba(82,190,235,.022) 29px 30px),linear-gradient(145deg,#102333,#080f19)}
+.market-card.asset-ada{background:radial-gradient(circle at 96% 5%,rgba(48,110,215,.27),transparent 36%),radial-gradient(circle at 2% 100%,rgba(85,160,255,.1),transparent 40%),radial-gradient(circle,rgba(85,160,255,.08) 1px,transparent 1.5px),linear-gradient(145deg,#101e39,#090f1d);background-size:auto,auto,18px 18px,auto}
+.market-card.asset-doge{background:radial-gradient(circle at 95% 0,rgba(197,164,94,.24),transparent 35%),radial-gradient(circle at 0 100%,rgba(255,211,103,.08),transparent 42%),linear-gradient(35deg,transparent 48%,rgba(255,211,103,.035) 49% 50%,transparent 51%),linear-gradient(145deg,#272314,#101117)}
+.market-card.asset-trx{background:radial-gradient(ellipse at 100% 0,rgba(239,58,77,.24),transparent 34%),radial-gradient(ellipse at 0 100%,rgba(255,111,77,.11),transparent 42%),linear-gradient(145deg,#2a141c,#100d15)}
+.market-card.asset-link{background:radial-gradient(circle at 96% 3%,rgba(48,104,214,.25),transparent 35%),radial-gradient(circle at 0 100%,rgba(94,147,255,.1),transparent 41%),repeating-linear-gradient(135deg,transparent 0 31px,rgba(94,147,255,.026) 31px 32px),linear-gradient(145deg,#101b33,#080f1a)}
+.market-card.asset-avax{background:radial-gradient(circle at 95% 0,rgba(232,65,84,.25),transparent 36%),radial-gradient(circle at 4% 100%,rgba(255,99,115,.09),transparent 41%),linear-gradient(155deg,transparent 49%,rgba(255,99,115,.04) 50%,transparent 51%),linear-gradient(145deg,#28171e,#100d16)}
+.market-card.asset-dot{background:radial-gradient(circle at 92% 4%,rgba(230,65,153,.25),transparent 35%),radial-gradient(circle at 0 100%,rgba(150,84,255,.1),transparent 43%),linear-gradient(145deg,#281329,#100d1a)}
+.market-card.asset-ltc{background:radial-gradient(circle at 94% 0,rgba(164,178,192,.21),transparent 35%),radial-gradient(circle at 0 100%,rgba(164,178,192,.08),transparent 44%),repeating-linear-gradient(0deg,transparent 0 24px,rgba(164,178,192,.022) 24px 25px),linear-gradient(145deg,#1a2029,#0b1119)}
+.market-card.asset-bch{background:radial-gradient(circle at 96% 3%,rgba(134,196,108,.23),transparent 36%),radial-gradient(circle at 0 100%,rgba(134,196,108,.08),transparent 40%),linear-gradient(145deg,#17281c,#0b1511)}
+.market-card.asset-shib{background:radial-gradient(ellipse at 94% 1%,rgba(243,112,62,.25),transparent 35%),radial-gradient(ellipse at 0 100%,rgba(243,112,62,.11),transparent 42%),linear-gradient(145deg,#281a19,#110e17)}
+.market-card.asset-uni{background:radial-gradient(circle at 96% 0,rgba(255,0,122,.22),transparent 36%),radial-gradient(circle at 0 100%,rgba(255,122,190,.1),transparent 44%),linear-gradient(145deg,#291427,#100d19)}
+.market-card.asset-near{background:radial-gradient(circle at 94% 0,rgba(91,200,188,.22),transparent 37%),repeating-linear-gradient(135deg,transparent 0 27px,rgba(91,200,188,.022) 27px 28px),linear-gradient(145deg,#112b2a,#081515)}
+.market-card.asset-sui{background:radial-gradient(circle at 95% 0,rgba(88,172,255,.26),transparent 35%),radial-gradient(circle at 0 100%,rgba(88,172,255,.09),transparent 40%),linear-gradient(145deg,#102638,#09121e)}
+.market-card.asset-xlm{background:radial-gradient(ellipse at 100% 0,rgba(117,111,235,.23),transparent 36%),radial-gradient(ellipse at 0 100%,rgba(84,164,255,.08),transparent 43%),linear-gradient(145deg,#181b39,#0a101d)}
+.market-card.asset-etc{background:radial-gradient(circle at 94% 1%,rgba(62,160,122,.22),transparent 35%),radial-gradient(circle at 0 100%,rgba(134,196,108,.08),transparent 42%),linear-gradient(145deg,#14271e,#0a1413)}
+.market-card.asset-atom{background:radial-gradient(circle at 95% 0,rgba(98,164,221,.24),transparent 34%),radial-gradient(circle at 0 100%,rgba(165,113,255,.1),transparent 43%),repeating-linear-gradient(45deg,transparent 0 32px,rgba(98,164,221,.02) 32px 33px),linear-gradient(145deg,#161d31,#0a111d)}
+.market-card.asset-apt{background:radial-gradient(circle at 95% 0,rgba(66,171,244,.24),transparent 37%),radial-gradient(circle at 0 100%,rgba(120,210,255,.08),transparent 42%),linear-gradient(145deg,#122439,#09131e)}
+.market-card.asset-fil{background:radial-gradient(circle at 95% 0,rgba(0,133,255,.24),transparent 35%),repeating-linear-gradient(90deg,transparent 0 28px,rgba(0,133,255,.022) 28px 29px),linear-gradient(145deg,#10233b,#09111e)}
+.market-card.asset-arb{background:radial-gradient(circle at 96% 0,rgba(43,116,220,.25),transparent 36%),radial-gradient(circle at 0 100%,rgba(95,168,255,.08),transparent 42%),linear-gradient(145deg,#122642,#09121f)}
+.market-card.asset-op{background:radial-gradient(circle at 95% 0,rgba(255,4,32,.24),transparent 35%),radial-gradient(circle at 0 100%,rgba(255,111,127,.08),transparent 41%),linear-gradient(145deg,#2a151d,#100d15)}
+.market-card.asset-hbar{background:radial-gradient(circle at 95% 0,rgba(130,89,214,.25),transparent 35%),radial-gradient(circle at 0 100%,rgba(184,129,255,.09),transparent 42%),repeating-linear-gradient(135deg,transparent 0 33px,rgba(130,89,214,.022) 33px 34px),linear-gradient(145deg,#211634,#0e0e1b)}
+.market-card.asset-inj{background:radial-gradient(circle at 95% 0,rgba(0,179,255,.24),transparent 35%),radial-gradient(circle at 0 100%,rgba(0,179,255,.09),transparent 40%),linear-gradient(145deg,#102938,#08141f)}
+.market-card.asset-aave{background:radial-gradient(circle at 95% 0,rgba(176,85,207,.24),transparent 37%),radial-gradient(circle at 0 100%,rgba(133,102,255,.09),transparent 43%),linear-gradient(145deg,#21172e,#0e101c)}
+.market-card.asset-pepe{background:radial-gradient(circle at 95% 0,rgba(67,181,129,.24),transparent 35%),radial-gradient(circle at 0 100%,rgba(139,224,126,.1),transparent 42%),linear-gradient(145deg,#14291f,#0b1515)}
+.market-card.asset-gold,.market-card.asset-xauusd{background:radial-gradient(circle at 95% 0,rgba(245,197,91,.26),transparent 34%),radial-gradient(circle at 0 100%,rgba(245,197,91,.1),transparent 42%),linear-gradient(145deg,#292316,#101116)}
+.market-card.asset-dollar{background:radial-gradient(circle at 95% 0,rgba(126,177,255,.22),transparent 36%),repeating-linear-gradient(0deg,transparent 0 27px,rgba(126,177,255,.022) 27px 28px),linear-gradient(145deg,#13233a,#0a111d)}
+.market-card.asset-brent,.market-card.asset-wti{background:radial-gradient(ellipse at 95% 0,rgba(78,221,179,.23),transparent 36%),radial-gradient(ellipse at 0 100%,rgba(78,221,179,.08),transparent 40%),linear-gradient(145deg,#102820,#081412)}
+.market-card.asset-silver{background:radial-gradient(circle at 95% 0,rgba(169,189,204,.22),transparent 36%),linear-gradient(145deg,#202933,#0b121a)}
+.market-card.asset-sp500,.market-card.asset-nasdaq{background:radial-gradient(circle at 95% 0,rgba(104,181,255,.22),transparent 34%),repeating-linear-gradient(45deg,transparent 0 30px,rgba(104,181,255,.02) 30px 31px),linear-gradient(145deg,#11243a,#090f19)}
+.market-card.asset-dxy{background:radial-gradient(circle at 95% 0,rgba(190,155,255,.22),transparent 35%),radial-gradient(circle at 0 100%,rgba(126,177,255,.08),transparent 43%),linear-gradient(145deg,#211a37,#0c111e)}
+body.light .market-card[class*="asset-"]{background-blend-mode:normal}
+body.light .market-card.asset-btc{background:radial-gradient(circle at 92% 7%,rgba(246,169,62,.19),transparent 34%),linear-gradient(145deg,#fffaf0,#f1f4f8)}
+body.light .market-card.asset-eth{background:radial-gradient(circle at 100% 0,rgba(98,126,234,.18),transparent 36%),linear-gradient(145deg,#f7f8ff,#edf1fb)}
+body.light .market-card.asset-sol{background:radial-gradient(circle at 100% 0,rgba(153,90,255,.18),transparent 35%),radial-gradient(circle at 0 100%,rgba(20,190,139,.1),transparent 43%),linear-gradient(145deg,#faf7ff,#edf7f5)}
+body.light .market-card.asset-usdt{background:radial-gradient(ellipse at 100% 10%,rgba(38,190,150,.18),transparent 36%),linear-gradient(145deg,#f2fffb,#edf7f5)}
+body.light .market-card.asset-bnb{background:radial-gradient(circle at 95% 2%,rgba(243,184,74,.19),transparent 34%),linear-gradient(145deg,#fffbef,#f4f2e9)}
+body.light .market-card.asset-xrp,body.light .market-card.asset-sui,body.light .market-card.asset-link{background:radial-gradient(circle at 100% 0,rgba(82,190,235,.18),transparent 37%),linear-gradient(145deg,#f3fbff,#edf3fa)}
+body.light .market-card.asset-avax,body.light .market-card.asset-trx,body.light .market-card.asset-op{background:radial-gradient(circle at 100% 0,rgba(239,58,77,.15),transparent 35%),linear-gradient(145deg,#fff7f7,#f7eef0)}
+body.light .market-card.asset-dot,body.light .market-card.asset-uni,body.light .market-card.asset-aave{background:radial-gradient(circle at 100% 0,rgba(230,65,153,.14),transparent 35%),linear-gradient(145deg,#fff7fc,#f5eff8)}
+body.light .market-card.asset-pepe,body.light .market-card.asset-bch,body.light .market-card.asset-etc,body.light .market-card.asset-near{background:radial-gradient(circle at 100% 0,rgba(67,181,129,.15),transparent 35%),linear-gradient(145deg,#f5fff9,#edf5f0)}
+body.light .market-card.asset-gold,body.light .market-card.asset-xauusd{background:radial-gradient(circle at 95% 0,rgba(245,197,91,.2),transparent 34%),linear-gradient(145deg,#fffaf0,#f3f2eb)}
