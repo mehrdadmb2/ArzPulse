@@ -1,9 +1,9 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-26T22:05:20.289Z",
-  "lastUpdate": "2026-10-26T22:05:20.289Z",
+  "lastAttempt": "2026-10-26T22:10:20.530Z",
+  "lastUpdate": "2026-10-26T22:10:20.530Z",
   "retentionDays": 30,
-  "gold18K": 261699753,
+  "gold18K": 261797392,
   "usdtPrice": 2699490,
   "dollarPrice": 2699490,
   "marketSummary": {
@@ -15,22 +15,22 @@
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "WTI": {
-      "last": 101.25,
-      "change": -1.95603438436059,
+      "last": 101.41000366210938,
+      "change": -1.8010971641509315,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4031,
-      "change": 0.5763641363084309,
+      "last": 4031.39990234375,
+      "change": 0.5863419888869382,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 54.03499984741211,
-      "change": 0.6032308486013084,
+      "last": 54.04999923706055,
+      "change": 0.631156953230735,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
@@ -50,24 +50,21 @@
       "timestamp": "2026-10-26T13:30:00.000Z"
     },
     "DXY": {
-      "last": 102.00900268554688,
-      "change": 0.19546717584252318,
+      "last": 102.0009994506836,
+      "change": 0.18760622401539517,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 2,
-  "errors": [
-    "Binance futures funding: HTTP 451 from upstream",
-    "Binance BTC open interest: HTTP 451 from upstream"
-  ],
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 50,
-    "totalMarketCapUsd": 2694934985799.451,
-    "btcDominance": 59.48030610988264
+    "totalMarketCapUsd": 2697695526289.818,
+    "btcDominance": 59.462439026209715
   },
   "successfulSources": 16,
   "successfulLocalSources": 5
