@@ -1,15 +1,15 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-26T22:10:20.530Z",
-  "lastUpdate": "2026-10-26T22:10:20.530Z",
+  "lastAttempt": "2026-10-26T22:15:18.499Z",
+  "lastUpdate": "2026-10-26T22:15:18.499Z",
   "retentionDays": 30,
-  "gold18K": 261797392,
+  "gold18K": 261777865,
   "usdtPrice": 2699490,
   "dollarPrice": 2699490,
   "marketSummary": {
     "BRENT": {
-      "last": 110.2699966430664,
-      "change": -5.526049100565511,
+      "last": 110.37000274658203,
+      "change": -5.4403687523220885,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
@@ -22,15 +22,15 @@
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4031.39990234375,
-      "change": 0.5863419888869382,
+      "last": 4030,
+      "change": 0.5514134133770718,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 54.04999923706055,
-      "change": 0.631156953230735,
+      "last": 53.9900016784668,
+      "change": 0.5194525347130288,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
@@ -50,16 +50,19 @@
       "timestamp": "2026-10-26T13:30:00.000Z"
     },
     "DXY": {
-      "last": 102.0009994506836,
-      "change": 0.18760622401539517,
+      "last": 102.02999877929688,
+      "change": 0.21608999703247195,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-26T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
+  "hasError": true,
+  "errorCount": 2,
+  "errors": [
+    "Binance futures funding: HTTP 451 from upstream",
+    "Binance BTC open interest: HTTP 451 from upstream"
+  ],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 50,
