@@ -1,36 +1,36 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-27T09:50:19.491Z",
-  "lastUpdate": "2026-10-27T09:50:19.491Z",
+  "lastAttempt": "2026-10-27T09:55:21.231Z",
+  "lastUpdate": "2026-10-27T09:55:21.231Z",
   "retentionDays": 30,
-  "gold18K": 262580491,
-  "usdtPrice": 2718990,
-  "dollarPrice": 2718990,
+  "gold18K": 262267106,
+  "usdtPrice": 2718460,
+  "dollarPrice": 2718460,
   "marketSummary": {
     "BRENT": {
-      "last": 111.18000030517578,
-      "change": -3.9979253527532754,
+      "last": 111.02999877929688,
+      "change": -4.127449166794471,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
     },
     "WTI": {
-      "last": 102.08999633789062,
-      "change": 0.32428674796840007,
+      "last": 101.94999694824219,
+      "change": 0.18670873429951837,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4009.699951171875,
-      "change": -0.7106763041277444,
+      "last": 4010.60009765625,
+      "change": -0.6883866224185955,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 53.26499938964844,
-      "change": -1.5579993581540104,
+      "last": 53.28499984741211,
+      "change": -1.5210354024876325,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
@@ -50,21 +50,16 @@
       "timestamp": "2026-10-26T13:30:00.000Z"
     },
     "DXY": {
-      "last": 102.27300262451172,
-      "change": 0.30698660538408085,
+      "last": 102.27100372314453,
+      "change": 0.3050261293296122,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
     }
   },
   "hasError": true,
-  "errorCount": 7,
+  "errorCount": 2,
   "errors": [
-    "BTC: Request timeout after 12000ms",
-    "ETH: Request timeout after 12000ms",
-    "USDT: Request timeout after 12000ms",
-    "NOT: Request timeout after 12000ms",
-    "XAUT: Request timeout after 12000ms",
     "Binance futures funding: HTTP 451 from upstream",
     "Binance BTC open interest: HTTP 451 from upstream"
   ],
@@ -74,6 +69,6 @@
     "totalMarketCapUsd": 2658023425280.7163,
     "btcDominance": 60.01933647884062
   },
-  "successfulSources": 11,
-  "successfulLocalSources": 0
+  "successfulSources": 16,
+  "successfulLocalSources": 5
 }
