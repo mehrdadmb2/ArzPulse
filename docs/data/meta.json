@@ -1,36 +1,36 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-27T09:45:22.431Z",
-  "lastUpdate": "2026-10-27T09:45:22.431Z",
+  "lastAttempt": "2026-10-27T09:50:19.491Z",
+  "lastUpdate": "2026-10-27T09:50:19.491Z",
   "retentionDays": 30,
   "gold18K": 262580491,
   "usdtPrice": 2718990,
   "dollarPrice": 2718990,
   "marketSummary": {
     "BRENT": {
-      "last": 111.04000091552734,
-      "change": -4.118812489097101,
+      "last": 111.18000030517578,
+      "change": -3.9979253527532754,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
     },
     "WTI": {
-      "last": 101.9800033569336,
-      "change": 0.21619616360522473,
+      "last": 102.08999633789062,
+      "change": 0.32428674796840007,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4008.89990234375,
-      "change": -0.7304873393761525,
+      "last": 4009.699951171875,
+      "change": -0.7106763041277444,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 53.220001220703125,
-      "change": -1.6411629707881112,
+      "last": 53.26499938964844,
+      "change": -1.5579993581540104,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-27T04:00:00.000Z"
@@ -58,17 +58,22 @@
     }
   },
   "hasError": true,
-  "errorCount": 2,
+  "errorCount": 7,
   "errors": [
+    "BTC: Request timeout after 12000ms",
+    "ETH: Request timeout after 12000ms",
+    "USDT: Request timeout after 12000ms",
+    "NOT: Request timeout after 12000ms",
+    "XAUT: Request timeout after 12000ms",
     "Binance futures funding: HTTP 451 from upstream",
     "Binance BTC open interest: HTTP 451 from upstream"
   ],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 48,
-    "totalMarketCapUsd": 2658624191937.691,
-    "btcDominance": 59.99909532433675
+    "totalMarketCapUsd": 2658023425280.7163,
+    "btcDominance": 60.01933647884062
   },
-  "successfulSources": 16,
-  "successfulLocalSources": 5
+  "successfulSources": 11,
+  "successfulLocalSources": 0
 }
