@@ -1,36 +1,36 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-29T10:35:19.292Z",
-  "lastUpdate": "2026-10-29T10:35:19.292Z",
+  "lastAttempt": "2026-10-29T10:40:20.685Z",
+  "lastUpdate": "2026-10-29T10:40:20.685Z",
   "retentionDays": 30,
-  "gold18K": 263896900,
-  "usdtPrice": 2715400,
-  "dollarPrice": 2715400,
+  "gold18K": 263392479,
+  "usdtPrice": 2715870,
+  "dollarPrice": 2715870,
   "marketSummary": {
     "BRENT": {
-      "last": 110.29000091552734,
-      "change": -4.361774880860176,
+      "last": 110.37999725341797,
+      "change": -4.283734351785614,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "WTI": {
-      "last": 101.47000122070312,
-      "change": -1.274564676155284,
+      "last": 101.55999755859375,
+      "change": -1.1870025639160366,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4042.10009765625,
-      "change": -0.23447526337793098,
+      "last": 4038.89990234375,
+      "change": -0.3134612253525897,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 52.78499984741211,
-      "change": -1.2570867721768657,
+      "last": 52.79499816894531,
+      "change": -1.23838328826229,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
@@ -50,21 +50,24 @@
       "timestamp": "2026-10-28T13:30:00.000Z"
     },
     "DXY": {
-      "last": 102.21600341796875,
-      "change": 0.025443757648805666,
+      "last": 102.20099639892578,
+      "change": 0.010758349404908734,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
+  "hasError": true,
+  "errorCount": 2,
+  "errors": [
+    "Binance futures funding: HTTP 451 from upstream",
+    "Binance BTC open interest: HTTP 451 from upstream"
+  ],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 51,
-    "totalMarketCapUsd": 2700815861718.1978,
-    "btcDominance": 59.4979193735629
+    "totalMarketCapUsd": 2707095992471.6567,
+    "btcDominance": 59.48024614307678
   },
   "successfulSources": 16,
   "successfulLocalSources": 5
