@@ -1,36 +1,36 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-29T09:50:17.611Z",
-  "lastUpdate": "2026-10-29T09:50:17.611Z",
+  "lastAttempt": "2026-10-29T09:55:20.490Z",
+  "lastUpdate": "2026-10-29T09:55:20.490Z",
   "retentionDays": 30,
-  "gold18K": 263914815,
-  "usdtPrice": 2717000,
-  "dollarPrice": 2717000,
+  "gold18K": 263572999,
+  "usdtPrice": 2714020,
+  "dollarPrice": 2714020,
   "marketSummary": {
     "BRENT": {
-      "last": 110.6500015258789,
-      "change": -4.049599532868288,
+      "last": 110.48999786376953,
+      "change": -4.188347072352157,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "WTI": {
-      "last": 101.66000366210938,
-      "change": -1.089701430715625,
+      "last": 101.56999969482422,
+      "change": -1.1772709659891416,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4038.60009765625,
-      "change": -0.32086088672769497,
+      "last": 4038.300048828125,
+      "change": -0.3282665738856791,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 52.69499969482422,
-      "change": -1.4254466714506482,
+      "last": 52.650001525878906,
+      "change": -1.5096230530822141,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
@@ -50,19 +50,16 @@
       "timestamp": "2026-10-28T13:30:00.000Z"
     },
     "DXY": {
-      "last": 102.28099822998047,
-      "change": 0.08904568587949097,
+      "last": 102.27799987792969,
+      "change": 0.08611159058724312,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 2,
-  "errors": [
-    "Binance futures funding: HTTP 451 from upstream",
-    "Binance BTC open interest: HTTP 451 from upstream"
-  ],
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 51,
