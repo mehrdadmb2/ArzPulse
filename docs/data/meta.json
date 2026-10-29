@@ -1,65 +1,72 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-29T08:00:19.253Z",
-  "lastUpdate": "2026-10-29T08:00:19.253Z",
+  "lastAttempt": "2026-10-29T08:05:18.323Z",
+  "lastUpdate": "2026-10-29T08:05:18.323Z",
   "retentionDays": 30,
-  "gold18K": 262553881,
-  "usdtPrice": 2708570,
-  "dollarPrice": 2708570,
+  "gold18K": 264100014,
+  "usdtPrice": 2712980,
+  "dollarPrice": 2712980,
   "marketSummary": {
     "BRENT": {
       "last": 110.70999908447266,
       "change": -3.997572513485246,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "WTI": {
       "last": 101.81999969482422,
       "change": -0.9340329790566512,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "XAUUSD": {
       "last": 4036.89990234375,
       "change": -0.36282443869531195,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "SILVER": {
       "last": 52.79999923706055,
       "change": -1.2290279782996771,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "SP500": {
       "last": 7743.97998046875,
       "change": 0.27684824466035257,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-28T13:30:00.000Z"
     },
     "NASDAQ": {
       "last": 26549.849609375,
       "change": 0.27207333617130325,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-28T13:30:00.000Z"
     },
     "DXY": {
       "last": 102.19599914550781,
       "change": 0.005868190584495673,
       "delayed": true,
-      "stale": false,
+      "stale": true,
       "timestamp": "2026-10-29T04:00:00.000Z"
     }
   },
   "hasError": true,
-  "errorCount": 2,
+  "errorCount": 9,
   "errors": [
+    "BRENT: HTTP 429 from upstream",
+    "WTI: HTTP 429 from upstream",
+    "XAUUSD: HTTP 429 from upstream",
+    "SILVER: HTTP 429 from upstream",
+    "SP500: HTTP 429 from upstream",
+    "NASDAQ: HTTP 429 from upstream",
+    "DXY: HTTP 429 from upstream",
     "Binance futures funding: HTTP 451 from upstream",
     "Binance BTC open interest: HTTP 451 from upstream"
   ],
@@ -69,6 +76,6 @@
     "totalMarketCapUsd": 2691948821675.0405,
     "btcDominance": 59.4594498233482
   },
-  "successfulSources": 16,
+  "successfulSources": 9,
   "successfulLocalSources": 5
 }
