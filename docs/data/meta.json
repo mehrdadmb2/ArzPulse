@@ -1,36 +1,36 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-29T11:40:19.825Z",
-  "lastUpdate": "2026-10-29T11:40:19.825Z",
+  "lastAttempt": "2026-10-29T11:45:18.324Z",
+  "lastUpdate": "2026-10-29T11:45:18.324Z",
   "retentionDays": 30,
-  "gold18K": 264214240,
-  "usdtPrice": 2716980,
-  "dollarPrice": 2716980,
+  "gold18K": 264201902,
+  "usdtPrice": 2717190,
+  "dollarPrice": 2717190,
   "marketSummary": {
     "BRENT": {
-      "last": 110.19000244140625,
-      "change": -4.448488785114186,
+      "last": 110.11000061035156,
+      "change": -4.517862554856121,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "WTI": {
-      "last": 101.44999694824219,
-      "change": -1.294027872009074,
+      "last": 101.37999725341797,
+      "change": -1.3621342114288004,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "XAUUSD": {
-      "last": 4043,
-      "change": -0.21226422768685743,
+      "last": 4044.300048828125,
+      "change": -0.18017693385751216,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     },
     "SILVER": {
-      "last": 52.84000015258789,
-      "change": -1.1541997706200737,
+      "last": 52.86000061035156,
+      "change": -1.116785666780272,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
@@ -50,16 +50,19 @@
       "timestamp": "2026-10-28T13:30:00.000Z"
     },
     "DXY": {
-      "last": 102.16200256347656,
-      "change": -0.027399821176970894,
+      "last": 102.15899658203125,
+      "change": -0.030341382360547602,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-10-29T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
+  "hasError": true,
+  "errorCount": 2,
+  "errors": [
+    "Binance futures funding: HTTP 451 from upstream",
+    "Binance BTC open interest: HTTP 451 from upstream"
+  ],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 51,
