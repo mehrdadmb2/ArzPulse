@@ -1,9 +1,9 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-31T03:25:20.064Z",
-  "lastUpdate": "2026-10-31T03:25:20.064Z",
+  "lastAttempt": "2026-10-31T03:30:19.731Z",
+  "lastUpdate": "2026-10-31T03:30:19.731Z",
   "retentionDays": 30,
-  "gold18K": 259092803,
+  "gold18K": 259086194,
   "usdtPrice": 2741050,
   "dollarPrice": 2741050,
   "marketSummary": {
@@ -57,9 +57,12 @@
       "timestamp": "2026-10-30T04:00:00.000Z"
     }
   },
-  "hasError": false,
-  "errorCount": 0,
-  "errors": [],
+  "hasError": true,
+  "errorCount": 2,
+  "errors": [
+    "Binance futures funding: HTTP 451 from upstream",
+    "Binance BTC open interest: HTTP 451 from upstream"
+  ],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 30,
