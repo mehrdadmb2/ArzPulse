@@ -1,11 +1,11 @@
 {
   "version": 6,
-  "lastAttempt": "2026-10-31T16:45:22.133Z",
-  "lastUpdate": "2026-10-31T16:45:22.133Z",
+  "lastAttempt": "2026-10-31T16:50:21.529Z",
+  "lastUpdate": "2026-10-31T16:50:21.529Z",
   "retentionDays": 30,
-  "gold18K": 255889941,
-  "usdtPrice": 2710900,
-  "dollarPrice": 2710900,
+  "gold18K": 255890672,
+  "usdtPrice": 2710700,
+  "dollarPrice": 2710700,
   "marketSummary": {
     "BRENT": {
       "last": 117.63999938964844,
@@ -57,17 +57,14 @@
       "timestamp": "2026-10-30T04:00:00.000Z"
     }
   },
-  "hasError": true,
-  "errorCount": 2,
-  "errors": [
-    "Binance futures funding: HTTP 451 from upstream",
-    "Binance BTC open interest: HTTP 451 from upstream"
-  ],
+  "hasError": false,
+  "errorCount": 0,
+  "errors": [],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 30,
-    "totalMarketCapUsd": 2627654359645.5894,
-    "btcDominance": 59.228433640477796
+    "totalMarketCapUsd": 2628259900077.876,
+    "btcDominance": 59.22480856305026
   },
   "successfulSources": 16,
   "successfulLocalSources": 5
