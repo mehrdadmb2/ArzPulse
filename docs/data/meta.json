@@ -1,39 +1,39 @@
 {
   "version": 6,
-  "lastAttempt": "2026-11-03T04:05:17.900Z",
-  "lastUpdate": "2026-11-03T04:05:17.900Z",
+  "lastAttempt": "2026-11-03T04:10:19.931Z",
+  "lastUpdate": "2026-11-03T04:10:19.931Z",
   "retentionDays": 30,
   "gold18K": 258470284,
   "usdtPrice": 2733000,
   "dollarPrice": 2733000,
   "marketSummary": {
     "BRENT": {
-      "last": 104.80000305175781,
-      "change": 0.02864026882966599,
+      "last": 104.7699966430664,
+      "change": 0,
       "delayed": true,
       "stale": false,
-      "timestamp": "2026-11-03T03:53:46.000Z"
+      "timestamp": "2026-11-03T03:58:42.000Z"
     },
     "WTI": {
-      "last": 96.66000366210938,
-      "change": 0.2073445775813965,
+      "last": 96.62999725341797,
+      "change": 0.17623695890401206,
       "delayed": true,
       "stale": false,
-      "timestamp": "2026-11-03T03:55:01.000Z"
+      "timestamp": "2026-11-03T04:00:11.000Z"
     },
     "XAUUSD": {
-      "last": 3938.300048828125,
-      "change": -0.7884937539830605,
+      "last": 3936.5,
+      "change": -0.8338396020242219,
       "delayed": true,
       "stale": false,
-      "timestamp": "2026-11-03T03:55:15.000Z"
+      "timestamp": "2026-11-03T04:00:20.000Z"
     },
     "SILVER": {
-      "last": 49.81999969482422,
-      "change": -1.7744509152565626,
+      "last": 49.79499816894531,
+      "change": -1.823744143326717,
       "delayed": true,
       "stale": false,
-      "timestamp": "2026-11-03T03:55:14.000Z"
+      "timestamp": "2026-11-03T04:00:17.000Z"
     },
     "SP500": {
       "last": 7541.39990234375,
@@ -50,11 +50,11 @@
       "timestamp": "2026-11-02T14:30:00.000Z"
     },
     "DXY": {
-      "last": 101.76799774169922,
-      "change": 0.017688198230190418,
+      "last": 101.76000213623047,
+      "change": 0.009830109317414005,
       "delayed": true,
       "stale": false,
-      "timestamp": "2026-11-03T03:55:19.000Z"
+      "timestamp": "2026-11-03T04:00:21.000Z"
     }
   },
   "hasError": true,
@@ -66,8 +66,8 @@
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 26,
-    "totalMarketCapUsd": 2598906645614.8335,
-    "btcDominance": 59.305443599491404
+    "totalMarketCapUsd": 2594687305237.765,
+    "btcDominance": 59.29676638582973
   },
   "successfulSources": 16,
   "successfulLocalSources": 5
