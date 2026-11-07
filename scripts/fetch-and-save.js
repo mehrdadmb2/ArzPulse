@@ -11,6 +11,9 @@ const YAHOO = 'https://query1.finance.yahoo.com';
 const BINANCE_DATA = 'https://data-api.binance.vision';
 const BINANCE_FUTURES = 'https://fapi.binance.com';
 const FEAR_GREED_URL = 'https://api.alternative.me/fng/?limit=8';
+const STOCK_SYMBOLS = ['AAPL','MSFT','NVDA','TSLA','AMZN','GOOGL','META','AVGO','AMD','ORCL','PLTR','COIN','SPCX'];
+const FOREX_PAIRS = { EURUSD: 'EUR/USD', GBPUSD: 'GBP/USD', USDJPY: 'USD/JPY', USDCHF: 'USD/CHF', USDCAD: 'USD/CAD', AUDUSD: 'AUD/USD', NZDUSD: 'NZD/USD', USDTRY: 'USD/TRY', EURGBP: 'EUR/GBP', EURJPY: 'EUR/JPY', GBPJPY: 'GBP/JPY', USDCNH: 'USD/CNH' };
+const FOREX_REFRESH_MS = 30 * 60 * 1000; // Twelve Data free-tier friendly: 12 pairs × 48 refreshes/day.
 const GLOBAL_CRYPTO_SYMBOLS = [
   'BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH',
   'SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE'
@@ -30,7 +33,7 @@ function clampInt(value, fallback, min, max) {
   return Number.isInteger(n) ? Math.min(max, Math.max(min, n)) : fallback;
 }
 
-function fetchText(url, timeout = REQUEST_TIMEOUT_MS, retries = REQUEST_RETRIES) {
+function fetchText(url, timeout = REQUEST_TIMEOUT_MS, retries = REQUEST_RETRIES, extraHeaders = {}) {
   return new Promise((resolve, reject) => {
     let attempt = 0;
     const run = () => {
@@ -39,7 +42,8 @@ function fetchText(url, timeout = REQUEST_TIMEOUT_MS, retries = REQUEST_RETRIES)
       const req = https.get(url, {
         headers: {
           'User-Agent': 'ArzPulse-Collector/5.0 (+https://github.com/mehrdadmb2/ArzPulse)',
-          Accept: 'application/json,text/plain,*/*'
+          Accept: 'application/json,text/plain,*/*',
+          ...extraHeaders
         }
       }, (res) => {
         let body = '';
@@ -66,8 +70,8 @@ function fetchText(url, timeout = REQUEST_TIMEOUT_MS, retries = REQUEST_RETRIES)
   });
 }
 
-async function fetchJSON(url) {
-  const text = await fetchText(url);
+async function fetchJSON(url, options = {}) {
+  const text = await fetchText(url, options.timeout ?? REQUEST_TIMEOUT_MS, options.retries ?? REQUEST_RETRIES, options.headers ?? {});
   try { return JSON.parse(text); }
   catch { throw new Error('Upstream returned invalid JSON'); }
 }
@@ -138,6 +142,137 @@ async function fetchYahoo(symbol) {
     fetchedAt: new Date().toISOString(),
     delayed: true, stale: false, source: 'Yahoo Finance', symbol
   };
+}
+
+
+
+async function mapLimit(items, limit, worker) {
+  const output = new Array(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor++;
+      output[index] = await worker(items[index], index);
+    }
+  });
+  await Promise.all(runners);
+  return output;
+}
+
+function parseMaybeDate(value, fallback) {
+  if (!value) return fallback;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : fallback;
+}
+
+async function fetchAlpacaEquities(symbols) {
+  const key = process.env.ALPACA_API_KEY || process.env.ALPACA_API_KEY_ID;
+  const secret = process.env.ALPACA_API_SECRET || process.env.ALPACA_API_SECRET_KEY;
+  const requestedFeed = String(process.env.ALPACA_DATA_FEED || 'iex').toLowerCase();
+  const feed = ['iex','sip','delayed_sip','otc','boats','overnight'].includes(requestedFeed) ? requestedFeed : 'iex';
+  if (!key || !secret) return {};
+  const url = `https://data.alpaca.markets/v2/stocks/snapshots?symbols=${encodeURIComponent(symbols.join(','))}&feed=${encodeURIComponent(feed)}`;
+  const payload = await fetchJSON(url, { headers: { 'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret } });
+  const output = {};
+  for (const symbol of symbols) {
+    const row = payload?.[symbol];
+    if (!row) continue;
+    const trade = row.latestTrade || row.latest_trade || {};
+    const bar = row.dailyBar || row.daily_bar || {};
+    const previous = row.prevDailyBar || row.previous_daily_bar || {};
+    const price = num(trade.p ?? trade.price ?? bar.c ?? bar.close);
+    if (!validPositive(price)) continue;
+    const previousClose = num(previous.c ?? previous.close);
+    const stamp = trade.t || trade.timestamp || row.minuteBar?.t || row.minute_bar?.timestamp || bar.t || bar.timestamp;
+    output[symbol] = {
+      symbol, last: price, price, change: previousClose > 0 ? ((price - previousClose) / previousClose) * 100 : null,
+      high: num(bar.h ?? bar.high), low: num(bar.l ?? bar.low), volume: num(bar.v ?? bar.volume),
+      trades: num(bar.n ?? bar.trade_count), vwap: num(bar.vw ?? bar.vwap),
+      timestamp: parseMaybeDate(stamp, new Date().toISOString()), fetchedAt: new Date().toISOString(),
+      source: `Alpaca ${feed.toUpperCase()}`, feed: feed.toUpperCase(), currency: 'USD', delayed: false, stale: false
+    };
+  }
+  return output;
+}
+
+async function fetchEquities(previous, attemptedAt, errors) {
+  const result = {};
+  let provider = 'Yahoo Finance';
+  try {
+    const alpaca = await fetchAlpacaEquities(STOCK_SYMBOLS);
+    if (Object.keys(alpaca).length) {
+      Object.assign(result, alpaca);
+      provider = `Alpaca ${String(process.env.ALPACA_DATA_FEED || 'iex').toUpperCase()}`;
+    }
+  } catch (error) {
+    errors.push(`Alpaca equities: ${error.message}`);
+    console.warn(`↪️ Alpaca equities unavailable: ${error.message}; using Yahoo fallback.`);
+  }
+  const missing = STOCK_SYMBOLS.filter((symbol) => !result[symbol]);
+  await mapLimit(missing, 4, async (symbol) => {
+    try {
+      const quote = await fetchYahoo(symbol);
+      result[symbol] = { ...quote, symbol, last: quote.last, currency: 'USD', source: 'Yahoo Finance', delayed: true };
+    } catch (error) {
+      errors.push(`Equity ${symbol}: ${error.message}`);
+      result[symbol] = fallbackRecord(previous?.[symbol], {
+        symbol, last: 0, change: null, high: 0, low: 0, volume: 0, timestamp: null,
+        fetchedAt: null, currency: 'USD', source: provider, delayed: true
+      }, attemptedAt, error.message);
+    }
+  });
+  return result;
+}
+
+async function fetchTwelveDataFx(pair, apiKey) {
+  const url = `https://api.twelvedata.com/quote?symbol=${encodeURIComponent(pair)}&apikey=${encodeURIComponent(apiKey)}`;
+  const json = await fetchJSON(url, { retries: 0, timeout: 9000 });
+  if (json?.status === 'error' || !validPositive(json?.close ?? json?.price)) throw new Error(json?.message || `Twelve Data has no usable quote for ${pair}`);
+  const price = num(json.close ?? json.price);
+  const stamp = json.datetime ? parseMaybeDate(json.datetime, new Date().toISOString()) : new Date().toISOString();
+  return {
+    last: price, price, change: Number.isFinite(Number(json.percent_change)) ? num(json.percent_change) : null,
+    high: num(json.high), low: num(json.low), volume: num(json.volume),
+    timestamp: stamp, fetchedAt: new Date().toISOString(), source: 'Twelve Data',
+    symbol: pair.replace('/', ''), pair, currency: pair.split('/')[1] || 'USD', delayed: false, stale: false
+  };
+}
+
+async function fetchForex(previous, attemptedAt, errors) {
+  const result = {};
+  const apiKey = process.env.TWELVE_DATA_API_KEY;
+  const due = Object.entries(FOREX_PAIRS).filter(([symbol]) => {
+    const old = previous?.[symbol];
+    const age = Date.now() - Date.parse(old?.fetchedAt || old?.timestamp || '');
+    return !old || !Number.isFinite(age) || age >= FOREX_REFRESH_MS;
+  });
+  const dueKeys = new Set(due.map(([symbol]) => symbol));
+  for (const [symbol, pair] of due) {
+    try {
+      if (apiKey) result[symbol] = await fetchTwelveDataFx(pair, apiKey);
+      else throw new Error('TWELVE_DATA_API_KEY is not configured');
+    } catch (error) {
+      // Yahoo fallback is a reference quote and may be delayed; never label it live.
+      try {
+        const yahooSymbol = `${pair.replace('/', '')}=X`;
+        const quote = await fetchYahoo(yahooSymbol);
+        result[symbol] = { ...quote, symbol, pair, currency: pair.split('/')[1] || 'USD', source: 'Yahoo Finance', delayed: true };
+      } catch (fallbackError) {
+        if (apiKey) errors.push(`Forex ${symbol}: ${error.message}; fallback: ${fallbackError.message}`);
+        else errors.push(`Forex ${symbol}: ${fallbackError.message}`);
+        result[symbol] = fallbackRecord(previous?.[symbol], {
+          symbol, pair, last: 0, change: null, high: 0, low: 0, volume: 0,
+          timestamp: null, fetchedAt: null, currency: pair.split('/')[1] || 'USD', source: apiKey ? 'Twelve Data' : 'Yahoo Finance', delayed: true
+        }, attemptedAt, fallbackError.message);
+      }
+    }
+  }
+  for (const [symbol] of Object.entries(FOREX_PAIRS)) {
+    if (result[symbol]) continue;
+    const old = previous?.[symbol];
+    if (old && validPositive(old.last)) result[symbol] = { ...old, stale: Boolean(old.stale), cached: true, lastCheckedAt: attemptedAt };
+  }
+  return result;
 }
 
 async function fetchBinanceCryptoBatch(symbols) {
@@ -375,7 +510,7 @@ function compactDailySnapshots(rows, maximum = MAX_SNAPSHOTS_PER_DAY) {
   return sampled;
 }
 
-function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto) {
+function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto, equities = {}, forex = {}) {
   const row = { time: now };
   const put = (key, value, stale = false) => {
     if (!stale && validPositive(value)) row[key] = Number(value);
@@ -387,6 +522,8 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
   put('GOLD18K', gold18K, prices.XAUT?.stale || prices.USDT?.stale);
   put('DOLLAR', dollarPrice, prices.USDT?.stale);
   for (const [key, value] of Object.entries(market)) put(key, value?.last, value?.stale);
+  for (const [key, value] of Object.entries(equities || {})) put(key, value?.last, value?.stale);
+  for (const [key, value] of Object.entries(forex || {})) put(key, value?.last, value?.stale);
   const usdtRate = num(dollarPrice);
   for (const [key, value] of Object.entries(globalCrypto || {})) {
     // Store approximate IRR values so existing charts/history need no new schema.
@@ -396,7 +533,7 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
 }
 
 (async () => {
-  console.log(`🚀 ArzPulse collector v6 — history retention ${HISTORY_KEEP_DAYS} days; max snapshots/day ${MAX_SNAPSHOTS_PER_DAY}`);
+  console.log(`🚀 ArzPulse collector v7 — history retention ${HISTORY_KEEP_DAYS} days; max snapshots/day ${MAX_SNAPSHOTS_PER_DAY}`);
   const previous = readJSON(LATEST_PATH, null);
   const attemptedAt = new Date().toISOString();
   const errors = [];
@@ -431,10 +568,12 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
   const market = {};
   const globalSymbols = {
     BRENT: 'BZ=F', WTI: 'CL=F', XAUUSD: 'GC=F', SILVER: 'SI=F',
-    SP500: '^GSPC', NASDAQ: '^IXIC', DXY: 'DX-Y.NYB'
+    SP500: '^GSPC', NASDAQ: '^IXIC', DXY: 'DX-Y.NYB', DOW: '^DJI', RUSSELL2000: '^RUT',
+    VIX: '^VIX', NIKKEI: '^N225', FTSE100: '^FTSE', DAX: '^GDAXI', HANGSENG: '^HSI',
+    NATGAS: 'NG=F', COPPER: 'HG=F', PLATINUM: 'PL=F', PALLADIUM: 'PA=F', US10Y: '^TNX'
   };
 
-  for (const [key, symbol] of Object.entries(globalSymbols)) {
+  await mapLimit(Object.entries(globalSymbols), 4, async ([key, symbol]) => {
     try {
       market[key] = await fetchYahoo(symbol);
       successfulSources += 1;
@@ -446,8 +585,12 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
       }, attemptedAt, error.message);
       console.warn(`↩️ ${key}: ${error.message}`);
     }
-  }
+  });
 
+  const equities = await fetchEquities(previous?.equities || {}, attemptedAt, errors);
+  const forex = await fetchForex(previous?.forex || {}, attemptedAt, errors);
+  successfulSources += Object.values(equities).filter((item) => !item?.stale && validPositive(item?.last)).length;
+  successfulSources += Object.values(forex).filter((item) => !item?.stale && validPositive(item?.last)).length;
   const successfulPriceSources = successfulSources;
   const contextResult = await fetchMarketContext({ ...(previous?.marketContext || {}), globalCrypto: previous?.globalCrypto || previous?.marketContext?.globalCrypto }, attemptedAt, errors);
   const marketContext = contextResult.context;
@@ -457,7 +600,7 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
   const hasAnyPreviousData = Boolean(previous && (previous.timestamp || previous.prices || previous.market));
   const topLevelTimestamp = successfulPriceSources > 0 ? attemptedAt : (previous?.timestamp || attemptedAt);
   const latest = {
-    version: 6,
+    version: 7,
     timestamp: topLevelTimestamp,
     attemptTimestamp: attemptedAt,
     lastGoodTimestamp: successfulPriceSources > 0 ? attemptedAt : (previous?.lastGoodTimestamp || previous?.timestamp || null),
@@ -468,6 +611,8 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
       dollar: Boolean(prices.USDT?.stale)
     },
     market,
+    equities,
+    forex,
     globalCrypto,
     marketContext: { fearGreed: marketContext.fearGreed || null, global: marketContext.global || null, derivatives: marketContext.derivatives || null },
     hasError: errors.length > 0,
@@ -493,14 +638,16 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
   const kept = Array.isArray(history)
     ? history.filter((item) => Number.isFinite(Date.parse(item?.time)) && Date.parse(item.time) >= cutoffMs)
     : [];
-  const row = buildHistoryRow(attemptedAt, prices, gold18K, dollarPrice, market, globalCrypto);
+  const row = buildHistoryRow(attemptedAt, prices, gold18K, dollarPrice, market, globalCrypto, equities, forex);
   if (Object.keys(row).length > 1) kept.push(row);
   const compactedHistory = compactDailySnapshots(kept, MAX_SNAPSHOTS_PER_DAY);
   writeJSONAtomic(dailyFile, compactedHistory);
 
   const meta = {
-    version: 6, lastAttempt: attemptedAt, lastUpdate: latest.timestamp,
+    version: 7, lastAttempt: attemptedAt, lastUpdate: latest.timestamp,
     retentionDays: HISTORY_KEEP_DAYS, gold18K, usdtPrice: usdt, dollarPrice,
+    equityCount: Object.values(equities).filter((item) => validPositive(item?.last) && !item?.stale).length,
+    forexCount: Object.values(forex).filter((item) => validPositive(item?.last) && !item?.stale).length,
     marketSummary: Object.fromEntries(Object.entries(market).map(([key, item]) => [key, {
       last: item.last, change: item.change, delayed: Boolean(item.delayed), stale: Boolean(item.stale), timestamp: item.timestamp || null
     }])),

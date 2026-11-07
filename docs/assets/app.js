@@ -44,13 +44,53 @@
     SILVER:{name:'Silver',fa:'نقره',short:'XAG',cat:'commodity',icon:'Ag',color:'169,189,204',global:true, aliases:['SILVER']},
     SP500:{name:'S&P 500',fa:'S&P 500',short:'SPX',cat:'index',icon:'S',color:'104,181,255',global:true, aliases:['SP500']},
     NASDAQ:{name:'Nasdaq',fa:'نزدک',short:'NDX',cat:'index',icon:'N',color:'127,145,244',global:true, aliases:['NASDAQ']},
-    DXY:{name:'US Dollar Index',fa:'شاخص دلار',short:'DXY',cat:'index',icon:'D',color:'190,155,255',global:true, aliases:['DXY']}
+    DXY:{name:'US Dollar Index',fa:'شاخص دلار',short:'DXY',cat:'index',icon:'D',color:'190,155,255',global:true, aliases:['DXY']},
+    DOW:{name:'Dow Jones Industrial Average',fa:'داوجونز',short:'DOW',cat:'index',icon:'DJ',color:'90,170,255',global:true,aliases:['DOW','DJI']},
+    RUSSELL2000:{name:'Russell 2000',fa:'راسل ۲۰۰۰',short:'RUT',cat:'index',icon:'R2',color:'122,190,255',global:true,aliases:['RUT','RUSSELL2000']},
+    VIX:{name:'CBOE Volatility Index',fa:'شاخص نوسان VIX',short:'VIX',cat:'index',icon:'V',color:'255,133,111',global:true,aliases:['VIX']},
+    NIKKEI:{name:'Nikkei 225',fa:'نیکی ۲۲۵',short:'N225',cat:'index',icon:'JP',color:'255,118,141',global:true,aliases:['NIKKEI']},
+    FTSE100:{name:'FTSE 100',fa:'فوتسی ۱۰۰',short:'FTSE',cat:'index',icon:'UK',color:'115,193,173',global:true,aliases:['FTSE100']},
+    DAX:{name:'DAX 40',fa:'دکس ۴۰',short:'DAX',cat:'index',icon:'DE',color:'244,187,88',global:true,aliases:['DAX']},
+    HANGSENG:{name:'Hang Seng Index',fa:'هنگ‌سنگ',short:'HSI',cat:'index',icon:'HK',color:'236,101,120',global:true,aliases:['HSI','HANGSENG']},
+    NATGAS:{name:'Natural Gas',fa:'گاز طبیعی',short:'NG',cat:'commodity',icon:'NG',color:'86,183,255',global:true,aliases:['NATGAS']},
+    COPPER:{name:'Copper Futures',fa:'مس',short:'HG',cat:'commodity',icon:'Cu',color:'212,132,91',global:true,aliases:['COPPER']},
+    PLATINUM:{name:'Platinum',fa:'پلاتین',short:'PL',cat:'commodity',icon:'Pt',color:'175,197,214',global:true,aliases:['PLATINUM']},
+    PALLADIUM:{name:'Palladium',fa:'پالادیوم',short:'PA',cat:'commodity',icon:'Pd',color:'151,180,199',global:true,aliases:['PALLADIUM']},
+    US10Y:{name:'US 10Y Treasury Yield',fa:'بازده اوراق ۱۰ساله آمریکا',short:'US10Y',cat:'index',icon:'10Y',color:'183,154,255',global:true,aliases:['US10Y']},
+    AAPL:{name:'Apple',fa:'اپل',short:'AAPL',cat:'stock',icon:'●',color:'190,202,215',global:true,aliases:['AAPL','APPLE']},
+    MSFT:{name:'Microsoft',fa:'مایکروسافت',short:'MSFT',cat:'stock',icon:'四',color:'96,160,245',global:true,aliases:['MSFT','MICROSOFT']},
+    NVDA:{name:'NVIDIA',fa:'انویدیا',short:'NVDA',cat:'stock',icon:'N',color:'118,210,112',global:true,aliases:['NVDA','NVIDIA']},
+    TSLA:{name:'Tesla',fa:'تسلا',short:'TSLA',cat:'stock',icon:'T',color:'239,92,105',global:true,aliases:['TSLA','TESLA']},
+    AMZN:{name:'Amazon',fa:'آمازون',short:'AMZN',cat:'stock',icon:'a',color:'238,169,89',global:true,aliases:['AMZN','AMAZON']},
+    GOOGL:{name:'Alphabet',fa:'آلفابت / گوگل',short:'GOOGL',cat:'stock',icon:'G',color:'112,168,245',global:true,aliases:['GOOGL','GOOG','GOOGLE']},
+    META:{name:'Meta Platforms',fa:'متا',short:'META',cat:'stock',icon:'∞',color:'91,151,241',global:true,aliases:['META']},
+    AVGO:{name:'Broadcom',fa:'برودکام',short:'AVGO',cat:'stock',icon:'B',color:'226,117,99',global:true,aliases:['AVGO']},
+    AMD:{name:'Advanced Micro Devices',fa:'ای‌ام‌دی',short:'AMD',cat:'stock',icon:'A',color:'222,93,93',global:true,aliases:['AMD']},
+    ORCL:{name:'Oracle',fa:'اوراکل',short:'ORCL',cat:'stock',icon:'O',color:'239,105,105',global:true,aliases:['ORCL']},
+    PLTR:{name:'Palantir',fa:'پالانتیر',short:'PLTR',cat:'stock',icon:'P',color:'169,183,197',global:true,aliases:['PLTR']},
+    COIN:{name:'Coinbase',fa:'کوین‌بیس',short:'COIN',cat:'stock',icon:'C',color:'83,155,255',global:true,aliases:['COIN']},
+    SPCX:{name:'SpaceX',fa:'اسپیس‌ایکس',short:'SPCX',cat:'stock',icon:'✦',color:'153,178,205',global:true,aliases:['SPCX','SPACEX']},
+    EURUSD:{name:'Euro / US Dollar',fa:'یورو / دلار',short:'EUR/USD',cat:'forex',icon:'€',color:'104,170,255',global:false,aliases:['EURUSD','EUR/USD']},
+    GBPUSD:{name:'Pound / US Dollar',fa:'پوند / دلار',short:'GBP/USD',cat:'forex',icon:'£',color:'169,142,255',global:false,aliases:['GBPUSD','GBP/USD']},
+    USDJPY:{name:'US Dollar / Yen',fa:'دلار / ین',short:'USD/JPY',cat:'forex',icon:'¥',color:'239,121,143',global:false,aliases:['USDJPY','USD/JPY']},
+    USDCHF:{name:'US Dollar / Swiss Franc',fa:'دلار / فرانک',short:'USD/CHF',cat:'forex',icon:'₣',color:'117,193,176',global:false,aliases:['USDCHF','USD/CHF']},
+    USDCAD:{name:'US Dollar / Canadian Dollar',fa:'دلار / دلار کانادا',short:'USD/CAD',cat:'forex',icon:'C$',color:'111,187,181',global:false,aliases:['USDCAD','USD/CAD']},
+    AUDUSD:{name:'Australian Dollar / US Dollar',fa:'دلار استرالیا / دلار',short:'AUD/USD',cat:'forex',icon:'A$',color:'101,205,171',global:false,aliases:['AUDUSD','AUD/USD']},
+    NZDUSD:{name:'New Zealand Dollar / US Dollar',fa:'دلار نیوزیلند / دلار',short:'NZD/USD',cat:'forex',icon:'NZ',color:'113,180,201',global:false,aliases:['NZDUSD','NZD/USD']},
+    USDTRY:{name:'US Dollar / Turkish Lira',fa:'دلار / لیر ترکیه',short:'USD/TRY',cat:'forex',icon:'₺',color:'234,111,116',global:false,aliases:['USDTRY','USD/TRY']},
+    EURGBP:{name:'Euro / Pound Sterling',fa:'یورو / پوند',short:'EUR/GBP',cat:'forex',icon:'€£',color:'144,172,225',global:false,aliases:['EURGBP','EUR/GBP']},
+    EURJPY:{name:'Euro / Japanese Yen',fa:'یورو / ین',short:'EUR/JPY',cat:'forex',icon:'€¥',color:'211,143,172',global:false,aliases:['EURJPY','EUR/JPY']},
+    GBPJPY:{name:'Pound Sterling / Japanese Yen',fa:'پوند / ین',short:'GBP/JPY',cat:'forex',icon:'£¥',color:'184,133,208',global:false,aliases:['GBPJPY','GBP/JPY']},
+    USDCNH:{name:'US Dollar / Offshore Yuan',fa:'دلار / یوان فراساحلی',short:'USD/CNH',cat:'forex',icon:'¥',color:'218,130,103',global:false,aliases:['USDCNH','USD/CNH']}
+
   };
 
   const CRYPTO_ORDER = ['BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH','SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE','USDT','NOT'];
-  const DEFAULT_ORDER = [...CRYPTO_ORDER,'GOLD','DOLLAR','BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY'];
-  const OVERVIEW_ORDER = ['BTC','SOL','GOLD','DOLLAR','BRENT','XAUUSD'];
-  const CHARTABLE = ['BTC','ETH','SOL','BNB','XRP','ADA','GOLD','DOLLAR','BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY'];
+  const STOCK_ORDER=['AAPL','MSFT','NVDA','TSLA','AMZN','GOOGL','META','AVGO','AMD','ORCL','PLTR','COIN','SPCX'];
+  const FOREX_ORDER=['EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD','USDTRY','EURGBP','EURJPY','GBPJPY','USDCNH'];
+  const DEFAULT_ORDER = [...CRYPTO_ORDER,'GOLD','DOLLAR','BRENT','WTI','XAUUSD','SILVER','NATGAS','COPPER','PLATINUM','PALLADIUM','SP500','NASDAQ','DOW','RUSSELL2000','VIX','NIKKEI','FTSE100','DAX','HANGSENG','DXY','US10Y',...STOCK_ORDER,...FOREX_ORDER];
+  const OVERVIEW_ORDER = ['BTC','AAPL','NVDA','TSLA','GOLD','EURUSD','SP500','DOLLAR'];
+  const CHARTABLE = ['BTC','ETH','SOL','BNB','XRP','GOLD','SP500','NASDAQ','AAPL','NVDA','TSLA','SPCX','EURUSD','GBPUSD','USDJPY','DXY'];
 
   const I18N = {
     en:{
@@ -60,7 +100,7 @@
       coverage:'Coverage',trackedAssets:'tracked assets',exploreMarkets:'Explore markets',share:'Share',dataLayer:'GitHub data layer',
       updateSchedule:'Updated by automation',galaxyCaption:'Interactive market pulse',overviewTitle:'Fast market view',
       marketDrivers:'Market drivers & sentiment',marketDriversLead:'Global crypto breadth, positioning, sentiment and macro context. Indicators are informative, not predictions.',marketSignalsTitle:'Market signal radar',marketSignalsLead:'Rule-based watch signals from sudden moves, breadth, sentiment and derivatives. These are monitoring cues, not predictions.',noHighSignals:'No high-threshold conditions are active. Markets are being monitored.',signalCritical:'Critical',signalWarning:'Important',signalWatch:'Watch',signalSource:'Source',signalUpdated:'Updated',signalMove:'24h move',fearGreed:'Fear & Greed',globalCap:'Total crypto market cap',globalVolume:'24h global volume',btcDominance:'BTC / ETH dominance',capChange:'Market cap 24h',cryptoBreadth:'Global crypto breadth',fundingRates:'Perpetual funding',openInterest:'BTC open interest',positiveNegative:'Advance / decline',sentimentSource:'Source: Alternative.me · daily sentiment index',contextDisclaimer:'Funding and open interest describe derivatives positioning; neither predicts price direction on its own.',
-      filterMarket:'Market',all:'All',crypto:'Crypto',commodities:'Commodities',indices:'Indices',unit:'Unit',comfortable:'Comfortable',compact:'Compact',
+      filterMarket:'Market',all:'All',crypto:'Crypto',commodities:'Commodities',indices:'Indices',stocks:'Stocks',forex:'Forex',unit:'Unit',comfortable:'Comfortable',compact:'Compact',
       marketStatusTitle:'Market status',marketStatusLead:'A compact view of breadth, momentum, pressure and data freshness.',pulseScoreLabel:'Pulse score',
       breadth:'Market breadth',momentum:'Momentum',volatility:'Volatility',dataHealth:'Data health',avgChange:'Average change',
       largestMove:'Largest move',freshness:'Freshness',sources:'Sources',errors:'Errors',topMovers:'Top movers',byDailyChange:'by daily change',
@@ -136,6 +176,7 @@
   const formatPrice = (key, value) => {
     const v = Number(value);
     if(!Number.isFinite(v) || v===0) return '—';
+    if(META[key]?.cat==='forex') return num(v);
     if(isGlobal(key)) return `$${num(v)}`;
     if(lang==='fa'){
       if(currency==='USD'){
@@ -201,11 +242,19 @@
         signals.push({key:`funding-${symbol}`,symbol,color,severity:Math.abs(rate)>=.001?'critical':'warning',title:`${symbol} · ${lang==='fa'?'فاندینگ غیرعادی':'Unusual funding'}`,value:`${(rate*100).toFixed(4)}%`,body:lang==='fa'?(rate>0?'نرخ مثبت یعنی لانگ‌ها معمولاً به شورت‌ها پرداخت می‌کنند. هزینه موقعیت‌گیری را بررسی کن.':'نرخ منفی می‌تواند نشان‌دهنده فشار موقعیت‌های شورت باشد؛ جهت بعدی قیمت قطعی نیست.'):(rate>0?'Positive funding typically means longs pay shorts. Check positioning costs.':'Negative funding can indicate short-side pressure; it does not guarantee the next price move.'),source:item.source||'Binance USD-M Futures',extra:item.nextFundingTime?relativeTime(item.nextFundingTime):'—'});
       }
     }
-    for(const key of ['BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY']){
+    for(const key of ['BRENT','WTI','XAUUSD','SILVER','SP500','NASDAQ','DXY','DOW','RUSSELL2000','VIX','NIKKEI','FTSE100','DAX','HANGSENG','NATGAS','COPPER','PLATINUM','PALLADIUM','US10Y']){
       const item=latest?.market?.[key];
       if(!item||item.stale||!Number.isFinite(Number(item.change))||Math.abs(Number(item.change))<1.5) continue;
       const meta=META[key];
       signals.push({key:`macro-${key}`,symbol:key,color:meta?.color||'89,216,255',severity:Math.abs(Number(item.change))>=3?'critical':'warning',title:`${lang==='fa'?(meta?.fa||key):(meta?.name||key)} · ${lang==='fa'?'حرکت کلان':'Macro move'}`,value:formatPct(item.change),body:lang==='fa'?'تغییر این شاخص می‌تواند فضای ریسک و دارایی‌های مرتبط را تحت تأثیر قرار دهد؛ به زمان و تأخیر داده دقت کن.':'This instrument may influence related markets and risk sentiment. Check market hours and potential data delay.',source:item.source||'Yahoo Finance',extra:formatUSD(item.last)});
+    }
+    for(const [category,items,threshold] of [['stock',latest?.equities||{},2.5],['forex',latest?.forex||{},0.65]]){
+      for(const [symbol,item] of Object.entries(items)){
+        const move=Number(item?.change);
+        if(!item||item.stale||!Number.isFinite(move)||Math.abs(move)<threshold) continue;
+        const meta=META[symbol]; if(!meta) continue;
+        signals.push({key:`${category}-${symbol}`,symbol,color:meta.color,severity:Math.abs(move)>=threshold*2?'critical':'warning',title:`${lang==='fa'?meta.fa:meta.name} · ${lang==='fa'?'حرکت قابل‌توجه':'Material move'}`,value:formatPct(move),body:category==='stock'?(lang==='fa'?'تغییر روزانهٔ سهم را همراه حجم، ساعت بازار و منبع داده بررسی کن.':'Review the move with volume, session status and feed coverage.'):(lang==='fa'?'جفت‌ارز در محدودهٔ نوسان قابل‌توجه است؛ زمان ثبت نرخ و منبع را بررسی کن.':'The FX pair crossed a monitoring threshold; verify quote time and provider.'),source:item.source||'Market feed',extra:formatPrice(symbol,item.last)});
+      }
     }
     const priority={critical:3,warning:2,watch:1};
     signals.sort((a,b)=>(priority[b.severity]||0)-(priority[a.severity]||0)||Math.abs(Number.parseFloat(String(b.value).replace('%',''))||0)-Math.abs(Number.parseFloat(String(a.value).replace('%',''))||0));
@@ -275,8 +324,10 @@
       bestBuy:Number(x.bestBuy ?? x.buy ?? x.bid ?? 0),
       bestSell:Number(x.bestSell ?? x.sell ?? x.ask ?? 0),
       change:Number(x.change ?? x.percentChange ?? 0),
-      timestamp:x.timestamp || latest?.timestamp || null,
-      delayed:false,
+      timestamp:x.timestamp || x.fetchedAt || latest?.timestamp || null,
+      fetchedAt:x.fetchedAt || null,
+      delayed:Boolean(x.delayed), stale:Boolean(x.stale), source:x.source || null,
+      currency:x.currency || null, feed:x.feed || null, trades:Number(x.trades||0), vwap:Number(x.vwap||0),
       symbol:x.symbol || null
     };
   }
@@ -295,6 +346,8 @@
     }
     if(latest.prices?.[key]) return {...normalizeLocal(latest.prices[key]),source:'Nobitex',globalQuote};
     if(latest.market?.[key]) return {...normalizeGlobal(latest.market[key]),source:latest.market[key]?.source || 'Yahoo Finance'};
+    if(latest.equities?.[key]) return {...normalizeGlobal(latest.equities[key]),source:latest.equities[key]?.source || 'Equity feed',quoteCurrency:'USD'};
+    if(latest.forex?.[key]) return {...normalizeGlobal(latest.forex[key]),source:latest.forex[key]?.source || 'FX feed',quoteCurrency:latest.forex[key]?.currency || 'USD'};
     if(globalQuote && Number(globalQuote.last)>0){
       const rate=Number(latest.usdtPrice || latest.dollarPrice || latest.prices?.USDT?.bestSell || 0);
       const fx=Number.isFinite(rate)&&rate>0?rate:0;
@@ -402,7 +455,7 @@
   }
 
   function allKeys(){
-    return [...new Set([...DEFAULT_ORDER,...Object.keys(latest?.globalCrypto||{})])].filter(k=>META[k]&&getAsset(k));
+    return [...new Set([...DEFAULT_ORDER,...Object.keys(latest?.globalCrypto||{}),...Object.keys(latest?.equities||{}),...Object.keys(latest?.forex||{})])].filter(k=>META[k]&&getAsset(k));
   }
 
   function renderAll(){
@@ -502,7 +555,7 @@
     $$('#overviewGrid [data-overview]').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.overview)));
   }
   function skeletonOverview(){
-    return Array.from({length:6},()=>`<div class="overview-tile"><div class="overview-tile-top"><span>Loading</span><span>—</span></div><div class="overview-tile-price">—</div><div class="overview-tile-bottom"><span>—</span><span>—</span></div><div class="overview-spark"></div></div>`).join('');
+    return Array.from({length:8},()=>`<div class="overview-tile"><div class="overview-tile-top"><span>Loading</span><span>—</span></div><div class="overview-tile-price">—</div><div class="overview-tile-bottom"><span>—</span><span>—</span></div><div class="overview-spark"></div></div>`).join('');
   }
 
   const COIN_LOGO_BASE='https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color';
@@ -526,15 +579,15 @@
     const rangeLast=Number(a.globalQuote?.last||a.last);
     const rangePct=rangeHigh>rangeLow?Math.max(0,Math.min(100,((rangeLast-rangeLow)/(rangeHigh-rangeLow))*100)):50;
     const quote=a.globalQuote;
-    const badge=isCrypto?(quote?'GLOBAL + LOCAL':'CRYPTO'):(global?'GLOBAL':'LOCAL');
+    const badge=isCrypto?(quote?'GLOBAL + LOCAL':'CRYPTO'):m.cat==='stock'?'US EQUITY':m.cat==='forex'?'FOREX':(global?'GLOBAL':'LOCAL');
     return `<article class="market-card interactive ${isCrypto?'crypto-card':'macro-card'} asset-${key.toLowerCase()}" data-key="${key}" data-watermark="${escapeHtml(m.icon)}" style="--asset:${color}" tabindex="0">
       <span class="accent-line"></span>
       <div class="market-watermark" aria-hidden="true">${escapeHtml(m.icon)}</div>
       <div class="market-head">
-        <div class="asset-title">${coinLogoMarkup(key,m)}<span class="asset-copy"><b>${escapeHtml(lang==='en'?m.name:m.fa)}</b><small>${m.short} · ${global?T('global'):T('local')}</small></span></div>
+        <div class="asset-title">${coinLogoMarkup(key,m)}<span class="asset-copy"><b>${escapeHtml(lang==='en'?m.name:m.fa)}</b><small>${m.short} · ${m.cat==='stock'?'US EQUITY':m.cat==='forex'?'FOREX':global?T('global'):T('local')}</small></span></div>
         <button class="favorite ${favorite?'active':''}" type="button" data-fav="${key}" aria-label="${T('watchlist')}" title="${T('watchlist')}">${favorite?'★':'☆'}</button>
       </div>
-      <div class="asset-badge-row"><span class="asset-class-badge">${badge}</span><span class="asset-class-note">${isCrypto?(lang==='fa'?'دارایی دیجیتال':'Digital asset'):(m.cat==='commodity'?(lang==='fa'?'کالا':'Commodity'):(lang==='fa'?'شاخص':'Index'))}</span></div>
+      <div class="asset-badge-row"><span class="asset-class-badge">${badge}</span><span class="asset-class-note">${isCrypto?(lang==='fa'?'دارایی دیجیتال':'Digital asset'):m.cat==='stock'?(lang==='fa'?'سهام شرکت':'Listed equity'):m.cat==='forex'?(lang==='fa'?'جفت‌ارز':'Currency pair'):m.cat==='commodity'?(lang==='fa'?'کالا':'Commodity'):(lang==='fa'?'شاخص':'Index')}</span></div>
       <div class="market-price"><strong>${price}</strong><span class="change ${cls(a.change)}">${formatPct(a.change)}</span></div>
       ${quote?`<div class="crypto-reference-line"><span class="reference-label">GLOBAL SPOT</span><b>${escapeHtml(formatUSD(quote.last))}</b><span class="change ${cls(quote.change)}">${formatPct(quote.change)}</span></div>`:''}
       <div class="market-meta">
@@ -546,7 +599,7 @@
       ${rangeHigh>rangeLow?`<div class="market-range"><div class="market-range-head"><span>${lang==='fa'?'محدوده روز':'24H RANGE'}</span><small>${rangePct.toFixed(0)}%</small></div><div class="market-range-track"><i style="width:${rangePct.toFixed(2)}%"></i><b style="left:${rangePct.toFixed(2)}%"></b></div></div>`:''}
       <div class="card-spark">${sparkSVG(getSeries(key),`rgb(${color})`)}</div>
       ${quote?`<div class="global-quote-line"><span>Weighted avg <b>${escapeHtml(formatUSD(quote.weightedAverage))}</b></span><span>Volume <b>${escapeHtml(compactNumber(quote.volumeUsd))}</b></span></div>`:''}
-      <div class="card-footer"><span class="asset-source"><i class="source-bullet"></i>${escapeHtml(source)}</span><span>${a.delayed||quote?.stale?T('delayed'):a.timestamp?relativeTime(a.timestamp):'—'}</span></div>
+      <div class="card-footer"><span class="asset-source"><i class="source-bullet"></i>${escapeHtml(source)}</span><span>${a.stale?T('stale'):a.delayed?T('delayed'):a.timestamp?relativeTime(a.timestamp):'—'}</span></div>
     </article>`;
   }
 
@@ -665,7 +718,7 @@
   }
 
   function renderChartControls(){
-    $('#chartAssetControls').innerHTML=CHARTABLE.filter(k=>getAsset(k)).slice(0,8).map(k=>`<button type="button" class="${k===chartAsset?'active':''}" data-chart-asset="${k}">${META[k].short}</button>`).join('');
+    $('#chartAssetControls').innerHTML=CHARTABLE.filter(k=>getAsset(k)).slice(0,16).map(k=>`<button type="button" class="${k===chartAsset?'active':''}" data-chart-asset="${k}">${META[k].short}</button>`).join('');
     $$('#chartAssetControls button').forEach(b=>b.addEventListener('click',()=>{chartAsset=b.dataset.chartAsset;renderAll()}));
     $$('#chartRangeControls button').forEach(b=>b.classList.toggle('active',b.dataset.range===chartRange));
   }
@@ -697,7 +750,7 @@
     $('#chartHeading').textContent=lang==='en'?m.name:m.fa;
   }
 
-  function globalOrLocalChartLabel(v,key){ return isGlobal(key)?`$${num(v)}`:currency==='USD'?`$${num(v/(latest?.dollarPrice||1))}`:lang==='fa'?faNum(v):num(v); }
+  function globalOrLocalChartLabel(v,key){ return META[key]?.cat==='forex'?num(v):isGlobal(key)?`$${num(v)}`:currency==='USD'?`$${num(v/(latest?.dollarPrice||1))}`:lang==='fa'?faNum(v):num(v); }
 
   function renderComparison(){
     const keys=allKeys().filter(k=>getSeries(k).length>=2).slice(0,5);

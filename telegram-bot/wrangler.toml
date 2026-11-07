@@ -15,9 +15,11 @@ DATA_STALE_MINUTES = "15"
 ALERT_CRYPTO_MOVE_PCT = "0.85"
 ALERT_LOCAL_MOVE_PCT = "0.45"
 ALERT_MACRO_MOVE_PCT = "0.55"
+ALERT_STOCK_MOVE_PCT = "0.8"
+ALERT_FOREX_MOVE_PCT = "0.18"
 ALERT_COOLDOWN_MINUTES = "25"
 # Set BOT_ADMIN_IDS in the Cloudflare dashboard (comma-separated numeric Telegram user IDs).
 
 [[kv_namespaces]]
 binding = "SETTINGS_KV"
-id = "******************"
+id = "REPLACE_WITH_EXISTING_SETTINGS_KV_NAMESPACE_ID"

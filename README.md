@@ -25,7 +25,7 @@
 
 **ArzPulse** is a complete, zero-cost price intelligence platform that:
 
-- 📊 Tracks Iranian-market prices plus a broad global crypto watchlist (including BTC, ETH, BNB, SOL, XRP and more)
+- 📊 Tracks Iranian-market prices, global equities, FX pairs, indices, commodities and a broad global crypto watchlist (including BTC, ETH, BNB, SOL, XRP and more)
 - 🏆 Calculates Gold price per gram using **XAUT/USDT** and **USDT/IRR** exchange rates
 - 💵 Displays **Dollar (USD)** price based on USDT/IRR rate
 - 💾 Stores historical data **inside the GitHub repository** (no external database needed)
@@ -51,6 +51,12 @@
 - **Market drivers** – total market cap/volume, BTC/ETH dominance, sentiment, BTC open interest, futures funding and cross-asset context
 - **Data resilience** – stale-source markers and preserved prior snapshots when a provider temporarily fails
 
+### 📈 Global Equities & Forex (v7)
+- US equities: AAPL, MSFT, NVDA, TSLA, AMZN, GOOGL, META, AVGO, AMD, ORCL, PLTR, COIN and SPCX (SpaceX).
+- Forex: EUR/USD, GBP/USD, USD/JPY, USD/CHF, USD/CAD, AUD/USD, NZD/USD, USD/TRY, EUR/GBP, EUR/JPY, GBP/JPY and USD/CNH.
+- Expanded global macro coverage: Dow Jones, Russell 2000, VIX, Nikkei, FTSE, DAX, Hang Seng, natural gas, copper, platinum, palladium and US 10Y yield.
+- Provider/freshness badges distinguish Alpaca IEX, Twelve Data and delayed Yahoo Finance fallback.
+
 ### 🤖 Telegram Bot
 **Core Commands:**
 - `/prices` – Show all current prices with full details
@@ -60,6 +66,10 @@
 - `/start` – Welcome message with command list
 - `/help` – Full help guide
 - `/status` – Show last update status
+- `/stocks` or `/stock NVDA` – US stock market board / one ticker
+- `/forex` or `/fx EURUSD` – Forex board / one currency pair
+- `/AAPL`, `/NVDA`, `/TSLA`, `/SPCX` – direct stock shortcuts
+- `/alertscope all|stocks|forex|crypto|macro|local` – choose alert market scope
 - `/crypto` – Global crypto board with USD prices, IRR estimates, daily changes and volume
 - `/macro` – Macro assets, market cap, BTC/ETH dominance, sentiment and derivatives context
 - `/sentiment` – Fear & Greed and broader market sentiment
@@ -68,8 +78,8 @@
 
 **Advanced Charting:**
 - `/chart [SYMBOL] [PERIOD]` – Get professional chart
-  - Example: `/chart BTC 24h`, `/chart ETH 7d`, `/chart NOT 30d`
-  - Supports: `BTC`, `ETH`, `USDT`, `NOT`, `GOLD`, `DOLLAR`
+  - Example: `/chart BTC 24h`, `/chart AAPL 7d`, `/chart SPCX 30d`, `/chart EURUSD 24h`
+  - Supports stored crypto, equity, FX and macro symbols, including `AAPL`, `NVDA`, `SPCX`, `EURUSD` and `GBPJPY`.
   - Periods: `24h`, `7d`, `30d`
 - `/chartall` – Get 4 separate charts (BTC, ETH, USDT, NOT) for 24h
 

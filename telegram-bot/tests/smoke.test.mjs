@@ -308,3 +308,184 @@ test('sudden move and timeframe move are combined into one detailed alert', asyn
     assert.ok(cooldowns['window:global:BTC:15m']);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+
+test('v7 /stocks and /forex commands render real snapshot sections and source freshness', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const snapshot = {
+    timestamp: new Date().toISOString(),
+    prices: {}, market: {},
+    equities: {
+      AAPL: { last: 225.5, change: 1.2, high: 227, low: 221, volume: 1200000, source: 'Alpaca IEX', delayed: false },
+      NVDA: { last: 188.2, change: -2.1, high: 192, low: 185, volume: 3200000, source: 'Alpaca IEX', delayed: false },
+      SPCX: { last: 135.4, change: 3.1, high: 137, low: 130, volume: 200000, source: 'Alpaca IEX', delayed: false }
+    },
+    forex: {
+      EURUSD: { last: 1.15432, change: 0.21, high: 1.16, low: 1.15, source: 'Twelve Data', delayed: false },
+      USDJPY: { last: 153.82, change: -0.16, high: 154.2, low: 153.5, source: 'Twelve Data', delayed: false }
+    }
+  };
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify(snapshot), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.startsWith('https://api.telegram.org/botfake-token/')) {
+      telegramCalls.push(JSON.parse(init.body));
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 140, chat: { id: 42 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in v7 markets test: ${url}`);
+  };
+  try {
+    for (const [updateId, command] of [[993001, '/stocks'], [993002, '/forex'], [993003, '/spcx']]) {
+      const state = ctxRecorder();
+      const response = await bot.fetch(new Request('https://worker.test/webhook', {
+        method: 'POST', headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'v7-markets' },
+        body: JSON.stringify({ update_id: updateId, message: { text: command, chat: { id: 42, type: 'private' }, from: { id: 42 } } })
+      }), { TELEGRAM_BOT_TOKEN: 'fake-token', TELEGRAM_WEBHOOK_SECRET: 'v7-markets' }, state.ctx);
+      assert.equal(response.status, 200);
+      await Promise.all(state.tasks);
+    }
+    const output = telegramCalls.map((call) => call.text).join('\n');
+    assert.match(output, /US Equities/);
+    assert.match(output, /AAPL/);
+    assert.match(output, /SPCX/);
+    assert.match(output, /Forex Board/);
+    assert.match(output, /EURUSD/);
+    assert.match(output, /Twelve Data/);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('/chart supports real equity and forex history symbols', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramMethods = [];
+  const now = Date.now();
+  const historyRows = [
+    { time: new Date(now - 2 * 60 * 60_000).toISOString(), AAPL: 220.5, EURUSD: 1.15125 },
+    { time: new Date(now - 60 * 60_000).toISOString(), AAPL: 223.4, EURUSD: 1.15310 }
+  ];
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify({ timestamp: new Date().toISOString(), equities: {}, forex: {} }), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/history/')) return new Response(JSON.stringify(historyRows), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.startsWith('https://quickchart.io/chart')) return new Response(new Uint8Array([137,80,78,71]), { status: 200, headers: { 'content-type': 'image/png' } });
+    if (url.startsWith('https://api.telegram.org/botfake-token/')) {
+      const method = url.split('/').pop();
+      telegramMethods.push(method);
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 200 + telegramMethods.length, chat: { id: 42 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in equity/FX chart test: ${url}`);
+  };
+  try {
+    for (const [updateId, command] of [[993050, '/chart AAPL 7d'], [993051, '/chart EURUSD 7d']]) {
+      const state = ctxRecorder();
+      const response = await bot.fetch(new Request('https://worker.test/webhook', {
+        method: 'POST', headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'chart-test' },
+        body: JSON.stringify({ update_id: updateId, message: { text: command, chat: { id: 42, type: 'private' }, from: { id: 42 } } })
+      }), { TELEGRAM_BOT_TOKEN: 'fake-token', TELEGRAM_WEBHOOK_SECRET: 'chart-test' }, state.ctx);
+      assert.equal(response.status, 200);
+      await Promise.all(state.tasks);
+    }
+    assert.equal(telegramMethods.filter((method) => method === 'sendPhoto').length, 2);
+    assert.equal(telegramMethods.filter((method) => method === 'editMessageText').length, 2);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('/alertscope persists per-chat market filters without enabling alerts implicitly', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const kvData = new Map();
+  const settingsKV = {
+    async get(key, options = {}) { const raw=kvData.get(key); if(raw==null)return null; return options.type==='json'?JSON.parse(raw):raw; },
+    async put(key,value) { kvData.set(key,String(value)); }
+  };
+  globalThis.fetch = async (input, init = {}) => {
+    const url=String(input);
+    if(url.startsWith('https://api.telegram.org/botfake-token/')) { telegramCalls.push(JSON.parse(init.body)); return new Response(JSON.stringify({ok:true,result:{message_id:141,chat:{id:42}}}),{status:200,headers:{'content-type':'application/json'}}); }
+    throw new Error(`Unexpected network call in alertscope test: ${url}`);
+  };
+  try {
+    const state=ctxRecorder();
+    const response=await bot.fetch(new Request('https://worker.test/webhook',{method:'POST',headers:{'content-type':'application/json','x-telegram-bot-api-secret-token':'scope-test'},body:JSON.stringify({update_id:993100,message:{text:'/alertscope stocks forex',chat:{id:42,type:'private'},from:{id:42}}})}),{TELEGRAM_BOT_TOKEN:'fake-token',TELEGRAM_WEBHOOK_SECRET:'scope-test',SETTINGS_KV:settingsKV},state.ctx);
+    assert.equal(response.status,200); await Promise.all(state.tasks);
+    const preferences=JSON.parse(kvData.get('alerts:subscribers:v1'));
+    assert.deepEqual(preferences['42'].markets,['stocks','forex']);
+    assert.equal(preferences['42'].enabled,false);
+    assert.match(telegramCalls[0].text,/دامنهٔ هشدار به‌روزرسانی شد/);
+  } finally { globalThis.fetch=originalFetch; }
+});
+
+
+test('forex price shocks use FX thresholds and only notify forex-scoped subscribers', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const kvData = new Map([
+    ['alerts:subscribers:v1', JSON.stringify({ '6262': { enabled: true, level: 'low', markets: ['forex'] } })],
+    ['channels', JSON.stringify([])]
+  ]);
+  const settingsKV = {
+    async get(key, options = {}) { const raw=kvData.get(key); if(raw==null)return null; return options.type==='json'?JSON.parse(raw):raw; },
+    async put(key,value) { kvData.set(key,String(value)); }
+  };
+  let fxPrice = 1.15;
+  let stamp = new Date(Date.now() - 5 * 60_000).toISOString();
+  const snapshot = () => ({
+    timestamp: stamp, prices: {}, market: {}, equities: {},
+    forex: { EURUSD: { last: fxPrice, change: 0.1, high: fxPrice * 1.01, low: fxPrice * 0.99, source: 'Twelve Data', stale: false, fetchedAt: stamp } }
+  });
+  globalThis.fetch = async (input, init = {}) => {
+    const url=String(input);
+    if(url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify(snapshot()),{status:200,headers:{'content-type':'application/json'}});
+    if(url.startsWith('https://api.github.com/repos/mehrdadmb2/ArzPulse/actions/workflows/update-prices.yml/dispatches')) return new Response(null,{status:204});
+    if(url.startsWith('https://api.telegram.org/botfake-token/sendMessage')) { telegramCalls.push(JSON.parse(init.body)); return new Response(JSON.stringify({ok:true,result:{message_id:191,chat:{id:6262}}}),{status:200,headers:{'content-type':'application/json'}}); }
+    throw new Error(`Unexpected network call in forex alert test: ${url}`);
+  };
+  try {
+    const env={TELEGRAM_BOT_TOKEN:'fake-token',GITHUB_TOKEN:'fake-github-token',SETTINGS_KV:settingsKV,DATA_STALE_MINUTES:'15',ALERT_FOREX_MOVE_PCT:'0.18'};
+    let state=ctxRecorder(); await bot.scheduled({cron:'*/5 * * * *'},env,state.ctx); await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length,0,'first snapshot establishes baseline only');
+    fxPrice=1.1532; stamp=new Date().toISOString();
+    state=ctxRecorder(); await bot.scheduled({cron:'*/5 * * * *'},env,state.ctx); await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length,1);
+    assert.match(telegramCalls[0].text,/EURUSD/);
+    assert.match(telegramCalls[0].text,/Twelve Data/);
+    assert.match(telegramCalls[0].text,/هشدار خودکار بازار/);
+  } finally { globalThis.fetch=originalFetch; }
+});
+
+test('stock price shocks use dedicated thresholds and deliver to stock-scoped subscribers', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const kvData = new Map([
+    ['alerts:subscribers:v1', JSON.stringify({ '5252': { enabled: true, level: 'low', markets: ['stocks'] } })],
+    ['channels', JSON.stringify([])]
+  ]);
+  const settingsKV = {
+    async get(key, options = {}) { const raw=kvData.get(key); if(raw==null)return null; return options.type==='json'?JSON.parse(raw):raw; },
+    async put(key,value) { kvData.set(key,String(value)); }
+  };
+  let stockPrice = 100;
+  let stamp = new Date(Date.now() - 5 * 60_000).toISOString();
+  const snapshot = () => ({
+    timestamp: stamp, prices: {}, market: {},
+    equities: { NVDA: { last: stockPrice, change: 0.4, high: stockPrice * 1.02, low: stockPrice * 0.98, volume: 1000000, source: 'Alpaca IEX', stale: false, fetchedAt: stamp } },
+    forex: { EURUSD: { last: 1.15, change: 0.1, source: 'Twelve Data', stale: false, fetchedAt: stamp } }
+  });
+  globalThis.fetch = async (input, init = {}) => {
+    const url=String(input);
+    if(url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify(snapshot()),{status:200,headers:{'content-type':'application/json'}});
+    if(url.startsWith('https://api.github.com/repos/mehrdadmb2/ArzPulse/actions/workflows/update-prices.yml/dispatches')) return new Response(null,{status:204});
+    if(url.startsWith('https://api.telegram.org/botfake-token/sendMessage')) { telegramCalls.push(JSON.parse(init.body)); return new Response(JSON.stringify({ok:true,result:{message_id:181,chat:{id:5252}}}),{status:200,headers:{'content-type':'application/json'}}); }
+    throw new Error(`Unexpected network call in stock alert test: ${url}`);
+  };
+  try {
+    const env={TELEGRAM_BOT_TOKEN:'fake-token',GITHUB_TOKEN:'fake-github-token',SETTINGS_KV:settingsKV,DATA_STALE_MINUTES:'15',ALERT_STOCK_MOVE_PCT:'0.8'};
+    let state=ctxRecorder(); await bot.scheduled({cron:'*/5 * * * *'},env,state.ctx); await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length,0,'first snapshot establishes baseline only');
+    stockPrice=101.2; stamp=new Date().toISOString();
+    state=ctxRecorder(); await bot.scheduled({cron:'*/5 * * * *'},env,state.ctx); await Promise.all(state.tasks);
+    assert.equal(telegramCalls.length,1);
+    assert.match(telegramCalls[0].text,/NVDA/);
+    assert.match(telegramCalls[0].text,/Alpaca IEX/);
+    assert.match(telegramCalls[0].text,/هشدار خودکار بازار/);
+  } finally { globalThis.fetch=originalFetch; }
+});

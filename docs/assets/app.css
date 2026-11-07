@@ -277,3 +277,15 @@ body.light .market-card.asset-avax,body.light .market-card.asset-trx,body.light 
 body.light .market-card.asset-dot,body.light .market-card.asset-uni,body.light .market-card.asset-aave{background:radial-gradient(circle at 100% 0,rgba(230,65,153,.14),transparent 35%),linear-gradient(145deg,#fff7fc,#f5eff8)}
 body.light .market-card.asset-pepe,body.light .market-card.asset-bch,body.light .market-card.asset-etc,body.light .market-card.asset-near{background:radial-gradient(circle at 100% 0,rgba(67,181,129,.15),transparent 35%),linear-gradient(145deg,#f5fff9,#edf5f0)}
 body.light .market-card.asset-gold,body.light .market-card.asset-xauusd{background:radial-gradient(circle at 95% 0,rgba(245,197,91,.2),transparent 34%),linear-gradient(145deg,#fffaf0,#f3f2eb)}
+
+
+/* ArzPulse v7 · market-family palettes */
+.market-card.asset-aapl,.market-card.asset-msft,.market-card.asset-googl,.market-card.asset-meta{background:radial-gradient(circle at 94% 5%,rgba(115,165,245,.20),transparent 38%),linear-gradient(145deg,#172333,#090f18)}
+.market-card.asset-nvda,.market-card.asset-amd,.market-card.asset-avgo{background:radial-gradient(circle at 96% 2%,rgba(118,210,112,.22),transparent 38%),linear-gradient(145deg,#17291f,#090f16)}
+.market-card.asset-tsla,.market-card.asset-spcx{background:radial-gradient(circle at 95% 0,rgba(239,92,105,.22),transparent 38%),linear-gradient(145deg,#2b171d,#100d15)}
+.market-card.asset-amzn,.market-card.asset-orcl,.market-card.asset-coin{background:radial-gradient(circle at 94% 3%,rgba(238,169,89,.21),transparent 38%),linear-gradient(145deg,#292117,#100f16)}
+.market-card.asset-pltr{background:radial-gradient(circle at 95% 0,rgba(169,183,197,.2),transparent 38%),linear-gradient(145deg,#20252d,#0a1018)}
+.market-card.asset-eurusd,.market-card.asset-gbpusd,.market-card.asset-usdjpy,.market-card.asset-usdchf,.market-card.asset-usdcad,.market-card.asset-audusd,.market-card.asset-nzdusd,.market-card.asset-usdtry{background:radial-gradient(circle at 96% 0,rgba(104,170,255,.19),transparent 40%),repeating-linear-gradient(135deg,transparent 0 29px,rgba(105,170,255,.023) 29px 30px),linear-gradient(145deg,#142338,#090f19)}
+.market-card.asset-vix{background:radial-gradient(circle at 95% 2%,rgba(255,133,111,.25),transparent 35%),linear-gradient(145deg,#2a191b,#100e16)}
+.market-card.asset-copper{background:radial-gradient(circle at 95% 2%,rgba(212,132,91,.22),transparent 35%),linear-gradient(145deg,#2b1d19,#100f17)}
+body.light .market-card.asset-aapl,body.light .market-card.asset-msft,body.light .market-card.asset-googl,body.light .market-card.asset-meta,body.light .market-card.asset-eurusd,body.light .market-card.asset-gbpusd,body.light .market-card.asset-usdjpy,body.light .market-card.asset-usdchf,body.light .market-card.asset-usdcad,body.light .market-card.asset-audusd,body.light .market-card.asset-nzdusd,body.light .market-card.asset-usdtry{background:radial-gradient(circle at 94% 5%,rgba(115,165,245,.16),transparent 38%),linear-gradient(145deg,#f8fbff,#edf2f8)}

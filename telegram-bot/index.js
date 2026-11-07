@@ -25,6 +25,8 @@ const MAX_ALERT_RECIPIENTS = 100;
 const ALERT_MAX_EVENTS_PER_RUN = 6;
 const ALERT_SNAPSHOT_MAX_AGE_MS = 20 * 60 * 1000;
 const GLOBAL_CRYPTOS = ['BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH','SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE'];
+const STOCK_SYMBOLS = ['AAPL','MSFT','NVDA','TSLA','AMZN','GOOGL','META','AVGO','AMD','ORCL','PLTR','COIN','SPCX'];
+const FOREX_SYMBOLS = ['EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD','USDTRY','EURGBP','EURJPY','GBPJPY','USDCNH'];
 const GLOBAL_CRYPTO_NAMES = { BTC:'بیت‌کوین', ETH:'اتریوم', BNB:'بایننس کوین', SOL:'سولانا', XRP:'ریپل', ADA:'کاردانو', DOGE:'دوج‌کوین', TRX:'ترون', LINK:'چین‌لینک', AVAX:'آوالانچ', DOT:'پولکادات', LTC:'لایت‌کوین', BCH:'بیت‌کوین کش', SHIB:'شیبا اینو', UNI:'یونی‌سواپ', NEAR:'نیر', SUI:'سویی', XLM:'استلار', ETC:'اتریوم کلاسیک', ATOM:'کازموس', APT:'آپتوس', FIL:'فایل‌کوین', ARB:'آربیتروم', OP:'آپتیمیسم', HBAR:'هدرا', INJ:'اینجکتیو', AAVE:'آوه', PEPE:'پپه' };
 
 const COLORS = {
@@ -109,7 +111,10 @@ function changeMark(value) {
 function getSymbolName(symbol) {
   return COLORS[symbol]?.fa || ({
     XAUT: 'تتر گلد', BRENT: 'نفت برنت', WTI: 'نفت WTI', XAUUSD: 'انس جهانی طلا',
-    SILVER: 'نقره', SP500: 'شاخص S&P 500', NASDAQ: 'شاخص نزدک', DXY: 'شاخص دلار', ...GLOBAL_CRYPTO_NAMES
+    SILVER: 'نقره', SP500: 'شاخص S&P 500', NASDAQ: 'شاخص نزدک', DXY: 'شاخص دلار',
+    DOW: 'شاخص داوجونز', RUSSELL2000: 'راسل ۲۰۰۰', VIX: 'شاخص نوسان VIX', NIKKEI: 'نیکی ۲۲۵', FTSE100: 'فوتسی ۱۰۰', DAX: 'شاخص دکس', HANGSENG: 'هنگ‌سنگ', NATGAS: 'گاز طبیعی', COPPER: 'مس', PLATINUM: 'پلاتین', PALLADIUM: 'پالادیوم', US10Y: 'بازده اوراق ۱۰ساله آمریکا',
+    AAPL: 'اپل', MSFT: 'مایکروسافت', NVDA: 'انویدیا', TSLA: 'تسلا', AMZN: 'آمازون', GOOGL: 'آلفابت', META: 'متا', AVGO: 'برودکام', AMD: 'ای‌ام‌دی', ORCL: 'اوراکل', PLTR: 'پالانتیر', COIN: 'کوین‌بیس', SPCX: 'اسپیس‌ایکس',
+    EURUSD: 'یورو/دلار', GBPUSD: 'پوند/دلار', USDJPY: 'دلار/ین', USDCHF: 'دلار/فرانک', USDCAD: 'دلار/دلار کانادا', AUDUSD: 'دلار استرالیا/دلار', NZDUSD: 'دلار نیوزیلند/دلار', USDTRY: 'دلار/لیر', EURGBP: 'یورو/پوند', EURJPY: 'یورو/ین', GBPJPY: 'پوند/ین', USDCNH: 'دلار/یوان فراساحلی', ...GLOBAL_CRYPTO_NAMES
   })[symbol] || symbol;
 }
 
@@ -349,9 +354,19 @@ async function saveAlertPreferences(env, preferences) {
   for (const [id, value] of Object.entries(preferences || {}).slice(0, MAX_ALERT_RECIPIENTS * 2)) {
     if (!/^-?\d+$/.test(String(id)) || !value || typeof value !== 'object') continue;
     const level = ['low', 'medium', 'high'].includes(value.level) ? value.level : 'medium';
-    normalized[String(id)] = { enabled: value.enabled !== false, level, updatedAt: value.updatedAt || new Date().toISOString() };
+    const markets = Array.isArray(value.markets) ? [...new Set(value.markets.filter((item) => ['local','crypto','stocks','forex','macro'].includes(item)))].slice(0, 5) : undefined;
+    normalized[String(id)] = { enabled: value.enabled !== false, level, ...(markets ? { markets } : {}), updatedAt: value.updatedAt || new Date().toISOString() };
   }
   await env.SETTINGS_KV.put(ALERT_SUBSCRIBERS_KEY, JSON.stringify(normalized));
+}
+
+function alertScopeForEvent(event) {
+  const kind = event?.metric?.kind;
+  if (kind === 'stock') return 'stocks';
+  if (kind === 'forex') return 'forex';
+  if (kind === 'crypto') return 'crypto';
+  if (kind === 'local') return 'local';
+  return 'macro';
 }
 
 function alertLevelNumber(level) {
@@ -365,11 +380,11 @@ async function getAlertRecipients(env) {
   for (const chatId of channels) {
     const preference = preferences[String(chatId)];
     if (preference?.enabled === false) continue;
-    recipients.set(String(chatId), { chatId: String(chatId), level: preference?.level || 'medium', kind: 'channel' });
+    recipients.set(String(chatId), { chatId: String(chatId), level: preference?.level || 'medium', markets: Array.isArray(preference?.markets) ? preference.markets : ['local','crypto','stocks','forex','macro'], kind: 'channel' });
   }
   for (const [chatId, preference] of Object.entries(preferences)) {
     if (!/^-?\d+$/.test(chatId) || preference?.enabled !== true) continue;
-    recipients.set(chatId, { chatId, level: preference.level || 'medium', kind: 'subscriber' });
+    recipients.set(chatId, { chatId, level: preference.level || 'medium', markets: Array.isArray(preference.markets) ? preference.markets : ['local','crypto','stocks','forex','macro'], kind: 'subscriber' });
   }
   return [...recipients.values()].slice(0, MAX_ALERT_RECIPIENTS);
 }
@@ -403,6 +418,12 @@ function makeAlertSnapshot(data) {
   for (const [symbol, item] of Object.entries(data?.globalCrypto || {})) {
     addPrice(`global:${symbol}`, symbol, item, 'crypto', 'USD', `${GLOBAL_CRYPTO_NAMES[symbol] || symbol} · بازار جهانی`);
   }
+  for (const [symbol, item] of Object.entries(data?.equities || {})) {
+    addPrice(`stock:${symbol}`, symbol, item, 'stock', 'USD', `${getSymbolName(symbol)} · سهام آمریکا`);
+  }
+  for (const [symbol, item] of Object.entries(data?.forex || {})) {
+    addPrice(`forex:${symbol}`, symbol, item, 'forex', 'quote', `${getSymbolName(symbol)} · فارکس`);
+  }
 
   const context = data?.marketContext || {};
   const indicators = {};
@@ -432,12 +453,16 @@ function makeAlertSnapshot(data) {
 function getAlertMoveThreshold(metric, env) {
   if (metric.kind === 'crypto') return numeric(env.ALERT_CRYPTO_MOVE_PCT) || 0.85;
   if (metric.kind === 'local') return numeric(env.ALERT_LOCAL_MOVE_PCT) || 0.45;
+  if (metric.kind === 'stock') return numeric(env.ALERT_STOCK_MOVE_PCT) || 0.8;
+  if (metric.kind === 'forex') return numeric(env.ALERT_FOREX_MOVE_PCT) || 0.18;
   return numeric(env.ALERT_MACRO_MOVE_PCT) || 0.55;
 }
 
 function getAlertDailyThreshold(metric) {
   if (metric.kind === 'crypto') return 3;
   if (metric.kind === 'local') return 1.5;
+  if (metric.kind === 'stock') return 2.5;
+  if (metric.kind === 'forex') return 0.75;
   return 1.25;
 }
 
@@ -450,6 +475,8 @@ function alertImpactText(metric, direction, type) {
   if (type === 'breadth') return 'هم‌جهت شدن تعداد زیادی از رمزارزها می‌تواند نشانهٔ حرکت فراگیر بازار باشد و ریسک هم‌بستگی سبد را افزایش دهد.';
   if (type === 'market-cap') return 'تغییر قابل‌توجه ارزش کل بازار به‌معنای حرکت در سطح کلان است؛ ترکیب آن با حجم، دامیننس و نقدشوندگی مهم است.';
   if (metric.kind === 'local') return 'این حرکت می‌تواند قیمت‌گذاری ریالی و معادل دلاری دارایی را جابه‌جا کند. نرخ تبدیل بر پایهٔ USDT/IRR پروژه تخمینی است و لزوماً نرخ اسکناس آزاد نیست.';
+  if (metric.kind === 'stock') return 'این تغییر مربوط به سهام شرکت است؛ حجم معامله، وضعیت جلسهٔ معاملاتی، رویدادهای شرکتی و پوشش فید (IEX یا SIP) را کنار قیمت بررسی کن.';
+  if (metric.kind === 'forex') return 'حرکت جفت‌ارز می‌تواند از نرخ بهره، داده‌های اقتصادی و نقدشوندگی جلسه‌های لندن/نیویورک اثر بگیرد؛ timestamp و منبع نرخ را بررسی کن.';
   if (metric.kind === 'commodity' || metric.kind === 'index') return 'این حرکت می‌تواند بر دارایی‌های مرتبط و جوّ ریسک بازار اثر بگذارد؛ ساعت معاملاتی، تأخیر منبع و سایر عوامل کلان را هم بررسی کن.';
   return direction === 'down'
     ? 'افت سریع می‌تواند با افزایش نوسان، لیکوییدیشن یا تغییر جریان نقدینگی همراه شود؛ برای نتیجه‌گیری، حجم، دامیننس و بازار مشتقه را هم بررسی کن.'
@@ -466,7 +493,7 @@ function buildAlertEvents(previous, current, env = {}) {
     const absMove = Math.abs(move);
     const threshold = getAlertMoveThreshold(metric, env);
     if (absMove >= threshold) {
-      const severity = absMove >= Math.max(threshold * 3.2, metric.kind === 'crypto' ? 2.8 : 1.8) ? 3 : absMove >= threshold * 1.8 ? 2 : 1;
+      const severity = absMove >= Math.max(threshold * 3.2, metric.kind === 'crypto' ? 2.8 : metric.kind === 'forex' ? 0.65 : 1.8) ? 3 : absMove >= threshold * 1.8 ? 2 : 1;
       events.push({
         id: `shock:${id}`, cooldownKey: `move:${id}`, type: 'shock', severity,
         title: `${metric.name} (${metric.symbol}) · ${move >= 0 ? 'جهش صعودی' : 'افت سریع'}`,
@@ -541,9 +568,9 @@ function buildAlertEvents(previous, current, env = {}) {
 
 function buildWindowMoveEvents(current, history, env = {}) {
   const windows = [
-    { key: '15m', label: '۱۵ دقیقه', ms: 15 * 60 * 1000, tolerance: 8 * 60 * 1000, cooldownMinutes: 25, thresholds: { crypto: 1.75, local: 0.9, commodity: 0.8, index: 0.8 } },
-    { key: '1h', label: '۱ ساعت', ms: 60 * 60 * 1000, tolerance: 20 * 60 * 1000, cooldownMinutes: 60, thresholds: { crypto: 3.1, local: 1.7, commodity: 1.4, index: 1.4 } },
-    { key: '6h', label: '۶ ساعت', ms: 6 * 60 * 60 * 1000, tolerance: 45 * 60 * 1000, cooldownMinutes: 120, thresholds: { crypto: 5.5, local: 3.2, commodity: 2.5, index: 2.5 } }
+    { key: '15m', label: '۱۵ دقیقه', ms: 15 * 60 * 1000, tolerance: 8 * 60 * 1000, cooldownMinutes: 25, thresholds: { crypto: 1.75, local: 0.9, commodity: 0.8, index: 0.8, stock: 0.8, forex: 0.18 } },
+    { key: '1h', label: '۱ ساعت', ms: 60 * 60 * 1000, tolerance: 20 * 60 * 1000, cooldownMinutes: 60, thresholds: { crypto: 3.1, local: 1.7, commodity: 1.4, index: 1.4, stock: 1.5, forex: 0.35 } },
+    { key: '6h', label: '۶ ساعت', ms: 6 * 60 * 60 * 1000, tolerance: 45 * 60 * 1000, cooldownMinutes: 120, thresholds: { crypto: 5.5, local: 3.2, commodity: 2.5, index: 2.5, stock: 2.8, forex: 0.75 } }
   ];
   const now = Date.parse(current?.timestamp || '');
   if (!Number.isFinite(now)) return [];
@@ -730,7 +757,7 @@ async function processAutomaticAlerts(env) {
     console.log('[alerts] thresholds crossed but no alert destinations are enabled. Use /alertson in a private chat or keep a /setchannel destination enabled.');
     return { sent: 0, reason: 'no-recipients' };
   }
-  const eligibleEvents = ready.filter((event) => recipients.some((recipient) => event.severity >= alertLevelNumber(recipient.level)));
+  const eligibleEvents = ready.filter((event) => recipients.some((recipient) => event.severity >= alertLevelNumber(recipient.level) && (recipient.markets || ['local','crypto','stocks','forex','macro']).includes(alertScopeForEvent(event))));
   if (!eligibleEvents.length) {
     await persistBaseline();
     return { sent: 0, reason: 'filtered-by-recipient-level' };
@@ -742,7 +769,7 @@ async function processAutomaticAlerts(env) {
     const message = buildAlertMessage(event, data);
     let delivered = 0;
     for (const recipient of recipients) {
-      if (event.severity < alertLevelNumber(recipient.level)) continue;
+      if (event.severity < alertLevelNumber(recipient.level) || !(recipient.markets || ['local','crypto','stocks','forex','macro']).includes(alertScopeForEvent(event))) continue;
       try {
         const result = await sendMessage(recipient.chatId, message, env.TELEGRAM_BOT_TOKEN);
         if (result) { delivered += 1; sendCount += 1; }
@@ -767,13 +794,16 @@ function alertsHelpMessage(preference, isChannel) {
   const enabled = preference?.enabled === true || (isChannel && preference?.enabled !== false);
   const level = ['low', 'medium', 'high'].includes(preference?.level) ? preference.level : 'medium';
   const levelFa = ({ low: 'همه هشدارها', medium: 'مهم و بحرانی', high: 'فقط بحرانی' })[level];
+  const markets = Array.isArray(preference?.markets) ? preference.markets : ['local','crypto','stocks','forex','macro'];
+  const marketLabels = { local:'داخلی', crypto:'کریپتو', stocks:'سهام', forex:'فارکس', macro:'ماکرو' };
   return [
     '🛰 <b>ArzPulse · تنظیم هشدارهای خودکار</b>',
-    `<blockquote>وضعیت این چت: <b>${enabled ? 'فعال' : 'غیرفعال'}</b> · حساسیت: <b>${levelFa}</b></blockquote>`,
+    `<blockquote>وضعیت این چت: <b>${enabled ? 'فعال' : 'غیرفعال'}</b> · حساسیت: <b>${levelFa}</b> · دامنه: <b>${markets.map((value) => marketLabels[value] || value).join('، ')}</b></blockquote>`,
     '<b>چه چیزی هشدار می‌دهد؟</b>',
     '• جهش/افت غیرمعمول بین Snapshotها با زمان، قیمت، تغییر، حجم، منبع و توضیح ریسک',
     '• عبور تغییر ۲۴ساعته از آستانهٔ مهم',
     '• تغییر شدید Fear & Greed یا ارزش کل بازار',
+    '• سهام آمریکا (از جمله AAPL، NVDA، TSLA و SPCX)، جفت‌ارزهای فارکس و شاخص‌ها/کالاها',
     '• Funding غیرعادی، تغییر سریع Open Interest و حرکت فراگیر رمزارزها',
     '',
     `<pre><code>/alertson          فعال‌سازی برای این چت
@@ -781,6 +811,11 @@ function alertsHelpMessage(preference, isChannel) {
 /alertlevel low    همه هشدارها
 /alertlevel medium مهم و بحرانی
 /alertlevel high   فقط بحرانی
+/alertscope all    همهٔ بازارها
+/alertscope stocks سهام آمریکا
+/alertscope forex  جفت‌ارزهای فارکس
+/alertscope crypto رمزارزها
+/alertscope macro  شاخص‌ها و کالاها
 /alerts            وضعیت و راهنما</code></pre>`,
     '<blockquote>هشدارها با مقایسهٔ Snapshotهای متوالی، آستانه‌های قابل تنظیم و وقفهٔ ضدتکرار ساخته می‌شوند. دادهٔ کهنه باعث تولید هشدار قیمت نمی‌شود. هشدار بازار توصیهٔ سرمایه‌گذاری نیست.</blockquote>'
   ].join('\n');
@@ -839,10 +874,16 @@ function getWelcomeMessage() {
 /usdt     تتر
 /not      نات‌کوین
 /crypto   فهرست رمزارزهای جهانی
+/stocks   سهام آمریکا
+/stock NVDA قیمت یک سهم
+/forex    جفت‌ارزهای فارکس
+/fx EURUSD یک جفت‌ارز مشخص
+/aapl /nvda /tsla /spcx میانبر سهام
 /macro    شاخص‌های کلان و محرک‌های بازار
 /sentiment ترس‌وطمع و احساسات بازار
 /alerts   تنظیم هشدار خودکار
 /alertson فعال‌سازی هشدار
+/alertscope انتخاب بازار هشدار
 /chart    راهنمای نمودار
 /chartall نمودارهای منتخب
 /refresh  درخواست آپدیت دستی
@@ -867,12 +908,18 @@ function getHelpMessage() {
 /not
 /status
 /crypto   رمزارزهای بیشتر + حجم و تغییر جهانی
+/stocks   سهام آمریکا (AAPL, NVDA, TSLA, SPCX و ...)
+/stock NVDA جزئیات نماد مشخص
+/forex    تابلوی فارکس
+/fx EURUSD جزئیات یک جفت‌ارز
+/aapl /nvda /tsla /spcx میانبر سهام منتخب
 /macro    احساسات، دامیننس، فاندینگ و شاخص‌های کلان
 /sentiment شاخص ترس و طمع
 /alerts   وضعیت و تنظیم هشدار خودکار
 /alertson فعال‌سازی هشدار
 /alertsoff غیرفعال‌سازی هشدار
-/alertlevel low|medium|high سطح حساسیت</code></pre>`,
+/alertlevel low|medium|high سطح حساسیت
+/alertscope all|stocks|forex|crypto|macro|local دامنهٔ هشدارها</code></pre>`,
     '<b>نمودارهای تاریخی</b>',
     `<pre><code>/chart BTC 24h
 /chart SOL 7d
@@ -894,13 +941,14 @@ function getChartHelpMessage() {
     '📈 <b>راهنمای نمودار</b>',
     '<blockquote>تاریخچهٔ موجود از Snapshotهای واقعی بازار ساخته می‌شود. اگر منبعی داده نداشته باشد، عدد ساختگی تولید نمی‌شود.</blockquote>',
     `<pre><code>/chart BTC 24h
-/chart SOL 7d
-/chart BNB 30d
+/chart AAPL 7d
+/chart NVDA 30d
+/chart SPCX 7d
+/chart EURUSD 24h
 /chart GOLD 7d
-/chart DOLLAR 30d
 /chartall</code></pre>`,
-    '<b>نمادها:</b> <code>BTC · ETH · BNB · SOL · XRP · ADA · DOGE · LINK · AVAX · DOT · LTC · GOLD · DOLLAR</code>',
-    '<b>بازه‌ها:</b> <code>24h · 7d · 30d</code>'
+    '<b>نمادها:</b> <code>BTC · ETH · SOL · BNB · GOLD · DOLLAR · AAPL · MSFT · NVDA · TSLA · SPCX · EURUSD · GBPUSD · USDJPY · USDTRY · EURGBP · EURJPY · GBPJPY · USDCNH</code> · سایر نمادهای ثبت‌شدهٔ سهام/فارکس و ماکرو هم پشتیبانی می‌شوند.',
+    '<b>بازه‌ها:</b> <code>24h · 7d · 30d</code> · تاریخچه از زمان شروع ثبت دادهٔ هر نماد ساخته می‌شود.' 
   ].join('\n');
 }
 
@@ -913,6 +961,48 @@ function localAssetRows(data) {
     { symbol: 'NOT', label: 'Notcoin', fa: 'نات‌کوین', emoji: '◉' }
   ];
   return definitions.map((asset) => ({ ...asset, data: prices[asset.symbol] || null }));
+}
+
+function formatGlobalMarketRow(symbol, item, marketType) {
+  if (!item || item.stale || !positive(item.last ?? item.price)) return `⚪ ${symbol} · دادهٔ معتبر موجود نیست`;
+  const price = numeric(item.last ?? item.price);
+  const change = Number.isFinite(Number(item.change)) ? formatPercent(item.change) : '—';
+  const quote = marketType === 'forex' ? formatNumber(price, price < 2 ? 5 : 3) : `$${formatNumber(price, 2)}`;
+  const extra = marketType === 'stock'
+    ? `H/L ${formatNumber(item.high,2)} / ${formatNumber(item.low,2)} · Shares ${formatNumber(item.volume,0)}${positive(item.trades) ? ` · Trades ${formatNumber(item.trades,0)}` : ''}${positive(item.vwap) ? ` · VWAP ${formatNumber(item.vwap,2)}` : ''}`
+    : `H/L ${formatNumber(item.high,5)} / ${formatNumber(item.low,5)}`;
+  const freshness = item.delayed ? ' · تأخیردار' : '';
+  const stamp = item.timestamp || item.fetchedAt;
+  const updated = stamp ? ` · ${formatTime(stamp)}` : '';
+  return `${changeMark(item.change)} <b>${html(symbol)} · ${html(getSymbolName(symbol))}</b>\n<pre><code>${quote}   ${html(change)}\n${html(extra)}\n${html(item.source || 'Market feed')}${freshness}${html(updated)}</code></pre>`;
+}
+
+function generateStocksMessage(data, requestedSymbol = '') {
+  const equities = data?.equities || {};
+  const symbols = requestedSymbol ? [requestedSymbol.toUpperCase()] : STOCK_SYMBOLS;
+  const rows = symbols.filter((symbol) => equities[symbol]).map((symbol) => formatGlobalMarketRow(symbol, equities[symbol], 'stock'));
+  const unavailable = symbols.filter((symbol) => !equities[symbol]);
+  return [
+    '📈 <b>ArzPulse · US Equities</b>',
+    '<blockquote>سهام آمریکا با واحد USD · قیمت‌های Yahoo fallback ممکن است تأخیردار باشند. فید Alpaca فعلی IEX است و معادل پوشش کامل SIP نیست.</blockquote>',
+    ...(rows.length ? rows : ['⚠️ برای نماد درخواستی داده‌ای در Snapshot موجود نیست.']),
+    unavailable.length ? `<i>بدون داده: ${html(unavailable.join(', '))}</i>` : '',
+    `<i>Snapshot: ${html(formatTime(data?.timestamp))}</i>`
+  ].filter(Boolean).join('\n\n');
+}
+
+function generateForexMessage(data, requestedSymbol = '') {
+  const forex = data?.forex || {};
+  const symbols = requestedSymbol ? [requestedSymbol.toUpperCase().replace('/', '')] : FOREX_SYMBOLS;
+  const rows = symbols.filter((symbol) => forex[symbol]).map((symbol) => formatGlobalMarketRow(symbol, forex[symbol], 'forex'));
+  const unavailable = symbols.filter((symbol) => !forex[symbol]);
+  return [
+    '💱 <b>ArzPulse · Forex Board</b>',
+    '<blockquote>نرخ جفت‌ارزها در واحد ارز دوم نمایش داده می‌شود. منبع و timestamp را بررسی کن؛ Yahoo fallback نرخ مرجع تأخیردار است.</blockquote>',
+    ...(rows.length ? rows : ['⚠️ برای این جفت‌ارز داده‌ای در Snapshot موجود نیست.']),
+    unavailable.length ? `<i>بدون داده: ${html(unavailable.join(', '))}</i>` : '',
+    `<i>Snapshot: ${html(formatTime(data?.timestamp))}</i>`
+  ].filter(Boolean).join('\n\n');
 }
 
 function generatePricesMessage(data, env) {
@@ -954,11 +1044,15 @@ USDT / IRR       ${formatPrice(usdt)} IRR
 USDT / USD       ${positive(usdt) ? '$1.00 approx.' : '—'}</code></pre>`);
   sections.push('<blockquote>💱 معادل دلاری قیمت‌های داخلی تخمینی است و با نرخ USDT/IRR همین Snapshot محاسبه می‌شود؛ نرخ رسمی اسکناس دلار نیست.</blockquote>');
   if (data?.derivedStale?.gold18K) sections.push('<blockquote>⚠️ قیمت طلای ۱۸ عیار از یکی از ورودی‌های قدیمی محاسبه شده است.</blockquote>');
+  const selectedStocks = ['AAPL','NVDA','TSLA','SPCX'].filter((symbol) => data?.equities?.[symbol] && positive(data.equities[symbol].last) && !data.equities[symbol].stale);
+  if (selectedStocks.length) sections.push('🇺🇸 <b>سهام منتخب آمریکا</b>\n' + selectedStocks.map((symbol) => { const item=data.equities[symbol]; return `${changeMark(item.change)} <b>${symbol}</b>  $${formatNumber(item.last,2)}  ·  ${formatPercent(item.change)}${item.delayed?' · تأخیردار':''}`; }).join('\n'));
+  const selectedFx = ['EURUSD','GBPUSD','USDJPY','USDTRY'].filter((symbol) => data?.forex?.[symbol] && positive(data.forex[symbol].last) && !data.forex[symbol].stale);
+  if (selectedFx.length) sections.push('💱 <b>فارکس منتخب</b>\n' + selectedFx.map((symbol) => { const item=data.forex[symbol]; return `${changeMark(item.change)} <b>${symbol}</b>  ${formatNumber(item.last,item.last<2?5:3)}  ·  ${formatPercent(item.change)}${item.delayed?' · تأخیردار':''}`; }).join('\n'));
 
   if (data?.market && typeof data.market === 'object') {
     const globalRows = Object.entries({
       BRENT: 'Brent Crude', WTI: 'WTI Crude', XAUUSD: 'Gold Futures', SILVER: 'Silver Futures',
-      SP500: 'S&P 500', NASDAQ: 'Nasdaq', DXY: 'Dollar Index'
+      SP500: 'S&P 500', NASDAQ: 'Nasdaq', DXY: 'Dollar Index', DOW: 'Dow Jones', RUSSELL2000: 'Russell 2000', VIX: 'VIX', NIKKEI: 'Nikkei 225', FTSE100: 'FTSE 100', DAX: 'DAX', HANGSENG: 'Hang Seng', NATGAS: 'Natural Gas', COPPER: 'Copper', PLATINUM: 'Platinum', PALLADIUM: 'Palladium', US10Y: 'US 10Y Yield'
     }).map(([key, name]) => ({ key, name, data: data.market[key] })).filter((row) => row.data && positive(row.data.last));
     if (globalRows.length) {
       sections.push('🌍 <b>بازار جهانی</b>');
@@ -1029,7 +1123,7 @@ function generateMacroMessage(data) {
     const item = derivatives[symbol];
     return item ? `${symbol}: ${formatPercent(numeric(item.fundingRate) * 100)} / 8h` : `${symbol}: —`;
   }).join(' · ');
-  const marketLines = Object.entries({ DXY: 'Dollar Index', SP500: 'S&P 500', NASDAQ: 'Nasdaq', BRENT: 'Brent', WTI: 'WTI', XAUUSD: 'Gold' })
+  const marketLines = Object.entries({ DXY: 'Dollar Index', SP500: 'S&P 500', NASDAQ: 'Nasdaq', DOW: 'Dow Jones', RUSSELL2000: 'Russell 2000', VIX: 'VIX', NIKKEI: 'Nikkei 225', FTSE100: 'FTSE 100', DAX: 'DAX', BRENT: 'Brent', WTI: 'WTI', NATGAS: 'Natural Gas', COPPER: 'Copper', XAUUSD: 'Gold', SILVER: 'Silver', US10Y: 'US 10Y Yield' })
     .map(([key, name]) => ({ key, name, item: data?.market?.[key] }))
     .filter((x) => positive(x.item?.last))
     .map((x) => `${x.key.padEnd(7)} ${formatNumber(x.item.last, 3)} · ${formatPercent(x.item.change)}${x.item.stale ? ' *' : ''}`);
@@ -1376,7 +1470,7 @@ async function requestRefreshForUser(message, env) {
 }
 
 async function commandChart(message, symbol, period, token) {
-  const supportedSymbols = new Set([...GLOBAL_CRYPTOS, 'USDT', 'NOT', 'GOLD', 'DOLLAR']);
+  const supportedSymbols = new Set([...GLOBAL_CRYPTOS, ...STOCK_SYMBOLS, ...FOREX_SYMBOLS, 'USDT', 'NOT', 'GOLD', 'DOLLAR', 'BRENT', 'WTI', 'XAUUSD', 'SILVER', 'SP500', 'NASDAQ', 'DXY', 'DOW', 'RUSSELL2000', 'VIX', 'NIKKEI', 'FTSE100', 'DAX', 'HANGSENG', 'NATGAS', 'COPPER', 'PLATINUM', 'PALLADIUM', 'US10Y']);
   const supportedPeriods = new Set(['24h', '7d', '30d']);
   if (!supportedSymbols.has(symbol) || !supportedPeriods.has(period)) {
     await sendMessage(message.chat.id, `${getChartHelpMessage()}\n\n⚠️ <b>نماد یا بازه معتبر نیست.</b>`, token);
@@ -1471,6 +1565,23 @@ async function handleCommand(message, command, env) {
       await sendMessage(chatId, generateMacroMessage(data), token);
       return;
     }
+    case 'stocks':
+    case 'equities':
+    case 'stock': {
+      const data = await fetchLatestData();
+      if (!data) { await sendMessage(chatId, '⚠️ دادهٔ سهام در دسترس نیست.', token); return; }
+      const symbol = String(args[0] || '').toUpperCase();
+      await sendMessage(chatId, generateStocksMessage(data, STOCK_SYMBOLS.includes(symbol) ? symbol : ''), token);
+      return;
+    }
+    case 'forex':
+    case 'fx': {
+      const data = await fetchLatestData();
+      if (!data) { await sendMessage(chatId, '⚠️ دادهٔ فارکس در دسترس نیست.', token); return; }
+      const symbol = String(args[0] || '').toUpperCase().replace('/', '');
+      await sendMessage(chatId, generateForexMessage(data, FOREX_SYMBOLS.includes(symbol) ? symbol : ''), token);
+      return;
+    }
     case 'sentiment': {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ دادهٔ احساسات بازار در دسترس نیست.', token); return; }
@@ -1497,7 +1608,7 @@ async function handleCommand(message, command, env) {
         const preferences = await getAlertPreferences(env);
         const old = preferences[String(chatId)] || {};
         const enabled = command.name === 'alertson';
-        preferences[String(chatId)] = { enabled, level: ['low', 'medium', 'high'].includes(old.level) ? old.level : 'medium', updatedAt: new Date().toISOString() };
+        preferences[String(chatId)] = { ...old, enabled, level: ['low', 'medium', 'high'].includes(old.level) ? old.level : 'medium', updatedAt: new Date().toISOString() };
         await saveAlertPreferences(env, preferences);
         await sendMessage(chatId, enabled
           ? '✅ <b>هشدارهای خودکار فعال شدند.</b>\n<blockquote>از این پس هشدارهای مهم قیمت، بازار، ترس‌وطمع، Funding و Open Interest در این چت ارسال می‌شوند. برای تنظیم حساسیت <code>/alertlevel</code> را بفرست.</blockquote>'
@@ -1516,11 +1627,26 @@ async function handleCommand(message, command, env) {
       }
       try {
         const preferences = await getAlertPreferences(env);
-        preferences[String(chatId)] = { enabled: true, level, updatedAt: new Date().toISOString() };
+        preferences[String(chatId)] = { ...(preferences[String(chatId)] || {}), enabled: true, level, updatedAt: new Date().toISOString() };
         await saveAlertPreferences(env, preferences);
         const label = ({ low: 'همه هشدارها', medium: 'هشدارهای مهم و بحرانی', high: 'فقط هشدارهای بحرانی' })[level];
         await sendMessage(chatId, `✅ حساسیت هشدار تنظیم شد: <b>${label}</b>.\n<blockquote>هشدارها برای این چت فعال هستند. برای توقف از <code>/alertsoff</code> استفاده کن.</blockquote>`, token);
       } catch (error) { await sendMessage(chatId, `❌ ذخیره سطح هشدار ناموفق بود.\n<blockquote>${html(error.message)}</blockquote>`, token); }
+      return;
+    }
+    case 'alertscope': {
+      if (!env.SETTINGS_KV) { await sendMessage(chatId, '⚠️ Binding با نام <code>SETTINGS_KV</code> لازم است.', token); return; }
+      if (message.chat.type !== 'private' && !await isChatAdmin(message, env)) { await sendMessage(chatId, '🔐 برای تغییر دامنهٔ هشدار گروه، مدیر گروه باید دستور را اجرا کند.', token); return; }
+      const aliases = { all: ['local','crypto','stocks','forex','macro'], crypto: ['crypto'], local: ['local'], stocks: ['stocks'], stock: ['stocks'], forex: ['forex'], fx: ['forex'], macro: ['macro'] };
+      const requested = args.map((value) => value.toLowerCase());
+      if (!requested.length || requested.some((value) => !aliases[value])) { await sendMessage(chatId, 'دامنه را مشخص کن: <code>/alertscope all</code> یا یکی از <code>crypto</code>، <code>stocks</code>، <code>forex</code>، <code>macro</code>، <code>local</code>.', token); return; }
+      const markets = [...new Set(requested.flatMap((value) => aliases[value]))];
+      const preferences = await getAlertPreferences(env);
+      const old = preferences[String(chatId)] || {};
+      preferences[String(chatId)] = { ...old, enabled: old.enabled === true, level: ['low','medium','high'].includes(old.level) ? old.level : 'medium', markets, updatedAt: new Date().toISOString() };
+      await saveAlertPreferences(env, preferences);
+      const labels = { local:'بازار داخلی', crypto:'رمزارزها', stocks:'سهام آمریکا', forex:'فارکس', macro:'شاخص‌ها و کالاها' };
+      await sendMessage(chatId, `✅ <b>دامنهٔ هشدار به‌روزرسانی شد.</b>\n<blockquote>${markets.map((value) => labels[value]).join(' · ')}\nبازگشت به همه: <code>/alertscope all</code></blockquote>`, token);
       return;
     }
     case 'chart':
@@ -1599,7 +1725,7 @@ async function handleCommand(message, command, env) {
       }
       const stale = isDataStale(data, env);
       const status = stale ? '🔴 قدیمی' : data.hasError ? '🟠 در دسترس با خطای جزئی' : '🟢 به‌روز';
-      const staleAssets = [...Object.entries(data.prices || {}), ...Object.entries(data.market || {}), ...Object.entries(data.globalCrypto || {})].filter(([, item]) => item?.stale).map(([symbol]) => symbol);
+      const staleAssets = [...Object.entries(data.prices || {}), ...Object.entries(data.market || {}), ...Object.entries(data.globalCrypto || {}), ...Object.entries(data.equities || {}), ...Object.entries(data.forex || {})].filter(([, item]) => item?.stale).map(([symbol]) => symbol);
       const body = [
         '🩺 <b>ArzPulse · وضعیت سیستم</b>',
         `<blockquote>وضعیت داده: <b>${status}</b>\nآخرین Snapshot: <code>${html(formatTime(data.timestamp))}</code>\nسن داده: <code>${html(ageText(data.timestamp))}</code>\nحد آستانهٔ کهنگی: <code>${formatNumber(currentStaleMinutes(env), 0)} دقیقه</code></blockquote>`,
@@ -1657,6 +1783,18 @@ Updated     ${html(formatTime(data.timestamp))}</code></pre>`,
       return;
     }
     default:
+      if (STOCK_SYMBOLS.includes(command.name.toUpperCase())) {
+        const data = await fetchLatestData();
+        if (data) await sendMessage(chatId, generateStocksMessage(data, command.name.toUpperCase()), token);
+        else await sendMessage(chatId, '⚠️ دادهٔ سهام در دسترس نیست.', token);
+        return;
+      }
+      if (FOREX_SYMBOLS.includes(command.name.toUpperCase())) {
+        const data = await fetchLatestData();
+        if (data) await sendMessage(chatId, generateForexMessage(data, command.name.toUpperCase()), token);
+        else await sendMessage(chatId, '⚠️ دادهٔ فارکس در دسترس نیست.', token);
+        return;
+      }
       if (message.chat.type === 'private') {
         const lower = String(message.text || '').toLowerCase();
         if (lower.includes('سلام') || /\b(hi|hello|salam)\b/.test(lower)) await sendMessage(chatId, getWelcomeMessage(), token);

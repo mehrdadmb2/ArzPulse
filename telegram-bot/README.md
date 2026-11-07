@@ -97,3 +97,12 @@ Detection rules include sudden moves between consecutive snapshots, new crossing
 Optional Worker vars: `ALERT_CRYPTO_MOVE_PCT` (default `0.85`), `ALERT_LOCAL_MOVE_PCT` (default `0.45`), `ALERT_MACRO_MOVE_PCT` (default `0.55`), and `ALERT_COOLDOWN_MINUTES` (default `25`). They may be set in the deployed Worker’s vars. Alert preferences, cooldowns and the last baseline are stored in the existing `SETTINGS_KV` namespace under new keys; the legacy `channels` key is not overwritten.
 
 The dashboard adds the Market Signal Radar and asset-specific market cards. Cryptocurrency logos are loaded from the open `spothq/cryptocurrency-icons` asset set with a text-symbol fallback if a remote icon is unavailable. Icons are decorative and do not affect market data collection.
+
+
+## Global market expansion (v7)
+
+Additional commands: `/stocks`, `/stock NVDA`, `/forex`, `/fx EURUSD`, and direct shortcuts `/aapl`, `/nvda`, `/tsla`, `/spcx`. Hourly `/prices` digests now include a compact equity/FX section when those quotes exist in the snapshot. The `/macro` report includes expanded indices and commodities. Historical chart commands now accept listed stocks, FX pairs, and macro tickers too, for example `/chart AAPL 7d`, `/chart SPCX 30d`, and `/chart EURUSD 24h`; charts require enough real stored snapshots.
+
+Alert preferences can be scoped per chat with `/alertscope all|stocks|forex|crypto|macro|local`. The existing `/alertson`, `/alertsoff`, and `/alertlevel` settings are preserved when scope changes. Dedicated default move thresholds are `ALERT_STOCK_MOVE_PCT=0.8` and `ALERT_FOREX_MOVE_PCT=0.18`.
+
+The Worker reads only the public `docs/data/latest.json` snapshot. Provider credentials belong in GitHub Actions repository secrets, never in this Worker or the website bundle. See [`../MARKET-EXPANSION-SETUP-FA.md`](../MARKET-EXPANSION-SETUP-FA.md) for the full setup and data-freshness caveats.
