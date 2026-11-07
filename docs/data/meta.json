@@ -1,24 +1,24 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-07T18:40:19.101Z",
-  "lastUpdate": "2026-11-07T18:40:19.101Z",
+  "lastAttempt": "2026-11-07T18:45:19.432Z",
+  "lastUpdate": "2026-11-07T18:45:19.432Z",
   "retentionDays": 30,
-  "gold18K": 262350375,
-  "usdtPrice": 2677300,
-  "dollarPrice": 2677300,
+  "gold18K": 262328471,
+  "usdtPrice": 2677340,
+  "dollarPrice": 2677340,
   "equityCount": 13,
   "forexCount": 12,
   "marketSummary": {
-    "BRENT": {
-      "last": 98.31999969482422,
-      "change": 0.03052068269147401,
+    "WTI": {
+      "last": 90.83000183105469,
+      "change": 0.3424714974423575,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "WTI": {
-      "last": 90.83000183105469,
-      "change": 0.3424714974423575,
+    "XAUUSD": {
+      "last": 4074.89990234375,
+      "change": -0.9383760217880152,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -30,9 +30,9 @@
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "XAUUSD": {
-      "last": 4074.89990234375,
-      "change": -0.9383760217880152,
+    "BRENT": {
+      "last": 98.31999969482422,
+      "change": 0.03052068269147401,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -86,6 +86,13 @@
       "stale": false,
       "timestamp": "2026-11-06T00:00:00.000Z"
     },
+    "DAX": {
+      "last": 25820.359375,
+      "change": -1.9169998230502794,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T08:00:00.000Z"
+    },
     "FTSE100": {
       "last": 10673.900390625,
       "change": -1.0090218842845868,
@@ -99,13 +106,6 @@
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T01:30:00.000Z"
-    },
-    "DAX": {
-      "last": 25820.359375,
-      "change": -1.9169998230502794,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T08:00:00.000Z"
     },
     "NATGAS": {
       "last": 2.997999906539917,
