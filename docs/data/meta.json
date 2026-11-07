@@ -1,24 +1,17 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-07T18:50:21.030Z",
-  "lastUpdate": "2026-11-07T18:50:21.030Z",
+  "lastAttempt": "2026-11-07T18:55:20.652Z",
+  "lastUpdate": "2026-11-07T18:55:20.652Z",
   "retentionDays": 30,
-  "gold18K": 262328471,
-  "usdtPrice": 2677340,
-  "dollarPrice": 2677340,
+  "gold18K": 262174710,
+  "usdtPrice": 2676100,
+  "dollarPrice": 2676100,
   "equityCount": 13,
   "forexCount": 12,
   "marketSummary": {
     "XAUUSD": {
       "last": 4074.89990234375,
       "change": -0.9383760217880152,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T05:00:00.000Z"
-    },
-    "WTI": {
-      "last": 90.83000183105469,
-      "change": 0.3424714974423575,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -37,12 +30,19 @@
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "DXY": {
-      "last": 102.30000305175781,
-      "change": 0.7385524150282313,
+    "WTI": {
+      "last": 90.83000183105469,
+      "change": 0.3424714974423575,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
+    },
+    "NASDAQ": {
+      "last": 24579.4296875,
+      "change": 1.087516707793543,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "SP500": {
       "last": 7376.85986328125,
@@ -51,12 +51,12 @@
       "stale": false,
       "timestamp": "2026-11-06T14:30:00.000Z"
     },
-    "NASDAQ": {
-      "last": 24579.4296875,
-      "change": 1.087516707793543,
+    "DXY": {
+      "last": 102.30000305175781,
+      "change": 0.7385524150282313,
       "delayed": true,
       "stale": false,
-      "timestamp": "2026-11-06T14:30:00.000Z"
+      "timestamp": "2026-11-06T05:00:00.000Z"
     },
     "DOW": {
       "last": 51285.73046875,
@@ -72,6 +72,13 @@
       "stale": false,
       "timestamp": "2026-11-06T14:30:00.000Z"
     },
+    "VIX": {
+      "last": 25.639999389648438,
+      "change": -9.013487892194329,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T08:00:00.000Z"
+    },
     "NIKKEI": {
       "last": 57434.76953125,
       "change": -5.964725374397014,
@@ -82,13 +89,6 @@
     "FTSE100": {
       "last": 10673.900390625,
       "change": -1.0090218842845868,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T08:00:00.000Z"
-    },
-    "VIX": {
-      "last": 25.639999389648438,
-      "change": -9.013487892194329,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T08:00:00.000Z"
