@@ -1,7 +1,7 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-07T18:45:19.432Z",
-  "lastUpdate": "2026-11-07T18:45:19.432Z",
+  "lastAttempt": "2026-11-07T18:50:21.030Z",
+  "lastUpdate": "2026-11-07T18:50:21.030Z",
   "retentionDays": 30,
   "gold18K": 262328471,
   "usdtPrice": 2677340,
@@ -9,16 +9,16 @@
   "equityCount": 13,
   "forexCount": 12,
   "marketSummary": {
-    "WTI": {
-      "last": 90.83000183105469,
-      "change": 0.3424714974423575,
+    "XAUUSD": {
+      "last": 4074.89990234375,
+      "change": -0.9383760217880152,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "XAUUSD": {
-      "last": 4074.89990234375,
-      "change": -0.9383760217880152,
+    "WTI": {
+      "last": 90.83000183105469,
+      "change": 0.3424714974423575,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -37,6 +37,13 @@
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
+    "DXY": {
+      "last": 102.30000305175781,
+      "change": 0.7385524150282313,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T05:00:00.000Z"
+    },
     "SP500": {
       "last": 7376.85986328125,
       "change": 0.3145326640212812,
@@ -50,13 +57,6 @@
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T14:30:00.000Z"
-    },
-    "DXY": {
-      "last": 102.30000305175781,
-      "change": 0.7385524150282313,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T05:00:00.000Z"
     },
     "DOW": {
       "last": 51285.73046875,
@@ -72,13 +72,6 @@
       "stale": false,
       "timestamp": "2026-11-06T14:30:00.000Z"
     },
-    "VIX": {
-      "last": 25.639999389648438,
-      "change": -9.013487892194329,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T08:00:00.000Z"
-    },
     "NIKKEI": {
       "last": 57434.76953125,
       "change": -5.964725374397014,
@@ -86,16 +79,23 @@
       "stale": false,
       "timestamp": "2026-11-06T00:00:00.000Z"
     },
-    "DAX": {
-      "last": 25820.359375,
-      "change": -1.9169998230502794,
+    "FTSE100": {
+      "last": 10673.900390625,
+      "change": -1.0090218842845868,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T08:00:00.000Z"
     },
-    "FTSE100": {
-      "last": 10673.900390625,
-      "change": -1.0090218842845868,
+    "VIX": {
+      "last": 25.639999389648438,
+      "change": -9.013487892194329,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T08:00:00.000Z"
+    },
+    "DAX": {
+      "last": 25820.359375,
+      "change": -1.9169998230502794,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T08:00:00.000Z"
@@ -152,8 +152,8 @@
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 25,
-    "totalMarketCapUsd": 2565113311174.7407,
-    "btcDominance": 59.2868504496199
+    "totalMarketCapUsd": 2565041275029.9443,
+    "btcDominance": 59.28616095936927
   },
   "successfulSources": 53,
   "successfulLocalSources": 5
