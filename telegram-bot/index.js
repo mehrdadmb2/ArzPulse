@@ -16,6 +16,7 @@ const HTTP_TIMEOUT_MS = 3500;
 const REFRESH_LOCK_KEY = 'bot:refresh-lock:v1';
 const REFRESH_LOCK_SECONDS = 240;
 const CHANNELS_KEY = 'channels'; // Keep the existing KV key for backwards compatibility.
+const CHAT_SETTINGS_KEY = 'chat:settings:v1'; // Per-chat number, currency and scheduled-digest preferences.
 const ALERT_SUBSCRIBERS_KEY = 'alerts:subscribers:v1';
 const ALERT_STATE_KEY = 'alerts:state:v2'; // Consolidated rolling state reduces KV writes on each five-minute tick.
 const ALERT_SNAPSHOT_KEY = 'alerts:last-snapshot:v1'; // Read only for one-time legacy migration.
@@ -27,6 +28,8 @@ const ALERT_SNAPSHOT_MAX_AGE_MS = 20 * 60 * 1000;
 const GLOBAL_CRYPTOS = ['BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH','SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE'];
 const STOCK_SYMBOLS = ['AAPL','MSFT','NVDA','TSLA','AMZN','GOOGL','META','AVGO','AMD','ORCL','PLTR','COIN','SPCX'];
 const FOREX_SYMBOLS = ['EURUSD','GBPUSD','USDJPY','USDCHF','USDCAD','AUDUSD','NZDUSD','USDTRY','EURGBP','EURJPY','GBPJPY','USDCNH'];
+const INDEX_SYMBOLS = ['SP500','NASDAQ','DOW','RUSSELL2000','VIX','DXY','NIKKEI','FTSE100','DAX','HANGSENG','US10Y'];
+const COMMODITY_SYMBOLS = ['BRENT','WTI','XAUUSD','SILVER','NATGAS','COPPER','PLATINUM','PALLADIUM'];
 const GLOBAL_CRYPTO_NAMES = { BTC:'بیت‌کوین', ETH:'اتریوم', BNB:'بایننس کوین', SOL:'سولانا', XRP:'ریپل', ADA:'کاردانو', DOGE:'دوج‌کوین', TRX:'ترون', LINK:'چین‌لینک', AVAX:'آوالانچ', DOT:'پولکادات', LTC:'لایت‌کوین', BCH:'بیت‌کوین کش', SHIB:'شیبا اینو', UNI:'یونی‌سواپ', NEAR:'نیر', SUI:'سویی', XLM:'استلار', ETC:'اتریوم کلاسیک', ATOM:'کازموس', APT:'آپتوس', FIL:'فایل‌کوین', ARB:'آربیتروم', OP:'آپتیمیسم', HBAR:'هدرا', INJ:'اینجکتیو', AAVE:'آوه', PEPE:'پپه' };
 
 const COLORS = {
@@ -65,10 +68,27 @@ function numeric(value) {
 
 function positive(value) { return Number.isFinite(Number(value)) && Number(value) > 0; }
 
-function formatNumber(value, maximumFractionDigits = 2) {
+function formatNumber(value, maximumFractionDigits = 2, style = 'fa') {
   const number = Number(value);
   if (!Number.isFinite(number)) return '—';
-  return number.toLocaleString('fa-IR', { maximumFractionDigits, useGrouping: true }).replace(/,/g, '٬');
+  const locale = style === 'en' ? 'en-US' : 'fa-IR';
+  return number.toLocaleString(locale, { maximumFractionDigits, useGrouping: true });
+}
+
+function toEnglishDigits(value) {
+  return String(value ?? '').replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+    .replace(/٬/g, ',').replace(/٫/g, '.');
+}
+
+function toPersianDigits(value) {
+  return String(value ?? '').replace(/[0-9]/g, (digit) => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)])
+    .replace(/,/g, '٬').replace(/\.(?=\d)/g, '٫');
+}
+
+function applyNumberFormat(value, style = 'fa') {
+  // Persian is already the renderer default. Only convert the rendered output
+  // when a chat explicitly selects English digits; do not mutate symbols like US10Y.
+  return style === 'en' ? toEnglishDigits(value) : String(value ?? '');
 }
 
 function formatPrice(value) {
@@ -92,6 +112,55 @@ function formatDualPrice(value, usdtIrrRate) {
   if (!positive(value)) return '—';
   const usd = formatUsd(value, usdtIrrRate);
   return `${formatPrice(value)} IRR${usd !== '—' ? `  |  ${usd}` : ''}`;
+}
+
+function normalizeDisplaySettings(settings = {}) {
+  const numberFormat = ['fa', 'en'].includes(settings.numberFormat) ? settings.numberFormat : 'fa';
+  const currency = ['usd', 'irr', 'irt', 'dual'].includes(settings.currency) ? settings.currency : 'dual';
+  return { ...settings, numberFormat, currency };
+}
+
+function formatLocalAmount(value, data, settings = {}) {
+  const amount = numeric(value);
+  if (!positive(amount)) return '—';
+  const prefs = normalizeDisplaySettings(settings);
+  const rate = getUsdtIrrRate(data);
+  if (prefs.currency === 'usd') return formatUsd(amount, rate);
+  if (prefs.currency === 'irr') return `${formatNumber(amount, 0, prefs.numberFormat)} ریال`;
+  if (prefs.currency === 'irt') return `${formatNumber(amount / 10, 0, prefs.numberFormat)} تومان`;
+  const usd = formatUsd(amount, rate);
+  return `${formatNumber(amount, 0, prefs.numberFormat)} ریال${usd !== '—' ? ` · ${usd}` : ''}`;
+}
+
+function formatSecurityAmount(usdValue, data, settings = {}) {
+  const amount = numeric(usdValue);
+  if (!positive(amount)) return '—';
+  const prefs = normalizeDisplaySettings(settings);
+  const rate = getUsdtIrrRate(data);
+  const usd = `$${formatNumber(amount, amount < 1 ? 6 : 2, prefs.numberFormat)}`;
+  if (prefs.currency === 'usd' || !positive(rate)) return usd;
+  const irr = amount * rate;
+  if (prefs.currency === 'irr') return `${formatNumber(irr, 0, prefs.numberFormat)} ریال`;
+  if (prefs.currency === 'irt') return `${formatNumber(irr / 10, 0, prefs.numberFormat)} تومان`;
+  return `${usd} · ${formatNumber(irr, 0, prefs.numberFormat)} ریال`;
+}
+
+function parseIntervalMinutes(value) {
+  const normalized = String(value || '').trim().toLowerCase()
+    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)));
+  const match = normalized.match(/^(?:every\s*)?(\d+)\s*(m|min|mins|minute|minutes|دقیقه|h|hr|hrs|hour|hours|ساعت|d|day|days|روز)$/i);
+  if (!match) return null;
+  const amount = Number(match[1]);
+  const unit = match[2].toLowerCase();
+  const multiplier = ['h','hr','hrs','hour','hours','ساعت'].includes(unit) ? 60 : ['d','day','days','روز'].includes(unit) ? 1440 : 1;
+  const minutes = amount * multiplier;
+  return Number.isInteger(minutes) && minutes >= 5 && minutes <= 1440 && minutes % 5 === 0 ? minutes : null;
+}
+
+function formatInterval(minutes) {
+  if (minutes % 1440 === 0) return `${formatNumber(minutes / 1440, 0)} روز`;
+  if (minutes % 60 === 0) return `${formatNumber(minutes / 60, 0)} ساعت`;
+  return `${formatNumber(minutes, 0)} دقیقه`;
 }
 
 function formatPercent(value) {
@@ -316,7 +385,7 @@ async function editMessage(chatId, messageId, text, token) {
 async function getChannelSettings(env) {
   if (!env.SETTINGS_KV) return [];
   try {
-    const result = await env.SETTINGS_KV.get(CHANNELS_KEY, { type: 'json', cacheTtl: 30 });
+    const result = await env.SETTINGS_KV.get(CHANNELS_KEY, { type: 'json' });
     if (result == null) return [];
     if (!Array.isArray(result)) throw new Error('The stored channels value is not a JSON array.');
     return [...new Set(result.map((id) => String(id)).filter((id) => /^-?\d+$/.test(id)))].slice(0, MAX_CHANNELS);
@@ -332,6 +401,56 @@ async function saveChannelSettings(env, channels) {
   const normalized = [...new Set(channels.map((id) => String(id)).filter((id) => /^-?\d+$/.test(id)))].slice(0, MAX_CHANNELS);
   // One small KV value; market history is not stored in KV.
   await env.SETTINGS_KV.put(CHANNELS_KEY, JSON.stringify(normalized));
+}
+
+async function getChatSettingsMap(env) {
+  if (!env.SETTINGS_KV) return {};
+  const value = await env.SETTINGS_KV.get(CHAT_SETTINGS_KEY, { type: 'json' });
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+async function getChatSettings(env, chatId) {
+  const map = await getChatSettingsMap(env);
+  return normalizeDisplaySettings(map[String(chatId)] || {});
+}
+
+async function saveChatSettings(env, chatId, patch) {
+  if (!env.SETTINGS_KV) throw new Error('SETTINGS_KV binding is missing');
+  const map = await getChatSettingsMap(env);
+  const old = map[String(chatId)] || {};
+  map[String(chatId)] = { ...old, ...patch, updatedAt: new Date().toISOString() };
+  const entries = Object.entries(map).slice(-500);
+  await env.SETTINGS_KV.put(CHAT_SETTINGS_KEY, JSON.stringify(Object.fromEntries(entries)));
+  return normalizeDisplaySettings(map[String(chatId)]);
+}
+
+async function sendChatMessage(chatId, message, token, env, settings = null, options = {}) {
+  let prefs = settings;
+  if (!prefs) {
+    try { prefs = await getChatSettings(env, chatId); }
+    catch (error) { console.warn('[chat-settings] read failed; using defaults:', error.message); prefs = {}; }
+  }
+  const normalized = normalizeDisplaySettings(prefs || {});
+  return sendMessage(chatId, applyNumberFormat(message, normalized.numberFormat), token, options);
+}
+
+function formatSettingsMessage(settings, chatId) {
+  const prefs = normalizeDisplaySettings(settings);
+  const currencyLabels = { usd: 'USD / دلار', irr: 'IRR / ریال', irt: 'IRT / تومان', dual: 'ترکیبی / دلار + ریال' };
+  const numberLabels = { fa: 'فارسی (۰۱۲۳)', en: 'English (0123)' };
+  const digest = prefs.digest?.enabled ? `فعال · هر ${formatInterval(prefs.digest.intervalMinutes || 60)}` : 'غیرفعال';
+  return [
+    '⚙️ <b>ArzPulse · تنظیمات این چت</b>',
+    `<blockquote>شناسهٔ چت: <code>${html(chatId)}</code>
+اعداد: <b>${numberLabels[prefs.numberFormat]}</b>
+واحد نمایش: <b>${currencyLabels[prefs.currency]}</b>
+گزارش خودکار: <b>${digest}</b></blockquote>`,
+    '<b>تغییر قالب عدد</b>', '<code>/numbers fa</code> · <code>/numbers en</code>',
+    '<b>واحد قیمت</b>', '<code>/currency usd</code> · <code>/currency irr</code> · <code>/currency irt</code> · <code>/currency dual</code>',
+    '<b>گزارش دوره‌ای</b>', '<code>/digest 30m</code> · <code>/digest 2h</code> · <code>/digest off</code> · <code>/digest status</code>',
+    '<b>انتخاب بخش‌های گزارش</b>', '<code>/digestmarket all</code> یا ترکیبی از <code>local crypto stocks forex macro</code>',
+    '<i>تغییرات برای همین چت ذخیره می‌شود و تنظیمات سایر کاربران را تغییر نمی‌دهد.</i>'
+  ].join('\n');
 }
 
 async function getAlertPreferences(env) {
@@ -635,7 +754,8 @@ function combinePriceMoveEvents(events) {
   return combined;
 }
 
-function buildAlertMessage(event, data) {
+function buildAlertMessage(event, data, settings = {}) {
+  const prefs = normalizeDisplaySettings(settings);
   const level = event.severity >= 3 ? '🚨 بحرانی' : event.severity === 2 ? '⚠️ مهم' : '🔎 رصد';
   const sign = event.direction === 'up' ? '🟢' : event.direction === 'down' ? '🔴' : '🟠';
   const lines = [`${level} <b>ArzPulse · هشدار خودکار بازار</b>`, `${sign} <b>${html(event.title)}</b>`];
@@ -644,10 +764,8 @@ function buildAlertMessage(event, data) {
   const rows = [];
   if (metric?.price != null && positive(metric.price)) {
     let shownPrice;
-    if (metric.currency === 'IRR') {
-      const rate = getUsdtIrrRate(data);
-      shownPrice = `${formatPrice(metric.price)} ریال${rate > 0 ? ` · ${formatUsd(metric.price, rate)}` : ''}`;
-    } else if (metric.currency === 'USD') shownPrice = `$${formatNumber(metric.price, metric.price < 1 ? 8 : 2)}`;
+    if (metric.currency === 'IRR') shownPrice = formatLocalAmount(metric.price, data, prefs);
+    else if (metric.currency === 'USD') shownPrice = formatSecurityAmount(metric.price, data, prefs);
     else if (metric.currency === 'funding') shownPrice = `${(Number(metric.price) * 100).toFixed(4)}٪`;
     else if (metric.currency === 'points') shownPrice = `${formatNumber(metric.price, 0)} از ۱۰۰`;
     else shownPrice = formatNumber(metric.price, 2);
@@ -659,7 +777,7 @@ function buildAlertMessage(event, data) {
   if (event.move != null && event.type === 'open-interest') rows.push(`تغییر Open Interest   ${event.move > 0 ? '+' : ''}${formatNumber(event.move, 2)}٪`);
   if (event.dailyChange != null) rows.push(`تغییر ۲۴ساعته   ${event.dailyChange > 0 ? '+' : ''}${formatNumber(event.dailyChange, 2)}٪`);
   if (metric?.high && metric?.low && metric.high > metric.low) rows.push(`بازهٔ روز   ${formatNumber(metric.low, 4)} — ${formatNumber(metric.high, 4)}`);
-  if (metric?.volumeUsd > 0) rows.push(`حجم ۲۴ساعت   ${formatCompactUsd(metric.volumeUsd)}`);
+  if (metric?.volumeUsd > 0) rows.push(`حجم ۲۴ساعت   ${formatCompactUsd(metric.volumeUsd, prefs.numberFormat)}`);
   else if (metric?.volume > 0) rows.push(`حجم   ${formatNumber(metric.volume, 2)}`);
   if (metric?.trades > 0) rows.push(`تعداد معاملات   ${formatNumber(metric.trades, 0)}`);
   if (metric?.source) rows.push(`منبع   ${html(metric.source)}`);
@@ -765,11 +883,15 @@ async function processAutomaticAlerts(env) {
 
   let sendCount = 0;
   const newCooldowns = { ...cooldowns };
+  let chatSettings = {};
+  try { chatSettings = await getChatSettingsMap(env); }
+  catch (error) { console.warn('[alerts] chat display preferences unavailable; using defaults:', error.message); }
   for (const event of eligibleEvents) {
-    const message = buildAlertMessage(event, data);
     let delivered = 0;
     for (const recipient of recipients) {
       if (event.severity < alertLevelNumber(recipient.level) || !(recipient.markets || ['local','crypto','stocks','forex','macro']).includes(alertScopeForEvent(event))) continue;
+      const prefs = normalizeDisplaySettings(chatSettings[String(recipient.chatId)] || {});
+      const message = applyNumberFormat(buildAlertMessage(event, data, prefs), prefs.numberFormat);
       try {
         const result = await sendMessage(recipient.chatId, message, env.TELEGRAM_BOT_TOKEN);
         if (result) { delivered += 1; sendCount += 1; }
@@ -880,10 +1002,17 @@ function getWelcomeMessage() {
 /fx EURUSD یک جفت‌ارز مشخص
 /aapl /nvda /tsla /spcx میانبر سهام
 /macro    شاخص‌های کلان و محرک‌های بازار
+/indices  شاخص‌های جهانی و VIX
+/commodities کالاهای جهانی
 /sentiment ترس‌وطمع و احساسات بازار
 /alerts   تنظیم هشدار خودکار
 /alertson فعال‌سازی هشدار
 /alertscope انتخاب بازار هشدار
+/settings تنظیمات چت
+/numbers fa|en قالب اعداد
+/currency usd|irr|irt|dual واحد قیمت
+/digest 30m|2h گزارش زمان‌بندی‌شده
+/digestmarket انتخاب بخش‌های گزارش
 /chart    راهنمای نمودار
 /chartall نمودارهای منتخب
 /refresh  درخواست آپدیت دستی
@@ -914,12 +1043,19 @@ function getHelpMessage() {
 /fx EURUSD جزئیات یک جفت‌ارز
 /aapl /nvda /tsla /spcx میانبر سهام منتخب
 /macro    احساسات، دامیننس، فاندینگ و شاخص‌های کلان
+/indices  شاخص‌های بورس و VIX
+/commodities طلا، نفت، فلزات و انرژی
 /sentiment شاخص ترس و طمع
 /alerts   وضعیت و تنظیم هشدار خودکار
 /alertson فعال‌سازی هشدار
 /alertsoff غیرفعال‌سازی هشدار
 /alertlevel low|medium|high سطح حساسیت
-/alertscope all|stocks|forex|crypto|macro|local دامنهٔ هشدارها</code></pre>`,
+/alertscope all|stocks|forex|crypto|macro|local دامنهٔ هشدارها
+/settings تنظیمات نمایش و گزارش
+/numbers fa|en اعداد فارسی/انگلیسی
+/currency usd|irr|irt|dual واحد نمایش قیمت
+/digest 15m|30m|2h|1d|off گزارش دوره‌ای
+/digestmarket all|stocks|forex|crypto|macro|local</code></pre>`,
     '<b>نمودارهای تاریخی</b>',
     `<pre><code>/chart BTC 24h
 /chart SOL 7d
@@ -963,154 +1099,192 @@ function localAssetRows(data) {
   return definitions.map((asset) => ({ ...asset, data: prices[asset.symbol] || null }));
 }
 
-function formatGlobalMarketRow(symbol, item, marketType) {
-  if (!item || item.stale || !positive(item.last ?? item.price)) return `⚪ ${symbol} · دادهٔ معتبر موجود نیست`;
+function formatGlobalMarketRow(symbol, item, marketType, data, settings = {}) {
+  if (!item || !positive(item.last ?? item.price)) return `⚪ ${symbol} · دادهٔ معتبر موجود نیست`;
+  const prefs = normalizeDisplaySettings(settings);
   const price = numeric(item.last ?? item.price);
   const change = Number.isFinite(Number(item.change)) ? formatPercent(item.change) : '—';
-  const quote = marketType === 'forex' ? formatNumber(price, price < 2 ? 5 : 3) : `$${formatNumber(price, 2)}`;
+  const quote = marketType === 'forex'
+    ? formatNumber(price, price < 2 ? 5 : 3, prefs.numberFormat)
+    : formatSecurityAmount(price, data, prefs);
   const extra = marketType === 'stock'
-    ? `H/L ${formatNumber(item.high,2)} / ${formatNumber(item.low,2)} · Shares ${formatNumber(item.volume,0)}${positive(item.trades) ? ` · Trades ${formatNumber(item.trades,0)}` : ''}${positive(item.vwap) ? ` · VWAP ${formatNumber(item.vwap,2)}` : ''}`
-    : `H/L ${formatNumber(item.high,5)} / ${formatNumber(item.low,5)}`;
-  const freshness = item.delayed ? ' · تأخیردار' : '';
+    ? `H/L ${formatSecurityAmount(item.high,data,prefs)} / ${formatSecurityAmount(item.low,data,prefs)} · Shares ${formatNumber(item.volume,0,prefs.numberFormat)}${positive(item.trades) ? ` · Trades ${formatNumber(item.trades,0,prefs.numberFormat)}` : ''}${positive(item.vwap) ? ` · VWAP ${formatSecurityAmount(item.vwap,data,prefs)}` : ''}`
+    : `H/L ${formatNumber(item.high,5,prefs.numberFormat)} / ${formatNumber(item.low,5,prefs.numberFormat)}`;
+  const freshness = `${item.delayed ? ' · تأخیردار' : ''}${item.stale ? ' · آخرین دادهٔ ذخیره‌شده' : ''}`;
   const stamp = item.timestamp || item.fetchedAt;
   const updated = stamp ? ` · ${formatTime(stamp)}` : '';
   return `${changeMark(item.change)} <b>${html(symbol)} · ${html(getSymbolName(symbol))}</b>\n<pre><code>${quote}   ${html(change)}\n${html(extra)}\n${html(item.source || 'Market feed')}${freshness}${html(updated)}</code></pre>`;
 }
 
-function generateStocksMessage(data, requestedSymbol = '') {
+function generateStocksMessage(data, requestedSymbol = '', settings = {}) {
   const equities = data?.equities || {};
   const symbols = requestedSymbol ? [requestedSymbol.toUpperCase()] : STOCK_SYMBOLS;
-  const rows = symbols.filter((symbol) => equities[symbol]).map((symbol) => formatGlobalMarketRow(symbol, equities[symbol], 'stock'));
-  const unavailable = symbols.filter((symbol) => !equities[symbol]);
+  const rows = symbols.filter((symbol) => equities[symbol]).map((symbol) => formatGlobalMarketRow(symbol, equities[symbol], 'stock', data, settings));
+  const unavailable = symbols.filter((symbol) => !equities[symbol] || !positive(equities[symbol]?.last));
   return [
     '📈 <b>ArzPulse · US Equities</b>',
-    '<blockquote>سهام آمریکا با واحد USD · قیمت‌های Yahoo fallback ممکن است تأخیردار باشند. فید Alpaca فعلی IEX است و معادل پوشش کامل SIP نیست.</blockquote>',
+    '<blockquote>دادهٔ پیش‌فرض از Yahoo Finance Chart بدون API Key دریافت می‌شود؛ این endpoint رسمی و دارای SLA نیست و ممکن است تأخیر/محدودیت داشته باشد. واحد قیمت طبق تنظیمات همین چت است.</blockquote>',
     ...(rows.length ? rows : ['⚠️ برای نماد درخواستی داده‌ای در Snapshot موجود نیست.']),
-    unavailable.length ? `<i>بدون داده: ${html(unavailable.join(', '))}</i>` : '',
+    unavailable.length ? `<i>بدون دادهٔ معتبر: ${html(unavailable.join(', '))}</i>` : '',
     `<i>Snapshot: ${html(formatTime(data?.timestamp))}</i>`
   ].filter(Boolean).join('\n\n');
 }
 
-function generateForexMessage(data, requestedSymbol = '') {
+function generateForexMessage(data, requestedSymbol = '', settings = {}) {
   const forex = data?.forex || {};
   const symbols = requestedSymbol ? [requestedSymbol.toUpperCase().replace('/', '')] : FOREX_SYMBOLS;
-  const rows = symbols.filter((symbol) => forex[symbol]).map((symbol) => formatGlobalMarketRow(symbol, forex[symbol], 'forex'));
-  const unavailable = symbols.filter((symbol) => !forex[symbol]);
+  const rows = symbols.filter((symbol) => forex[symbol]).map((symbol) => formatGlobalMarketRow(symbol, forex[symbol], 'forex', data, settings));
+  const unavailable = symbols.filter((symbol) => !forex[symbol] || !positive(forex[symbol]?.last));
   return [
     '💱 <b>ArzPulse · Forex Board</b>',
-    '<blockquote>نرخ جفت‌ارزها در واحد ارز دوم نمایش داده می‌شود. منبع و timestamp را بررسی کن؛ Yahoo fallback نرخ مرجع تأخیردار است.</blockquote>',
+    '<blockquote>قیمت‌ها نرخ جفت‌ارز هستند، نه مبلغ قابل تبدیل به IRR/USD؛ برای مثال EURUSD یعنی چند دلار در برابر یک یورو. منبع پیش‌فرض Yahoo Finance Chart بدون کلید و با تأخیر احتمالی است.</blockquote>',
     ...(rows.length ? rows : ['⚠️ برای این جفت‌ارز داده‌ای در Snapshot موجود نیست.']),
-    unavailable.length ? `<i>بدون داده: ${html(unavailable.join(', '))}</i>` : '',
+    unavailable.length ? `<i>بدون دادهٔ معتبر: ${html(unavailable.join(', '))}</i>` : '',
     `<i>Snapshot: ${html(formatTime(data?.timestamp))}</i>`
   ].filter(Boolean).join('\n\n');
 }
 
-function generatePricesMessage(data, env) {
+function generatePricesMessage(data, env, settings = {}, requestedMarkets = ['local','crypto','stocks','forex','macro']) {
   const stale = isDataStale(data, env);
-  const usdtIrrRate = getUsdtIrrRate(data);
-  const timestamp = data?.timestamp;
+  const prefs = normalizeDisplaySettings(settings);
+  const markets = new Set(Array.isArray(requestedMarkets) && requestedMarkets.length ? requestedMarkets : ['local','crypto','stocks','forex','macro']);
   const sections = [
-    '📊 <b>ArzPulse · Market Snapshot</b>',
-    `<blockquote>آخرین Snapshot: ${html(formatTime(timestamp))}\nتازگی داده: ${html(ageText(timestamp))}</blockquote>`
+    '📊 <b>ArzPulse · Complete Market Snapshot</b>',
+    `<blockquote>آخرین Snapshot: ${html(formatTime(data?.timestamp))}\nتازگی داده: ${html(ageText(data?.timestamp))}\nقالب عدد: ${prefs.numberFormat === 'fa' ? 'فارسی' : 'English'} · واحد قیمت: ${prefs.currency.toUpperCase()}</blockquote>`
   ];
-  if (stale) sections.push('<blockquote>⚠️ <b>داده‌ها قدیمی‌اند.</b> مقادیر زیر آخرین Snapshot ذخیره‌شده هستند؛ برای درخواست آپدیت از <code>/refresh</code> (مدیر مجاز) استفاده کن.</blockquote>');
-  if (data?.hasError) sections.push(`<blockquote>⚠️ بخشی از منابع خطا داشته‌اند (${formatNumber(data.errorCount || data.errorDetails?.length || 0, 0)}). دارایی‌هایی که تازه دریافت نشده‌اند با برچسب کهنگی مشخص می‌شوند.</blockquote>`);
+  if (stale) sections.push('<blockquote>⚠️ <b>Snapshot اصلی قدیمی است.</b> مقادیر آخرین دادهٔ ذخیره‌شده هستند؛ مدیر می‌تواند <code>/refresh</code> را اجرا کند.</blockquote>');
+  if (data?.hasError) sections.push(`<blockquote>⚠️ ${formatNumber(data.errorCount || data.errorDetails?.length || 0, 0, prefs.numberFormat)} خطای منبع ثبت شده است؛ مقادیر ذخیره‌شده با نشان «قدیمی» مشخص می‌شوند.</blockquote>`);
 
-  sections.push('🇮🇷 <b>بازار داخلی</b>');
-  for (const asset of localAssetRows(data)) {
-    const coin = asset.data;
-    if (!coin || ![coin.lastPrice, coin.bestBuy, coin.bestSell].some(positive)) {
-      sections.push(`⚪ <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b>\n<blockquote>اطلاعات این دارایی در Snapshot موجود نیست.</blockquote>`);
-      continue;
+  if (markets.has('local')) {
+    sections.push('🇮🇷 <b>بازار داخلی</b>');
+    for (const asset of localAssetRows(data)) {
+      const coin = asset.data;
+      if (!coin || ![coin.lastPrice, coin.bestBuy, coin.bestSell].some(positive)) {
+        sections.push(`⚪ <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b> · داده موجود نیست`);
+        continue;
+      }
+      sections.push(`${changeMark(coin.change)} <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b>${coin.stale ? ' · <i>قدیمی</i>' : ''}\n<pre><code>Last ${formatLocalAmount(coin.lastPrice, data, prefs)} · Buy ${formatLocalAmount(coin.bestBuy, data, prefs)} · Sell ${formatLocalAmount(coin.bestSell, data, prefs)}\nH/L ${formatLocalAmount(coin.high, data, prefs)} / ${formatLocalAmount(coin.low, data, prefs)} · Vol ${formatNumber(coin.volume, 4, prefs.numberFormat)} ${asset.symbol}\n24h ${formatPercent(coin.change)}</code></pre>`);
     }
-    const isStaleAsset = Boolean(coin.stale);
-    sections.push([
-      `${changeMark(coin.change)} <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b>${isStaleAsset ? ' <i>(قدیمی)</i>' : ''}`,
-      `<pre><code>Last      ${formatDualPrice(coin.lastPrice, usdtIrrRate)}
-Buy       ${formatDualPrice(coin.bestBuy, usdtIrrRate)}
-Sell      ${formatDualPrice(coin.bestSell, usdtIrrRate)}
-High      ${formatDualPrice(coin.high, usdtIrrRate)}
-Low       ${formatDualPrice(coin.low, usdtIrrRate)}
-Volume    ${formatNumber(coin.volume, 4)} ${asset.symbol}</code></pre>`,
-      `<blockquote>تغییر ۲۴ ساعت: <b>${formatPercent(coin.change)}</b> · Spread: <code>${positive(coin.bestBuy) && positive(coin.bestSell) ? formatPercent(((coin.bestSell - coin.bestBuy) / coin.bestSell) * 100) : '—'}</code></blockquote>`
-    ].join('\n'));
+    const usdt = numeric(data?.usdtPrice || data?.prices?.USDT?.bestSell);
+    sections.push('🥇 <b>طلا و نرخ مرجع</b>');
+    sections.push(`<pre><code>18K Gold / gram  ${formatLocalAmount(data?.gold18K, data, prefs)}\nUSDT / IRR       ${formatNumber(usdt, 0, prefs.numberFormat)} ریال\nUSDT / USD       $1.00 approx.</code></pre>`);
+    sections.push('<i>تبدیل USD/IRR با نرخ USDT/IRR همین Snapshot تخمینی است و نرخ رسمی اسکناس محسوب نمی‌شود.</i>');
   }
 
-  const usdt = numeric(data?.usdtPrice || data?.prices?.USDT?.bestSell);
-  const gold = numeric(data?.gold18K);
-  sections.push('🥇 <b>طلا و نرخ مرجع</b>');
-  sections.push(`<pre><code>18K Gold / gram  ${formatDualPrice(gold, usdtIrrRate)}
-USDT / IRR       ${formatPrice(usdt)} IRR
-USDT / USD       ${positive(usdt) ? '$1.00 approx.' : '—'}</code></pre>`);
-  sections.push('<blockquote>💱 معادل دلاری قیمت‌های داخلی تخمینی است و با نرخ USDT/IRR همین Snapshot محاسبه می‌شود؛ نرخ رسمی اسکناس دلار نیست.</blockquote>');
-  if (data?.derivedStale?.gold18K) sections.push('<blockquote>⚠️ قیمت طلای ۱۸ عیار از یکی از ورودی‌های قدیمی محاسبه شده است.</blockquote>');
-  const selectedStocks = ['AAPL','NVDA','TSLA','SPCX'].filter((symbol) => data?.equities?.[symbol] && positive(data.equities[symbol].last) && !data.equities[symbol].stale);
-  if (selectedStocks.length) sections.push('🇺🇸 <b>سهام منتخب آمریکا</b>\n' + selectedStocks.map((symbol) => { const item=data.equities[symbol]; return `${changeMark(item.change)} <b>${symbol}</b>  $${formatNumber(item.last,2)}  ·  ${formatPercent(item.change)}${item.delayed?' · تأخیردار':''}`; }).join('\n'));
-  const selectedFx = ['EURUSD','GBPUSD','USDJPY','USDTRY'].filter((symbol) => data?.forex?.[symbol] && positive(data.forex[symbol].last) && !data.forex[symbol].stale);
-  if (selectedFx.length) sections.push('💱 <b>فارکس منتخب</b>\n' + selectedFx.map((symbol) => { const item=data.forex[symbol]; return `${changeMark(item.change)} <b>${symbol}</b>  ${formatNumber(item.last,item.last<2?5:3)}  ·  ${formatPercent(item.change)}${item.delayed?' · تأخیردار':''}`; }).join('\n'));
-
-  if (data?.market && typeof data.market === 'object') {
-    const globalRows = Object.entries({
-      BRENT: 'Brent Crude', WTI: 'WTI Crude', XAUUSD: 'Gold Futures', SILVER: 'Silver Futures',
-      SP500: 'S&P 500', NASDAQ: 'Nasdaq', DXY: 'Dollar Index', DOW: 'Dow Jones', RUSSELL2000: 'Russell 2000', VIX: 'VIX', NIKKEI: 'Nikkei 225', FTSE100: 'FTSE 100', DAX: 'DAX', HANGSENG: 'Hang Seng', NATGAS: 'Natural Gas', COPPER: 'Copper', PLATINUM: 'Platinum', PALLADIUM: 'Palladium', US10Y: 'US 10Y Yield'
-    }).map(([key, name]) => ({ key, name, data: data.market[key] })).filter((row) => row.data && positive(row.data.last));
-    if (globalRows.length) {
-      sections.push('🌍 <b>بازار جهانی</b>');
-      sections.push('<pre><code>' + globalRows.map((row) => `${row.key.padEnd(7)} ${formatNumber(row.data.last, 3).padStart(13)}   ${formatPercent(row.data.change).padStart(9)}${row.data.stale ? ' *' : ''}`).join('\n') + '</code></pre>');
-      sections.push('<blockquote>* قیمت‌های بازار جهانی ممکن است با تأخیر منبع نمایش داده شوند. ارقام بازار جهانی بر حسب واحد قرارداد/شاخص هستند، نه ریال.</blockquote>');
-    }
+  if (markets.has('stocks')) {
+    sections.push('🇺🇸 <b>تمام سهام رصدشدهٔ آمریکا</b>');
+    const lines = STOCK_SYMBOLS.map((symbol) => {
+      const item = data?.equities?.[symbol];
+      if (!item || !positive(item.last)) return `${symbol.padEnd(6)} —`;
+      return `${symbol.padEnd(6)} ${formatSecurityAmount(item.last, data, prefs)}  ${formatPercent(item.change)}${item.stale ? '  *stale' : ''}${item.delayed ? '  delayed' : ''}`;
+    });
+    sections.push(`<pre><code>${lines.join('\n')}</code></pre>`);
+    sections.push('<i>منبع پایه بدون کلید: Yahoo Finance Chart؛ قیمت‌ها ممکن است تأخیردار باشند.</i>');
   }
+
+  if (markets.has('forex')) {
+    sections.push('💱 <b>تمام جفت‌ارزهای فارکس</b>');
+    const lines = FOREX_SYMBOLS.map((symbol) => {
+      const item = data?.forex?.[symbol];
+      if (!item || !positive(item.last)) return `${symbol.padEnd(8)} —`;
+      return `${symbol.padEnd(8)} ${formatNumber(item.last, item.last < 2 ? 5 : 3, prefs.numberFormat)}  ${formatPercent(item.change)}${item.stale ? '  *stale' : ''}${item.delayed ? '  delayed' : ''}`;
+    });
+    sections.push(`<pre><code>${lines.join('\n')}</code></pre>`);
+    sections.push('<i>قیمت FX نسبت تبدیل دو ارز است و با انتخاب USD/IRR/IRT به مبلغ تبدیل نمی‌شود.</i>');
+  }
+
+  if (markets.has('crypto')) {
+    sections.push('🪙 <b>رمزارزهای جهانی</b>');
+    const cryptoLines = GLOBAL_CRYPTOS.map((symbol) => {
+      const item = data?.globalCrypto?.[symbol];
+      if (!item || !positive(item.last)) return `${symbol.padEnd(6)} —`;
+      return `${symbol.padEnd(6)} ${formatSecurityAmount(item.last, data, prefs)}  ${formatPercent(item.change)}  Vol ${formatCompactUsd(item.volumeUsd, prefs.numberFormat)}`;
+    });
+    sections.push(`<pre><code>${cryptoLines.join('\n')}</code></pre>`);
+  }
+
+  if (markets.has('macro')) {
+    sections.push('🌍 <b>شاخص‌ها و کالاهای جهانی</b>');
+    const symbols = [...INDEX_SYMBOLS.filter((symbol) => symbol !== 'US10Y'), ...COMMODITY_SYMBOLS, 'US10Y'];
+    const lines = symbols.map((symbol) => {
+      const item = data?.market?.[symbol];
+      if (!item || !positive(item.last)) return `${symbol.padEnd(10)} —`;
+      const usdCommodity = ['BRENT','WTI','XAUUSD','SILVER','NATGAS','COPPER','PLATINUM','PALLADIUM'].includes(symbol);
+      const displayPrice = usdCommodity ? formatSecurityAmount(item.last, data, prefs) : symbol === 'US10Y' ? `${formatNumber(item.last, 3, prefs.numberFormat)}%` : `${formatNumber(item.last, 2, prefs.numberFormat)} pts`;
+      return `${symbol.padEnd(10)} ${displayPrice}  ${formatPercent(item.change)}${item.stale ? '  *stale' : ''}`;
+    });
+    sections.push(`<pre><code>${lines.join('\n')}</code></pre>`);
+  }
+
   const context = data?.marketContext || {};
-  const fg = context.fearGreed;
-  const global = context.global;
-  sections.push('🧭 <b>محرک‌های کلیدی بازار</b>');
-  sections.push(`<pre><code>Fear & Greed    ${fg ? `${formatNumber(fg.value, 0)}/100 · ${html(fg.classification || '')}` : '—'}
-BTC dominance   ${positive(global?.btcDominance) ? `${formatNumber(global.btcDominance, 2)}%` : '—'}
-Global cap      ${formatCompactUsd(global?.totalMarketCapUsd)}
-24h volume      ${formatCompactUsd(global?.totalVolume24hUsd)}
-BTC funding     ${context.derivatives?.BTC ? formatPercent(numeric(context.derivatives.BTC.fundingRate) * 100) : '—'}</code></pre>`);
-  sections.push('━━━━━━━━━━━━━━━━━━\n🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>  ·  برای جزئیات بیشتر <code>/crypto</code> و <code>/macro</code>');
+  if (markets.has('crypto') || markets.has('macro')) {
+    const fg = context.fearGreed, global = context.global;
+    sections.push('🧭 <b>محرک‌های کلیدی بازار</b>');
+    sections.push(`<pre><code>Fear & Greed    ${fg ? `${formatNumber(fg.value,0,prefs.numberFormat)}/100 · ${html(fg.classification || '')}` : '—'}\nBTC dominance   ${positive(global?.btcDominance) ? `${formatNumber(global.btcDominance,2,prefs.numberFormat)}%` : '—'}\nETH dominance   ${positive(global?.ethDominance) ? `${formatNumber(global.ethDominance,2,prefs.numberFormat)}%` : '—'}\nGlobal cap      ${formatCompactUsd(global?.totalMarketCapUsd, prefs.numberFormat)}\n24h volume      ${formatCompactUsd(global?.totalVolume24hUsd, prefs.numberFormat)}\nBTC funding     ${context.derivatives?.BTC ? formatPercent(numeric(context.derivatives.BTC.fundingRate) * 100) : '—'}</code></pre>`);
+  }
+  sections.push('━━━━━━━━━━━━━━━━━━\n🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a> · جزئیات: <code>/crypto</code> <code>/stocks</code> <code>/forex</code> <code>/macro</code>');
   return sections.join('\n\n');
 }
 
-function formatCompactUsd(value) {
+function formatCompactUsd(value, numberFormat = 'fa') {
   const n = numeric(value);
   if (!positive(n)) return '—';
-  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-  if (n >= 1e3) return `$${(n / 1e3).toFixed(2)}K`;
-  return `$${formatNumber(n, n < 1 ? 6 : 2)}`;
+  if (n >= 1e12) return `$${formatNumber(n / 1e12, 2, numberFormat)}T`;
+  if (n >= 1e9) return `$${formatNumber(n / 1e9, 2, numberFormat)}B`;
+  if (n >= 1e6) return `$${formatNumber(n / 1e6, 2, numberFormat)}M`;
+  if (n >= 1e3) return `$${formatNumber(n / 1e3, 2, numberFormat)}K`;
+  return `$${formatNumber(n, n < 1 ? 6 : 2, numberFormat)}`;
 }
 
-function globalCryptoLine(symbol, item, rate) {
+function globalCryptoLine(symbol, item, data, settings = {}) {
   const usd = numeric(item?.last);
   if (!positive(usd)) return '';
-  const irr = positive(rate) ? `${formatPrice(usd * rate)} IRR` : 'IRR unavailable';
+  const priceText = formatSecurityAmount(usd, data, settings);
   const change = formatPercent(item.change);
   const mark = numeric(item.change) > 0 ? '🟢' : numeric(item.change) < 0 ? '🔴' : '⚪';
-  return `${mark} <code>${symbol.padEnd(5)}</code> <b>$${formatNumber(usd, usd < 0.01 ? 8 : 4)}</b> · ${irr} · ${change} · Vol ${formatCompactUsd(item.volumeUsd)}`;
+  return `${mark} <code>${symbol.padEnd(5)}</code> <b>${priceText}</b> · ${change} · Vol ${formatCompactUsd(item.volumeUsd, normalizeDisplaySettings(settings).numberFormat)}${item.stale ? ' · stale' : ''}`;
 }
 
-function generateCryptoMessage(data) {
-  const rate = getUsdtIrrRate(data);
+function generateCryptoMessage(data, settings = {}) {
   const sourceData = data?.globalCrypto || {};
   const rows = GLOBAL_CRYPTOS.map((symbol) => ({ symbol, item: sourceData[symbol] }))
     .filter((x) => x.item && positive(x.item.last))
     .sort((a, b) => Number(b.item.volumeUsd || 0) - Number(a.item.volumeUsd || 0));
-  const lines = rows.map(({ symbol, item }) => globalCryptoLine(symbol, item, rate));
+  const lines = rows.map(({ symbol, item }) => globalCryptoLine(symbol, item, data, settings));
   const freshCount = rows.filter(({ item }) => !item.stale).length;
   return [
     '🪙 <b>ArzPulse · Global Crypto Board</b>',
-    `<blockquote>نماد معتبر: <b>${formatNumber(rows.length, 0)}</b> · داده تازه: <b>${formatNumber(freshCount, 0)}</b> · نرخ تقریبی تبدیل: ${positive(rate) ? `${formatPrice(rate)} IRR/USDT` : 'در دسترس نیست'}</blockquote>`,
+    `<blockquote>نماد معتبر: <b>${formatNumber(rows.length, 0, settings.numberFormat || 'fa')}</b> · داده تازه: <b>${formatNumber(freshCount, 0, settings.numberFormat || 'fa')}</b> · واحد قیمت: ${html(normalizeDisplaySettings(settings).currency.toUpperCase())}</blockquote>`,
     lines.join('\n'),
-    '<blockquote>قیمت USD و حجم جهانی از Binance Spot هستند. معادل IRR تخمینی و با نرخ USDT/IRR همان Snapshot محاسبه می‌شود؛ حجم جهانی، حجم معاملات جفت USDT است نه کل همه صرافی‌ها.</blockquote>',
+    '<blockquote>قیمت جهانی از Binance Spot است؛ تبدیل‌های IRR/IRT بر پایهٔ نرخ USDT/IRR همان Snapshot تخمینی‌اند. حجم نشان‌داده‌شده حجم جفت USDT است، نه کل همهٔ صرافی‌ها.</blockquote>',
     `<blockquote>Snapshot: <code>${html(formatTime(data?.timestamp))}</code> · منبع قیمت: <a href="https://www.binance.com/en/markets">Binance Markets</a></blockquote>`,
     '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>'
   ].join('\n\n');
 }
 
-function generateMacroMessage(data) {
+function generateMacroCategoryMessage(data, category, settings = {}, requestedSymbol = '') {
+  const prefs = normalizeDisplaySettings(settings);
+  const isIndex = category === 'indices';
+  const symbols = isIndex ? INDEX_SYMBOLS : COMMODITY_SYMBOLS;
+  const list = requestedSymbol ? symbols.filter((symbol) => symbol === requestedSymbol) : symbols;
+  if (requestedSymbol && !list.length) return `⚠️ نماد ${html(requestedSymbol)} در این بخش پشتیبانی نمی‌شود.`;
+  const rows = list.map((symbol) => {
+    const item = data?.market?.[symbol];
+    if (!item || !positive(item.last)) return `${symbol.padEnd(10)} —`;
+    const price = isIndex
+      ? (symbol === 'US10Y' ? `${formatNumber(item.last, 3, prefs.numberFormat)}%` : `${formatNumber(item.last, 2, prefs.numberFormat)} pts`)
+      : formatSecurityAmount(item.last, data, prefs);
+    return `${symbol.padEnd(10)} ${price}  ${formatPercent(item.change)}${item.stale ? '  *stale' : ''}`;
+  });
+  const title = isIndex ? '📊 ArzPulse · Global Indices' : '🛢 ArzPulse · Global Commodities';
+  const unitNote = isIndex
+    ? 'شاخص‌ها با واحد points و بازده اوراق ۱۰ساله با درصد نمایش داده می‌شود؛ این مقادیر قیمت پولی نیستند.'
+    : 'کالاهای جهانی بر اساس قیمت‌گذاری USD منبع، با واحد انتخابی و تبدیل تقریبی USDT/IRR نمایش داده می‌شوند.';
+  return [title, `<blockquote>Snapshot: <code>${html(formatTime(data?.timestamp))}</code> · واحد: ${prefs.currency.toUpperCase()}</blockquote>`, `<pre><code>${rows.join('\n')}</code></pre>`, `<i>${unitNote}</i>`, '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>'].join('\n\n');
+}
+
+function generateMacroMessage(data, settings = {}) {
+  const prefs = normalizeDisplaySettings(settings);
   const context = data?.marketContext || {};
   const fg = context.fearGreed;
   const global = context.global;
@@ -1123,25 +1297,25 @@ function generateMacroMessage(data) {
     const item = derivatives[symbol];
     return item ? `${symbol}: ${formatPercent(numeric(item.fundingRate) * 100)} / 8h` : `${symbol}: —`;
   }).join(' · ');
-  const marketLines = Object.entries({ DXY: 'Dollar Index', SP500: 'S&P 500', NASDAQ: 'Nasdaq', DOW: 'Dow Jones', RUSSELL2000: 'Russell 2000', VIX: 'VIX', NIKKEI: 'Nikkei 225', FTSE100: 'FTSE 100', DAX: 'DAX', BRENT: 'Brent', WTI: 'WTI', NATGAS: 'Natural Gas', COPPER: 'Copper', XAUUSD: 'Gold', SILVER: 'Silver', US10Y: 'US 10Y Yield' })
-    .map(([key, name]) => ({ key, name, item: data?.market?.[key] }))
+  const marketSymbols = [...INDEX_SYMBOLS.filter((symbol) => symbol !== 'US10Y'), ...COMMODITY_SYMBOLS, 'US10Y'];
+  const marketLines = marketSymbols.map((key) => ({ key, item: data?.market?.[key] }))
     .filter((x) => positive(x.item?.last))
-    .map((x) => `${x.key.padEnd(7)} ${formatNumber(x.item.last, 3)} · ${formatPercent(x.item.change)}${x.item.stale ? ' *' : ''}`);
+    .map((x) => { const isCommodity = COMMODITY_SYMBOLS.includes(x.key); const value = isCommodity ? formatSecurityAmount(x.item.last, data, prefs) : x.key === 'US10Y' ? `${formatNumber(x.item.last, 3, prefs.numberFormat)}%` : `${formatNumber(x.item.last, 2, prefs.numberFormat)} pts`; return `${x.key.padEnd(10)} ${value} · ${formatPercent(x.item.change)}${x.item.stale ? ' *' : ''}`; });
   const rows = [
     '🧭 <b>ArzPulse · Market Drivers</b>',
     `<blockquote>Snapshot: <code>${html(formatTime(data?.timestamp))}</code> · ${isDataStale(data, {}) ? '⚠️ دادهٔ اصلی ممکن است قدیمی باشد' : 'دادهٔ اصلی تازه است'}</blockquote>`,
     '🧠 <b>Sentiment & Crypto Market</b>',
     `<pre><code>Fear & Greed       ${fg ? `${formatNumber(fg.value, 0)}/100 · ${html(fg.classification || '')}${fg.stale ? ' *' : ''}` : '—'}
 Yesterday          ${fg?.yesterday ? `${formatNumber(fg.yesterday.value, 0)}/100 · ${html(fg.yesterday.classification || '')}` : '—'}
-Total market cap   ${formatCompactUsd(global?.totalMarketCapUsd)}
-24h global volume  ${formatCompactUsd(global?.totalVolume24hUsd)}
+Total market cap   ${formatCompactUsd(global?.totalMarketCapUsd, prefs.numberFormat)}
+24h global volume  ${formatCompactUsd(global?.totalVolume24hUsd, prefs.numberFormat)}
 BTC dominance      ${positive(global?.btcDominance) ? `${formatNumber(global.btcDominance, 2)}%` : '—'}
 ETH dominance      ${positive(global?.ethDominance) ? `${formatNumber(global.ethDominance, 2)}%` : '—'}
 Market cap 24h     ${formatPercent(global?.marketCapChange24h)}
 Global breadth     ${formatNumber(up, 0)} up / ${formatNumber(down, 0)} down / ${formatNumber(flat, 0)} flat</code></pre>`,
     '📉 <b>Derivatives positioning</b>',
     `<pre><code>${html(fundingLine)}
-BTC open interest  ${formatCompactUsd(derivatives.BTC?.openInterestUsd)}
+BTC open interest  ${formatCompactUsd(derivatives.BTC?.openInterestUsd, prefs.numberFormat)}
 BTC mark / index   ${positive(derivatives.BTC?.markPrice) ? formatNumber(derivatives.BTC.markPrice, 2) : '—'} / ${positive(derivatives.BTC?.indexPrice) ? formatNumber(derivatives.BTC.indexPrice, 2) : '—'}</code></pre>`,
     '🌐 <b>Macro & Commodities</b>',
     `<pre><code>${html(marketLines.join('\n') || 'Global macro data unavailable')}</code></pre>`,
@@ -1170,20 +1344,21 @@ ETH funding             ${context.derivatives?.ETH ? formatPercent(numeric(conte
   ].join('\n\n');
 }
 
-function generateGlobalCryptoSingleMessage(symbol, data, env) {
+function generateGlobalCryptoSingleMessage(symbol, data, env, settings = {}) {
+  const prefs = normalizeDisplaySettings(settings);
   const item = data?.globalCrypto?.[symbol];
   if (!item || !positive(item.last)) return `⚠️ دادهٔ جهانی ${html(symbol)} فعلاً در Snapshot موجود نیست. دستور <code>/crypto</code> را برای فهرست بازار بفرست.`;
   const rate = getUsdtIrrRate(data);
-  const localEstimate = positive(rate) ? `${formatPrice(numeric(item.last) * rate)} IRR` : '—';
+  const localEstimate = formatSecurityAmount(item.last, data, prefs);
   return [
     `${changeMark(item.change)} <b>${html(GLOBAL_CRYPTO_NAMES[symbol] || symbol)} · ${html(symbol)}</b>`,
-    `<blockquote>قیمت جهانی: <code>$${formatNumber(item.last, numeric(item.last) < 0.01 ? 8 : 4)}</code>\nمعادل تقریبی: <code>${localEstimate}</code>\nتغییر ۲۴ ساعت: <b>${formatPercent(item.change)}</b></blockquote>`,
-    `<pre><code>24h high       $${formatNumber(item.high, 8)}
-24h low        $${formatNumber(item.low, 8)}
-Weighted avg   $${formatNumber(item.weightedAverage, 8)}
-Bid / Ask      $${formatNumber(item.bid, 8)} / $${formatNumber(item.ask, 8)}
+    `<blockquote>قیمت جهانی (USD): <code>$${formatNumber(item.last, numeric(item.last) < 0.01 ? 8 : 4, prefs.numberFormat)}</code>\nقیمت با واحد انتخابی: <code>${localEstimate}</code>\nتغییر ۲۴ ساعت: <b>${formatPercent(item.change)}</b></blockquote>`,
+    `<pre><code>24h high       ${formatSecurityAmount(item.high, data, prefs)}
+24h low        ${formatSecurityAmount(item.low, data, prefs)}
+Weighted avg   ${formatSecurityAmount(item.weightedAverage, data, prefs)}
+Bid / Ask      ${formatSecurityAmount(item.bid, data, prefs)} / ${formatSecurityAmount(item.ask, data, prefs)}
 Base volume    ${formatNumber(item.volumeBase, 4)} ${html(symbol)}
-Quote volume   ${formatCompactUsd(item.volumeUsd)}
+Quote volume   ${formatCompactUsd(item.volumeUsd, prefs.numberFormat)}
 Trades         ${formatNumber(item.trades, 0)}
 Source         Binance Spot
 Updated        ${html(formatTime(item.timestamp))}</code></pre>`,
@@ -1192,15 +1367,16 @@ Updated        ${html(formatTime(item.timestamp))}</code></pre>`,
   ].filter(Boolean).join('\n\n');
 }
 
-function generateGoldMessage(data, env) {
+function generateGoldMessage(data, env, settings = {}) {
   const stale = isDataStale(data, env) || Boolean(data?.derivedStale?.gold18K);
+  const prefs = normalizeDisplaySettings(settings);
   const usdtIrrRate = getUsdtIrrRate(data);
   return [
     '🥇 <b>ArzPulse · 18K Gold</b>',
-    `<blockquote>هر گرم طلای ۱۸ عیار\n<code>${formatDualPrice(data?.gold18K, usdtIrrRate)}</code></blockquote>`,
-    `<pre><code>USDT / IRR   ${formatPrice(data?.usdtPrice || data?.prices?.USDT?.bestSell)} ریال
+    `<blockquote>هر گرم طلای ۱۸ عیار\n<code>${formatLocalAmount(data?.gold18K, data, settings)}</code></blockquote>`,
+    `<pre><code>USDT / IRR   ${formatNumber(data?.usdtPrice || data?.prices?.USDT?.bestSell,0,prefs.numberFormat)} ریال
 USDT / USD   $1.00 approx.
-XAUT / USDT  ${formatPrice(data?.prices?.XAUT?.bestSell)} USD
+XAUT / USDT  ${formatNumber(data?.prices?.XAUT?.bestSell,4,prefs.numberFormat)} USD
 Update       ${html(formatTime(data?.timestamp))}</code></pre>`,
     '<blockquote>معادل دلاری طلا با نرخ USDT/IRR همین Snapshot محاسبه می‌شود و تقریبی است.</blockquote>',
     '<blockquote>فرمول محاسبه: (XAUT/USDT × USDT/IRR ÷ 31.1034768) × 0.75. نتیجه تخمینی است و جایگزین نرخ رسمی بازار طلا نیست.</blockquote>',
@@ -1209,7 +1385,8 @@ Update       ${html(formatTime(data?.timestamp))}</code></pre>`,
   ].filter(Boolean).join('\n\n');
 }
 
-function generateSingleAssetMessage(coin, name, symbol, env, data) {
+function generateSingleAssetMessage(coin, name, symbol, env, data, settings = {}) {
+  const prefs = normalizeDisplaySettings(settings);
   const usdtIrrRate = getUsdtIrrRate(data);
   if (!coin || ![coin.lastPrice, coin.bestBuy, coin.bestSell].some(positive)) {
     return `⚠️ <b>${html(name)} (${html(symbol)})</b>\n<blockquote>در آخرین Snapshot دادهٔ قابل استفاده‌ای وجود ندارد.</blockquote>`;
@@ -1217,14 +1394,14 @@ function generateSingleAssetMessage(coin, name, symbol, env, data) {
   const stale = Boolean(coin.stale);
   return [
     `${changeMark(coin.change)} <b>${html(name)} · ${html(symbol)}</b>`,
-    `<blockquote>قیمت آخر: <code>${formatDualPrice(coin.lastPrice, usdtIrrRate)}</code>\nتغییر ۲۴ ساعت: <b>${formatPercent(coin.change)}</b></blockquote>`,
-    `<pre><code>Best buy  ${formatDualPrice(coin.bestBuy, usdtIrrRate)}
-Best sell ${formatDualPrice(coin.bestSell, usdtIrrRate)}
-Day high  ${formatDualPrice(coin.high, usdtIrrRate)}
-Day low   ${formatDualPrice(coin.low, usdtIrrRate)}
-Volume    ${formatNumber(coin.volume, 4)} ${html(symbol)}</code></pre>`,
+    `<blockquote>قیمت آخر: <code>${formatLocalAmount(coin.lastPrice, data, settings)}</code>\nتغییر ۲۴ ساعت: <b>${formatPercent(coin.change)}</b></blockquote>`,
+    `<pre><code>Best buy  ${formatLocalAmount(coin.bestBuy, data, settings)}
+Best sell ${formatLocalAmount(coin.bestSell, data, settings)}
+Day high  ${formatLocalAmount(coin.high, data, settings)}
+Day low   ${formatLocalAmount(coin.low, data, settings)}
+Volume    ${formatNumber(coin.volume, 4, prefs.numberFormat)} ${html(symbol)}</code></pre>`,
     '<blockquote>معادل دلاری تخمینی و بر پایه نرخ USDT/IRR همین Snapshot است.</blockquote>',
-    data?.globalCrypto?.[symbol] ? `<blockquote>🌍 <b>مقایسه بازار جهانی</b>\nقیمت Binance: <code>$${formatNumber(data.globalCrypto[symbol].last, numeric(data.globalCrypto[symbol].last) < 0.01 ? 8 : 4)}</code> · تغییر جهانی: <b>${formatPercent(data.globalCrypto[symbol].change)}</b>\nحجم جهانی ۲۴ساعت: <code>${formatCompactUsd(data.globalCrypto[symbol].volumeUsd)}</code> · معاملات: <code>${formatNumber(data.globalCrypto[symbol].trades, 0)}</code></blockquote>` : '',
+    data?.globalCrypto?.[symbol] ? `<blockquote>🌍 <b>مقایسه بازار جهانی</b>\nقیمت Binance: <code>$${formatNumber(data.globalCrypto[symbol].last, numeric(data.globalCrypto[symbol].last) < 0.01 ? 8 : 4, prefs.numberFormat)}</code> · تغییر جهانی: <b>${formatPercent(data.globalCrypto[symbol].change)}</b>\nحجم جهانی ۲۴ساعت: <code>${formatCompactUsd(data.globalCrypto[symbol].volumeUsd, prefs.numberFormat)}</code> · معاملات: <code>${formatNumber(data.globalCrypto[symbol].trades, 0, prefs.numberFormat)}</code></blockquote>` : '',
     stale || isDataStale({ timestamp: coin.fetchedAt }, env) ? '<blockquote>⚠️ اطلاعات این دارایی ممکن است قدیمی باشد.</blockquote>' : '',
     '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>'
   ].filter(Boolean).join('\n\n');
@@ -1433,7 +1610,7 @@ async function requestRefreshLock(env) {
   if (!env.SETTINGS_KV) throw new Error('SETTINGS_KV binding is missing; manual refresh lock cannot be safely enforced.');
   const now = Date.now();
   try {
-    const current = await env.SETTINGS_KV.get(REFRESH_LOCK_KEY, { type: 'json', cacheTtl: 30 });
+    const current = await env.SETTINGS_KV.get(REFRESH_LOCK_KEY, { type: 'json' });
     if (current?.until && Number(current.until) > now) {
       const remaining = Math.ceil((Number(current.until) - now) / 1000);
       return { acquired: false, remaining };
@@ -1551,18 +1728,104 @@ async function handleCommand(message, command, env) {
     case 'help':
       await sendMessage(chatId, getHelpMessage(), token);
       return;
+    case 'settings': {
+      if (!env.SETTINGS_KV) { await sendMessage(chatId, '⚠️ برای ذخیرهٔ تنظیمات، Binding موجود <code>SETTINGS_KV</code> لازم است.', token); return; }
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, formatSettingsMessage(prefs, chatId), token, env, prefs);
+      return;
+    }
+    case 'numbers': {
+      const style = String(args[0] || '').toLowerCase();
+      if (!['fa','en'].includes(style)) { await sendMessage(chatId, 'قالب عدد را انتخاب کن: <code>/numbers fa</code> یا <code>/numbers en</code>.', token); return; }
+      if (message.chat.type !== 'private' && !await isChatAdmin(message, env)) { await sendMessage(chatId, '🔐 در گروه فقط مدیر چت می‌تواند قالب نمایش را تغییر دهد.', token); return; }
+      try {
+        const prefs = await saveChatSettings(env, chatId, { numberFormat: style });
+        await sendChatMessage(chatId, `✅ قالب اعداد ذخیره شد: <b>${style === 'fa' ? 'فارسی · ۰۱۲۳۴۵۶۷۸۹' : 'English · 0123456789'}</b>
+نمونه: <code>${style === 'fa' ? '۱۲۳٬۴۵۶٫۷۸' : '123,456.78'}</code>`, token, env, prefs);
+      } catch (error) { await sendMessage(chatId, `❌ ذخیره تنظیمات انجام نشد: ${html(error.message)}`, token); }
+      return;
+    }
+    case 'currency': {
+      const currency = String(args[0] || '').toLowerCase();
+      if (!['usd','irr','irt','dual'].includes(currency)) { await sendMessage(chatId, 'واحد را انتخاب کن: <code>/currency usd</code> · <code>/currency irr</code> · <code>/currency irt</code> · <code>/currency dual</code>.', token); return; }
+      if (message.chat.type !== 'private' && !await isChatAdmin(message, env)) { await sendMessage(chatId, '🔐 در گروه فقط مدیر چت می‌تواند واحد نمایش را تغییر دهد.', token); return; }
+      try {
+        const prefs = await saveChatSettings(env, chatId, { currency });
+        const labels = { usd:'دلار آمریکا', irr:'ریال', irt:'تومان', dual:'ترکیبی (دلار + ریال)' };
+        await sendChatMessage(chatId, `✅ واحد نمایش این چت روی <b>${labels[currency]}</b> تنظیم شد.
+برای مشاهدهٔ نتیجه <code>/prices</code> را بفرست.`, token, env, prefs);
+      } catch (error) { await sendMessage(chatId, `❌ ذخیره تنظیمات انجام نشد: ${html(error.message)}`, token); }
+      return;
+    }
+    case 'digest': {
+      if (!env.SETTINGS_KV) { await sendMessage(chatId, '⚠️ برای گزارش زمان‌بندی‌شده، Binding موجود <code>SETTINGS_KV</code> لازم است.', token); return; }
+      if (message.chat.type !== 'private' && !await isChatAdmin(message, env)) { await sendMessage(chatId, '🔐 تنظیم گزارش زمان‌بندی‌شده در گروه فقط با مدیر چت است.', token); return; }
+      const current = await getChatSettings(env, chatId);
+      const request = String(command.args || '').trim().toLowerCase();
+      if (!request || request === 'status' || request === 'وضعیت') {
+        const digest = current.digest || {};
+        const body = digest.enabled
+          ? `✅ گزارش خودکار فعال است.
+فاصله: <b>${formatInterval(digest.intervalMinutes || 60)}</b>
+بخش‌ها: <code>${(digest.markets || ['local','crypto','stocks','forex','macro']).join(' · ')}</code>
+لغو: <code>/digest off</code>`
+          : 'گزارش خودکار این چت غیرفعال است.\nبرای فعال‌سازی: <code>/digest 30m</code> یا <code>/digest 2h</code>.';
+        await sendChatMessage(chatId, body, token, env, current);
+        return;
+      }
+      if (['off','stop','خاموش','غیرفعال'].includes(request)) {
+        const prefs = await saveChatSettings(env, chatId, { digest: { ...(current.digest || {}), enabled: false } });
+        await sendChatMessage(chatId, '🛑 گزارش دوره‌ای این چت متوقف شد. تنظیم هشدارهای لحظه‌ای مستقل است.', token, env, prefs);
+        return;
+      }
+      const rawInterval = request.replace(/^on\s+/, '').replace(/^every\s+/, '').split(/\s+/)[0];
+      const intervalMinutes = parseIntervalMinutes(rawInterval);
+      if (!intervalMinutes) {
+        await sendMessage(chatId, 'فاصله باید مضربی از ۵ دقیقه و بین ۵ دقیقه تا ۲۴ ساعت باشد؛ نمونه: <code>/digest 15m</code>، <code>/digest 30m</code>، <code>/digest 2h</code>، <code>/digest 1d</code>.', token);
+        return;
+      }
+      const digest = { ...(current.digest || {}), enabled: true, intervalMinutes, markets: current.digest?.markets || ['local','crypto','stocks','forex','macro'], lastSentAt: Date.now() };
+      const prefs = await saveChatSettings(env, chatId, { digest });
+      await sendChatMessage(chatId, `✅ گزارش دوره‌ای فعال شد.
+هر <b>${formatInterval(intervalMinutes)}</b> یک نمای کلی از بخش‌های انتخابی برای همین چت ارسال می‌شود.
+اولین گزارش پس از گذشت یک فاصلهٔ کامل ارسال خواهد شد.
+تغییر بخش‌ها: <code>/digestmarket all</code> · توقف: <code>/digest off</code>`, token, env, prefs);
+      return;
+    }
+    case 'digestmarket': {
+      if (!env.SETTINGS_KV) { await sendMessage(chatId, '⚠️ Binding با نام <code>SETTINGS_KV</code> لازم است.', token); return; }
+      if (message.chat.type !== 'private' && !await isChatAdmin(message, env)) { await sendMessage(chatId, '🔐 تغییر بخش‌های گزارش گروه فقط با مدیر چت است.', token); return; }
+      const aliases = { all:['local','crypto','stocks','forex','macro'], local:['local'], crypto:['crypto'], coins:['crypto'], stocks:['stocks'], stock:['stocks'], forex:['forex'], fx:['forex'], macro:['macro'], global:['crypto','stocks','forex','macro'] };
+      const requested = args.map((value) => value.toLowerCase());
+      if (!requested.length || requested.some((value) => !aliases[value])) { await sendMessage(chatId, 'نمونه: <code>/digestmarket all</code> یا <code>/digestmarket crypto stocks forex</code>.', token); return; }
+      const markets = [...new Set(requested.flatMap((value) => aliases[value]))];
+      const current = await getChatSettings(env, chatId);
+      const prefs = await saveChatSettings(env, chatId, { digest: { ...(current.digest || {}), markets } });
+      await sendChatMessage(chatId, `✅ بخش‌های گزارش ذخیره شد: <code>${markets.join(' · ')}</code>.`, token, env, prefs);
+      return;
+    }
     case 'crypto':
     case 'coins': {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ دادهٔ رمزارزها فعلاً در دسترس نیست.', token); return; }
-      await sendMessage(chatId, generateCryptoMessage(data), token);
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generateCryptoMessage(data, prefs), token, env, prefs);
+      return;
+    }
+    case 'indices':
+    case 'commodities': {
+      const data = await fetchLatestData();
+      if (!data) { await sendMessage(chatId, '⚠️ داده‌های بازار جهانی در دسترس نیستند.', token); return; }
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generateMacroCategoryMessage(data, command.name, prefs), token, env, prefs);
       return;
     }
     case 'macro':
     case 'market': {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ داده‌های بازار در دسترس نیستند.', token); return; }
-      await sendMessage(chatId, generateMacroMessage(data), token);
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generateMacroMessage(data, prefs), token, env, prefs);
       return;
     }
     case 'stocks':
@@ -1571,7 +1834,8 @@ async function handleCommand(message, command, env) {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ دادهٔ سهام در دسترس نیست.', token); return; }
       const symbol = String(args[0] || '').toUpperCase();
-      await sendMessage(chatId, generateStocksMessage(data, STOCK_SYMBOLS.includes(symbol) ? symbol : ''), token);
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generateStocksMessage(data, STOCK_SYMBOLS.includes(symbol) ? symbol : '', prefs), token, env, prefs);
       return;
     }
     case 'forex':
@@ -1579,13 +1843,15 @@ async function handleCommand(message, command, env) {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ دادهٔ فارکس در دسترس نیست.', token); return; }
       const symbol = String(args[0] || '').toUpperCase().replace('/', '');
-      await sendMessage(chatId, generateForexMessage(data, FOREX_SYMBOLS.includes(symbol) ? symbol : ''), token);
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generateForexMessage(data, FOREX_SYMBOLS.includes(symbol) ? symbol : '', prefs), token, env, prefs);
       return;
     }
     case 'sentiment': {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ دادهٔ احساسات بازار در دسترس نیست.', token); return; }
-      await sendMessage(chatId, generateSentimentMessage(data), token);
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generateSentimentMessage(data), token, env, prefs);
       return;
     }
     case 'alerts': {
@@ -1723,6 +1989,7 @@ async function handleCommand(message, command, env) {
         await sendMessage(chatId, '🚨 <b>دادهٔ بازار در دسترس نیست.</b>\n<blockquote>آدرس latest.json، انتشار GitHub Pages و گزارش GitHub Actions را بررسی کن.</blockquote>', token);
         return;
       }
+      const prefs = await getChatSettings(env, chatId);
       const stale = isDataStale(data, env);
       const status = stale ? '🔴 قدیمی' : data.hasError ? '🟠 در دسترس با خطای جزئی' : '🟢 به‌روز';
       const staleAssets = [...Object.entries(data.prices || {}), ...Object.entries(data.market || {}), ...Object.entries(data.globalCrypto || {}), ...Object.entries(data.equities || {}), ...Object.entries(data.forex || {})].filter(([, item]) => item?.stale).map(([symbol]) => symbol);
@@ -1737,7 +2004,7 @@ Stale assets        ${formatNumber(staleAssets.length, 0)}</code></pre>`,
         data.hasError && data.errorDetails?.length ? `<blockquote>خطاهای آخرین جمع‌آوری:\n${html(data.errorDetails.slice(0, 5).join('\n'))}</blockquote>` : '',
         '<blockquote>ربات گزارش قیمت را ارائه می‌کند؛ زمان اجرای GitHub Actions را با صفحهٔ Actions بررسی کن.</blockquote>'
       ].filter(Boolean).join('\n\n');
-      await sendMessage(chatId, body, token);
+      await sendChatMessage(chatId, body, token, env, prefs);
       return;
     }
     case 'prices':
@@ -1747,51 +2014,58 @@ Stale assets        ${formatNumber(staleAssets.length, 0)}</code></pre>`,
         await sendMessage(chatId, '⚠️ <b>دریافت قیمت‌ها ناموفق بود.</b>\n<blockquote>آخرین داده از GitHub Pages دریافت نشد. کمی بعد دوباره تلاش کن.</blockquote>', token);
         return;
       }
-      await sendMessage(chatId, generatePricesMessage(data, env), token);
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generatePricesMessage(data, env, prefs), token, env, prefs);
       return;
     }
     case 'gold': {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ دادهٔ طلا فعلاً در دسترس نیست.', token); return; }
-      await sendMessage(chatId, generateGoldMessage(data, env), token);
+      const prefs = await getChatSettings(env, chatId);
+      await sendChatMessage(chatId, generateGoldMessage(data, env, prefs), token, env, prefs);
       return;
     }
     case 'dollar': {
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, '⚠️ دادهٔ دلار فعلاً در دسترس نیست.', token); return; }
+      const prefs = await getChatSettings(env, chatId);
       const price = data.usdtPrice || data.dollarPrice || data.prices?.USDT?.bestSell;
-      await sendMessage(chatId, [
+      await sendChatMessage(chatId, [
         '💵 <b>ArzPulse · Dollar Reference</b>',
         `<blockquote>مرجع دلار بر پایهٔ بازار USDT/IRR نوبیتکس است و لزوماً نرخ اسکناس بازار آزاد نیست.</blockquote>`,
-        `<pre><code>USDT / IRR  ${formatPrice(price)} ریال
-USDT / USD  $1.00 approx.
-24h change  ${formatPercent(data.dollarChange ?? data.prices?.USDT?.change)}
+        `<pre><code>USDT reference  ${formatLocalAmount(price, data, prefs)}
+USDT / IRR      ${formatNumber(price,0,prefs.numberFormat)} ریال
+USDT / USD      $1.00 approx.
+24h change      ${formatPercent(data.dollarChange ?? data.prices?.USDT?.change)}
 Updated     ${html(formatTime(data.timestamp))}</code></pre>`,
         isDataStale(data, env) ? '<blockquote>⚠️ Snapshot قدیمی است.</blockquote>' : ''
-      ].filter(Boolean).join('\n\n'), token);
+      ].filter(Boolean).join('\n\n'), token, env, prefs);
       return;
     }
     case 'btc': case 'eth': case 'usdt': case 'not': case 'bnb': case 'sol': case 'xrp': case 'ada': case 'doge': case 'trx': case 'link': case 'avax': case 'dot': case 'ltc': case 'bch': case 'shib': case 'uni': case 'near': case 'sui': case 'xlm': case 'etc': case 'atom': case 'apt': case 'fil': case 'arb': case 'op': case 'hbar': case 'inj': case 'aave': case 'pepe': {
       const symbol = command.name.toUpperCase();
       const data = await fetchLatestData();
       if (!data) { await sendMessage(chatId, `⚠️ دادهٔ ${symbol} در دسترس نیست.`, token); return; }
+      const prefs = await getChatSettings(env, chatId);
       if (data.prices?.[symbol] && [data.prices[symbol].lastPrice, data.prices[symbol].bestBuy, data.prices[symbol].bestSell].some(positive)) {
-        await sendMessage(chatId, generateSingleAssetMessage(data.prices[symbol], getSymbolName(symbol), symbol, env, data), token);
+        await sendChatMessage(chatId, generateSingleAssetMessage(data.prices[symbol], getSymbolName(symbol), symbol, env, data, prefs), token, env, prefs);
       } else {
-        await sendMessage(chatId, generateGlobalCryptoSingleMessage(symbol, data, env), token);
+        await sendChatMessage(chatId, generateGlobalCryptoSingleMessage(symbol, data, env, prefs), token, env, prefs);
       }
       return;
     }
     default:
       if (STOCK_SYMBOLS.includes(command.name.toUpperCase())) {
         const data = await fetchLatestData();
-        if (data) await sendMessage(chatId, generateStocksMessage(data, command.name.toUpperCase()), token);
+        const prefs = await getChatSettings(env, chatId);
+        if (data) await sendChatMessage(chatId, generateStocksMessage(data, command.name.toUpperCase(), prefs), token, env, prefs);
         else await sendMessage(chatId, '⚠️ دادهٔ سهام در دسترس نیست.', token);
         return;
       }
       if (FOREX_SYMBOLS.includes(command.name.toUpperCase())) {
         const data = await fetchLatestData();
-        if (data) await sendMessage(chatId, generateForexMessage(data, command.name.toUpperCase()), token);
+        const prefs = await getChatSettings(env, chatId);
+        if (data) await sendChatMessage(chatId, generateForexMessage(data, command.name.toUpperCase(), prefs), token, env, prefs);
         else await sendMessage(chatId, '⚠️ دادهٔ فارکس در دسترس نیست.', token);
         return;
       }
@@ -1830,24 +2104,50 @@ async function handleUpdate(update, env) {
   }
 }
 
+async function processScheduledDigests(env) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.SETTINGS_KV) return { sent: 0, reason: 'configuration-missing' };
+  const [settingsMap, data] = await Promise.all([getChatSettingsMap(env), fetchLatestData()]);
+  if (!data) return { sent: 0, reason: 'snapshot-unavailable' };
+  const now = Date.now();
+  const due = Object.entries(settingsMap).filter(([chatId, prefs]) => /^-?\d+$/.test(chatId) && prefs?.digest?.enabled === true && Number(prefs.digest.intervalMinutes) >= 5 && Number(prefs.digest.intervalMinutes) <= 1440 && now - Number(prefs.digest.lastSentAt || 0) >= Number(prefs.digest.intervalMinutes) * 60000);
+  if (!due.length) return { sent: 0, reason: 'not-due' };
+  let sent = 0;
+  for (const [chatId, rawPrefs] of due.slice(0, MAX_ALERT_RECIPIENTS)) {
+    const prefs = normalizeDisplaySettings(rawPrefs);
+    const selected = Array.isArray(prefs.digest.markets) ? prefs.digest.markets : ['local','crypto','stocks','forex','macro'];
+    const message = generatePricesMessage(data, env, prefs, selected);
+    try {
+      const result = await sendChatMessage(chatId, message, env.TELEGRAM_BOT_TOKEN, env, prefs);
+      if (!result) continue;
+      settingsMap[chatId] = { ...rawPrefs, digest: { ...rawPrefs.digest, lastSentAt: now }, updatedAt: new Date().toISOString() };
+      sent += 1;
+    } catch (error) { console.error(`[digest] send failed for ${chatId}:`, error.message); }
+  }
+  if (sent) await env.SETTINGS_KV.put(CHAT_SETTINGS_KEY, JSON.stringify(Object.fromEntries(Object.entries(settingsMap).slice(-500))));
+  console.log(`[digest] ${sent}/${due.length} scheduled report(s) sent.`);
+  return { sent, due: due.length };
+}
+
 async function sendAutoUpdates(env) {
   const token = env.TELEGRAM_BOT_TOKEN;
   if (!token || !env.SETTINGS_KV) {
     console.warn('[scheduled] Telegram token or SETTINGS_KV is not configured; automatic channel updates skipped.');
     return;
   }
-  const channels = await getChannelSettings(env);
+  const [allChannels, settingsMap] = await Promise.all([getChannelSettings(env), getChatSettingsMap(env)]);
+  const channels = allChannels.filter((chatId) => settingsMap[String(chatId)]?.digest?.enabled !== true);
   if (!channels.length) return;
   const data = await fetchLatestData();
   if (!data) {
     console.warn('[scheduled] price data unavailable; automatic channel update skipped.');
     return;
   }
-  const message = generatePricesMessage(data, env);
   let success = 0;
   for (const chatId of channels) {
     try {
-      const delivered = await sendMessage(chatId, message, token);
+      const prefs = normalizeDisplaySettings(settingsMap[String(chatId)] || {});
+      const message = generatePricesMessage(data, env, prefs);
+      const delivered = await sendChatMessage(chatId, message, token, env, prefs);
       if (delivered) success += 1;
       else throw new Error('Telegram sendMessage returned no message id');
     } catch (error) {
@@ -2037,7 +2337,9 @@ export default {
         .catch((error) => console.error('[scheduled] market workflow dispatch failed:', error?.stack || error));
       const alertTask = processAutomaticAlerts(env)
         .catch((error) => console.error('[scheduled] automatic alerts failed:', error?.stack || error));
-      ctx.waitUntil(Promise.allSettled([dispatchTask, alertTask]));
+      const digestTask = processScheduledDigests(env)
+        .catch((error) => console.error('[scheduled] scheduled digest failed:', error?.stack || error));
+      ctx.waitUntil(Promise.allSettled([dispatchTask, alertTask, digestTask]));
       return;
     }
     // Keep the already configured hourly Telegram channel digest unchanged.

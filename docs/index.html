@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050b12">
-  <meta name="description" content="ArzPulse — interactive crypto, local rates, commodities and global market terminal with sentiment, derivatives context and market signal radar.">
+  <meta name="description" content="ArzPulse — market terminal for Iranian prices, cryptocurrencies, US equities, forex, commodities, indices, historical charts and configurable market alerts.">
   <meta name="color-scheme" content="dark light">
   <title>ArzPulse | Market Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +154,15 @@
         <span class="toolbar-title" data-i18n="unit">Unit</span>
         <div class="segmented" id="currencyToggle" role="group">
           <button class="active" data-currency="IRR" type="button">IRR</button>
+          <button data-currency="IRT" type="button">IRT</button>
           <button data-currency="USD" type="button">USD</button>
+          <button data-currency="DUAL" type="button">Dual</button>
+        </div>
+        <span class="toolbar-title" data-i18n="digits">Digits</span>
+        <div class="segmented" id="digitToggle" role="group" aria-label="Number format">
+          <button class="active" data-digits="auto" type="button" data-i18n="auto">Auto</button>
+          <button data-digits="fa" type="button">۰۱۲</button>
+          <button data-digits="en" type="button">012</button>
         </div>
         <div class="segmented" id="densityToggle" role="group">
           <button class="active" data-density="comfortable" type="button" data-i18n="comfortable">Comfortable</button>

@@ -13,7 +13,8 @@ const BINANCE_FUTURES = 'https://fapi.binance.com';
 const FEAR_GREED_URL = 'https://api.alternative.me/fng/?limit=8';
 const STOCK_SYMBOLS = ['AAPL','MSFT','NVDA','TSLA','AMZN','GOOGL','META','AVGO','AMD','ORCL','PLTR','COIN','SPCX'];
 const FOREX_PAIRS = { EURUSD: 'EUR/USD', GBPUSD: 'GBP/USD', USDJPY: 'USD/JPY', USDCHF: 'USD/CHF', USDCAD: 'USD/CAD', AUDUSD: 'AUD/USD', NZDUSD: 'NZD/USD', USDTRY: 'USD/TRY', EURGBP: 'EUR/GBP', EURJPY: 'EUR/JPY', GBPJPY: 'GBP/JPY', USDCNH: 'USD/CNH' };
-const FOREX_REFRESH_MS = 30 * 60 * 1000; // Twelve Data free-tier friendly: 12 pairs × 48 refreshes/day.
+const EQUITY_REFRESH_MS = 15 * 60 * 1000; // Yahoo's undocumented chart endpoint: keep requests conservative.
+const FOREX_REFRESH_MS = 30 * 60 * 1000; // FX reference quotes are refreshed every 30 minutes.
 const GLOBAL_CRYPTO_SYMBOLS = [
   'BTC','ETH','BNB','SOL','XRP','ADA','DOGE','TRX','LINK','AVAX','DOT','LTC','BCH',
   'SHIB','UNI','NEAR','SUI','XLM','ETC','ATOM','APT','FIL','ARB','OP','HBAR','INJ','AAVE','PEPE'
@@ -41,7 +42,7 @@ function fetchText(url, timeout = REQUEST_TIMEOUT_MS, retries = REQUEST_RETRIES,
       let settled = false;
       const req = https.get(url, {
         headers: {
-          'User-Agent': 'ArzPulse-Collector/5.0 (+https://github.com/mehrdadmb2/ArzPulse)',
+          'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
           Accept: 'application/json,text/plain,*/*',
           ...extraHeaders
         }
@@ -118,32 +119,52 @@ async function fetchNobitex(src, dst) {
   };
 }
 
-async function fetchYahoo(symbol) {
-  const url = `${YAHOO}/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=1d&events=div%2Csplits`;
-  const json = await fetchJSON(url);
+async function fetchYahoo(symbol, options = {}) {
+  // Yahoo's chart endpoint does not require a private API key, but it is an
+  // undocumented interface. Treat its quotes as delayed/reference data, cache
+  // them conservatively, and preserve the provider timestamp in every record.
+  const range = options.range || '5d';
+  const interval = options.interval || '1d';
+  const url = `${YAHOO}/v8/finance/chart/${encodeURIComponent(symbol)}?range=${encodeURIComponent(range)}&interval=${encodeURIComponent(interval)}&events=div%2Csplits`;
+  const json = await fetchJSON(url, { timeout: 10000, retries: 1 });
   const result = json?.chart?.result?.[0];
   if (!result) throw new Error(`Yahoo Finance omitted ${symbol}`);
   const quote = result.indicators?.quote?.[0] || {};
-  const lastCloseIndex = (quote.close || []).findLastIndex((v) => v != null && Number.isFinite(Number(v)));
+  const closes = quote.close || [];
+  const lastCloseIndex = closes.findLastIndex((value) => value != null && validPositive(value));
   if (lastCloseIndex < 0) throw new Error(`Yahoo Finance has no usable close for ${symbol}`);
-  const last = num(quote.close[lastCloseIndex]);
-  let prev = last;
-  for (let i = lastCloseIndex - 1; i >= 0; i -= 1) {
-    if (quote.close[i] != null && validPositive(quote.close[i])) { prev = num(quote.close[i]); break; }
-  }
-  const ts = result.timestamp?.[lastCloseIndex] ?? result.timestamp?.at(-1);
+  const last = num(closes[lastCloseIndex]);
+  const timestamps = result.timestamp || [];
+  const ts = timestamps[lastCloseIndex] ?? timestamps.at(-1);
+  const lastDay = ts ? new Date(Number(ts) * 1000).toISOString().slice(0, 10) : null;
+  const dayIndexes = timestamps.map((stamp, index) => ({ stamp, index }))
+    .filter(({ stamp, index }) => lastDay && new Date(Number(stamp) * 1000).toISOString().slice(0, 10) === lastDay && validPositive(closes[index]));
+  const previousDayRows = timestamps.map((stamp, index) => ({ stamp, index }))
+    .filter(({ stamp, index }) => lastDay && new Date(Number(stamp) * 1000).toISOString().slice(0, 10) < lastDay && validPositive(closes[index]));
+  const previousDayClose = previousDayRows.length ? num(closes[previousDayRows.at(-1).index]) : 0;
+  const meta = result.meta || {};
+  const previousClose = num(meta.chartPreviousClose || meta.previousClose || meta.regularMarketPreviousClose || previousDayClose || last);
+  const dayHighValues = dayIndexes.map(({ index }) => num(quote.high?.[index] || closes[index])).filter(validPositive);
+  const dayLowValues = dayIndexes.map(({ index }) => num(quote.low?.[index] || closes[index])).filter(validPositive);
+  const dayVolumes = dayIndexes.map(({ index }) => num(quote.volume?.[index])).filter((value) => value >= 0);
+  const dayVolume = dayVolumes.reduce((sum, value) => sum + value, 0);
+  const dayHigh = dayHighValues.length ? Math.max(...dayHighValues) : num(quote.high?.[lastCloseIndex] || last);
+  const dayLow = dayLowValues.length ? Math.min(...dayLowValues) : num(quote.low?.[lastCloseIndex] || last);
+  const volumeWeighted = dayIndexes.reduce((sum, { index }) => sum + num(closes[index]) * num(quote.volume?.[index]), 0);
+  const vwap = dayVolume > 0 ? volumeWeighted / dayVolume : 0;
+  const timestamp = ts ? new Date(Number(ts) * 1000).toISOString() : null;
+  const ageMs = timestamp ? Date.now() - Date.parse(timestamp) : Infinity;
+  const staleAfterMs = options.staleAfterMs || 24 * 60 * 60 * 1000;
   return {
-    last,
-    change: prev ? ((last - prev) / prev) * 100 : 0,
-    high: num(quote.high?.[lastCloseIndex]),
-    low: num(quote.low?.[lastCloseIndex]),
-    volume: num(quote.volume?.[lastCloseIndex]),
-    timestamp: ts ? new Date(ts * 1000).toISOString() : null,
-    fetchedAt: new Date().toISOString(),
-    delayed: true, stale: false, source: 'Yahoo Finance', symbol
+    last, change: previousClose > 0 ? ((last - previousClose) / previousClose) * 100 : null,
+    high: dayHigh, low: dayLow, volume: dayVolume, vwap,
+    timestamp, fetchedAt: new Date().toISOString(),
+    delayed: true, stale: !Number.isFinite(ageMs) || ageMs > staleAfterMs,
+    source: 'Yahoo Finance Chart (unofficial / delayed)', symbol,
+    marketState: meta.marketState || null, currency: meta.currency || null,
+    exchangeTimezoneName: meta.exchangeTimezoneName || null
   };
 }
-
 
 
 async function mapLimit(items, limit, worker) {
@@ -165,116 +186,67 @@ function parseMaybeDate(value, fallback) {
   return Number.isFinite(parsed) ? new Date(parsed).toISOString() : fallback;
 }
 
-async function fetchAlpacaEquities(symbols) {
-  const key = process.env.ALPACA_API_KEY || process.env.ALPACA_API_KEY_ID;
-  const secret = process.env.ALPACA_API_SECRET || process.env.ALPACA_API_SECRET_KEY;
-  const requestedFeed = String(process.env.ALPACA_DATA_FEED || 'iex').toLowerCase();
-  const feed = ['iex','sip','delayed_sip','otc','boats','overnight'].includes(requestedFeed) ? requestedFeed : 'iex';
-  if (!key || !secret) return {};
-  const url = `https://data.alpaca.markets/v2/stocks/snapshots?symbols=${encodeURIComponent(symbols.join(','))}&feed=${encodeURIComponent(feed)}`;
-  const payload = await fetchJSON(url, { headers: { 'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret } });
-  const output = {};
-  for (const symbol of symbols) {
-    const row = payload?.[symbol];
-    if (!row) continue;
-    const trade = row.latestTrade || row.latest_trade || {};
-    const bar = row.dailyBar || row.daily_bar || {};
-    const previous = row.prevDailyBar || row.previous_daily_bar || {};
-    const price = num(trade.p ?? trade.price ?? bar.c ?? bar.close);
-    if (!validPositive(price)) continue;
-    const previousClose = num(previous.c ?? previous.close);
-    const stamp = trade.t || trade.timestamp || row.minuteBar?.t || row.minute_bar?.timestamp || bar.t || bar.timestamp;
-    output[symbol] = {
-      symbol, last: price, price, change: previousClose > 0 ? ((price - previousClose) / previousClose) * 100 : null,
-      high: num(bar.h ?? bar.high), low: num(bar.l ?? bar.low), volume: num(bar.v ?? bar.volume),
-      trades: num(bar.n ?? bar.trade_count), vwap: num(bar.vw ?? bar.vwap),
-      timestamp: parseMaybeDate(stamp, new Date().toISOString()), fetchedAt: new Date().toISOString(),
-      source: `Alpaca ${feed.toUpperCase()}`, feed: feed.toUpperCase(), currency: 'USD', delayed: false, stale: false
-    };
-  }
-  return output;
-}
-
 async function fetchEquities(previous, attemptedAt, errors) {
   const result = {};
-  let provider = 'Yahoo Finance';
-  try {
-    const alpaca = await fetchAlpacaEquities(STOCK_SYMBOLS);
-    if (Object.keys(alpaca).length) {
-      Object.assign(result, alpaca);
-      provider = `Alpaca ${String(process.env.ALPACA_DATA_FEED || 'iex').toUpperCase()}`;
-    }
-  } catch (error) {
-    errors.push(`Alpaca equities: ${error.message}`);
-    console.warn(`↪️ Alpaca equities unavailable: ${error.message}; using Yahoo fallback.`);
-  }
-  const missing = STOCK_SYMBOLS.filter((symbol) => !result[symbol]);
-  await mapLimit(missing, 4, async (symbol) => {
+  const due = STOCK_SYMBOLS.filter((symbol) => {
+    const old = previous?.[symbol];
+    const age = Date.now() - Date.parse(old?.fetchedAt || old?.timestamp || '');
+    return !old || !Number.isFinite(age) || age >= EQUITY_REFRESH_MS;
+  });
+  await mapLimit(due, 3, async (symbol) => {
     try {
-      const quote = await fetchYahoo(symbol);
-      result[symbol] = { ...quote, symbol, last: quote.last, currency: 'USD', source: 'Yahoo Finance', delayed: true };
+      const quote = await fetchYahoo(symbol, { range: '5d', interval: '5m' });
+      result[symbol] = {
+        ...quote, symbol, last: quote.last, price: quote.last, currency: 'USD',
+        source: 'Yahoo Finance Chart (unofficial / delayed)', delayed: true
+      };
     } catch (error) {
       errors.push(`Equity ${symbol}: ${error.message}`);
       result[symbol] = fallbackRecord(previous?.[symbol], {
-        symbol, last: 0, change: null, high: 0, low: 0, volume: 0, timestamp: null,
-        fetchedAt: null, currency: 'USD', source: provider, delayed: true
+        symbol, last: 0, change: null, high: 0, low: 0, volume: 0, trades: 0, vwap: 0,
+        timestamp: null, fetchedAt: null, currency: 'USD', source: 'Yahoo Finance Chart (unofficial / delayed)', delayed: true
       }, attemptedAt, error.message);
     }
   });
+  for (const symbol of STOCK_SYMBOLS) {
+    if (result[symbol]) continue;
+    const old = previous?.[symbol];
+    if (old && validPositive(old.last)) result[symbol] = { ...old, cached: true, lastCheckedAt: attemptedAt };
+  }
   return result;
-}
-
-async function fetchTwelveDataFx(pair, apiKey) {
-  const url = `https://api.twelvedata.com/quote?symbol=${encodeURIComponent(pair)}&apikey=${encodeURIComponent(apiKey)}`;
-  const json = await fetchJSON(url, { retries: 0, timeout: 9000 });
-  if (json?.status === 'error' || !validPositive(json?.close ?? json?.price)) throw new Error(json?.message || `Twelve Data has no usable quote for ${pair}`);
-  const price = num(json.close ?? json.price);
-  const stamp = json.datetime ? parseMaybeDate(json.datetime, new Date().toISOString()) : new Date().toISOString();
-  return {
-    last: price, price, change: Number.isFinite(Number(json.percent_change)) ? num(json.percent_change) : null,
-    high: num(json.high), low: num(json.low), volume: num(json.volume),
-    timestamp: stamp, fetchedAt: new Date().toISOString(), source: 'Twelve Data',
-    symbol: pair.replace('/', ''), pair, currency: pair.split('/')[1] || 'USD', delayed: false, stale: false
-  };
 }
 
 async function fetchForex(previous, attemptedAt, errors) {
   const result = {};
-  const apiKey = process.env.TWELVE_DATA_API_KEY;
   const due = Object.entries(FOREX_PAIRS).filter(([symbol]) => {
     const old = previous?.[symbol];
     const age = Date.now() - Date.parse(old?.fetchedAt || old?.timestamp || '');
     return !old || !Number.isFinite(age) || age >= FOREX_REFRESH_MS;
   });
-  const dueKeys = new Set(due.map(([symbol]) => symbol));
-  for (const [symbol, pair] of due) {
+  await mapLimit(due, 3, async ([symbol, pair]) => {
     try {
-      if (apiKey) result[symbol] = await fetchTwelveDataFx(pair, apiKey);
-      else throw new Error('TWELVE_DATA_API_KEY is not configured');
+      const yahooSymbol = `${pair.replace('/', '')}=X`;
+      const quote = await fetchYahoo(yahooSymbol, { range: '5d', interval: '5m', staleAfterMs: 24 * 60 * 60 * 1000 });
+      result[symbol] = {
+        ...quote, symbol, pair, currency: pair.split('/')[1] || 'USD',
+        source: 'Yahoo Finance Chart (unofficial / delayed)', delayed: true
+      };
     } catch (error) {
-      // Yahoo fallback is a reference quote and may be delayed; never label it live.
-      try {
-        const yahooSymbol = `${pair.replace('/', '')}=X`;
-        const quote = await fetchYahoo(yahooSymbol);
-        result[symbol] = { ...quote, symbol, pair, currency: pair.split('/')[1] || 'USD', source: 'Yahoo Finance', delayed: true };
-      } catch (fallbackError) {
-        if (apiKey) errors.push(`Forex ${symbol}: ${error.message}; fallback: ${fallbackError.message}`);
-        else errors.push(`Forex ${symbol}: ${fallbackError.message}`);
-        result[symbol] = fallbackRecord(previous?.[symbol], {
-          symbol, pair, last: 0, change: null, high: 0, low: 0, volume: 0,
-          timestamp: null, fetchedAt: null, currency: pair.split('/')[1] || 'USD', source: apiKey ? 'Twelve Data' : 'Yahoo Finance', delayed: true
-        }, attemptedAt, fallbackError.message);
-      }
+      errors.push(`Forex ${symbol}: ${error.message}`);
+      result[symbol] = fallbackRecord(previous?.[symbol], {
+        symbol, pair, last: 0, change: null, high: 0, low: 0, volume: 0,
+        timestamp: null, fetchedAt: null, currency: pair.split('/')[1] || 'USD',
+        source: 'Yahoo Finance Chart (unofficial / delayed)', delayed: true
+      }, attemptedAt, error.message);
     }
-  }
+  });
   for (const [symbol] of Object.entries(FOREX_PAIRS)) {
     if (result[symbol]) continue;
     const old = previous?.[symbol];
-    if (old && validPositive(old.last)) result[symbol] = { ...old, stale: Boolean(old.stale), cached: true, lastCheckedAt: attemptedAt };
+    if (old && validPositive(old.last)) result[symbol] = { ...old, cached: true, lastCheckedAt: attemptedAt };
   }
   return result;
 }
-
 async function fetchBinanceCryptoBatch(symbols) {
   const pairs = symbols.map((symbol) => `${symbol}USDT`);
   const url = `${BINANCE_DATA}/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(pairs))}`;
@@ -533,7 +505,7 @@ function buildHistoryRow(now, prices, gold18K, dollarPrice, market, globalCrypto
 }
 
 (async () => {
-  console.log(`🚀 ArzPulse collector v7 — history retention ${HISTORY_KEEP_DAYS} days; max snapshots/day ${MAX_SNAPSHOTS_PER_DAY}`);
+  console.log(`🚀 ArzPulse collector v8 — keyless Yahoo stock/FX quotes; history retention ${HISTORY_KEEP_DAYS} days; max snapshots/day ${MAX_SNAPSHOTS_PER_DAY}`);
   const previous = readJSON(LATEST_PATH, null);
   const attemptedAt = new Date().toISOString();
   const errors = [];

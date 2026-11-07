@@ -109,7 +109,7 @@
       comparisonTitle:'Compare performance',dataNoteTitle:'Data & update model',
       dataNote:'ArzPulse reads the generated JSON data layer. Local market snapshots come from the project’s collector and global market snapshots are stored by the automated workflow. Global quotes can be delayed.',
       repo:'Repository ↗',footerText:'Built for fast, high-signal market monitoring.',
-      up:'Up',down:'Down',balanced:'Balanced',fresh:'Fresh',stale:'Stale',veryFresh:'Live',none:'—',noData:'No data for this filter.',
+      up:'Up',down:'Down',balanced:'Balanced',fresh:'Fresh',stale:'Stale',veryFresh:'Live',none:'—',noData:'No data for this filter.',digits:'Digits',auto:'Auto',
       historyMissing:'Historical data is not available for this asset yet.',clickHint:'Click an asset card to inspect more details.',
       noWatch:'Your watchlist is empty. Tap ☆ on a card to add assets.',last:'Last',high:'High',low:'Low',volume:'Volume',bestBuy:'Best buy',bestSell:'Best sell',
       spread:'Spread',source:'Source',updated:'Updated',delayed:'Delayed',local:'Local',global:'Global',change:'Change',
@@ -132,7 +132,7 @@
       comparisonTitle:'مقایسه عملکرد',dataNoteTitle:'مدل داده و بروزرسانی',
       dataNote:'ArzPulse داده را از لایه JSON تولیدشده می‌خواند. داده‌های داخلی از Collector پروژه و داده‌های جهانی از Workflow خودکار ذخیره می‌شوند. داده‌های بازار جهانی ممکن است با تأخیر همراه باشند.',
       repo:'مخزن ↗',footerText:'ساخته‌شده برای پایش سریع و پُر‌سیگنال بازار.',
-      up:'مثبت',down:'منفی',balanced:'متعادل',fresh:'تازه',stale:'کهنه',veryFresh:'زنده',none:'—',noData:'داده‌ای برای این فیلتر موجود نیست.',
+      up:'مثبت',down:'منفی',balanced:'متعادل',fresh:'تازه',stale:'کهنه',veryFresh:'زنده',none:'—',noData:'داده‌ای برای این فیلتر موجود نیست.',digits:'اعداد',auto:'خودکار',
       historyMissing:'هنوز تاریخچه‌ای برای این دارایی ثبت نشده است.',clickHint:'برای جزئیات بیشتر روی کارت دارایی کلیک کنید.',
       noWatch:'واچ‌لیست خالی است. روی ☆ کارت‌ها بزنید تا دارایی اضافه شود.',last:'آخرین',high:'بیشترین',low:'کمترین',volume:'حجم',bestBuy:'بهترین خرید',bestSell:'بهترین فروش',
       spread:'اسپرد',source:'منبع',updated:'به‌روزرسانی',delayed:'با تأخیر',local:'داخلی',global:'جهانی',change:'تغییر',
@@ -143,6 +143,7 @@
 
   let lang = localStorage.getItem('arzpulse_lang') || 'en';
   let currency = localStorage.getItem('arzpulse_currency') || 'IRR';
+  let digitStyle = localStorage.getItem('arzpulse_digits') || 'auto';
   let density = localStorage.getItem('arzpulse_density') || 'comfortable';
   let theme = localStorage.getItem('arzpulse_theme') || 'dark';
   let activeFilter = 'all';
@@ -158,52 +159,53 @@
   const $$ = s => [...document.querySelectorAll(s)];
   const T = k => I18N[lang][k] ?? k;
   const isGlobal = key => !!META[key]?.global;
-  const num = n => {
+  const numberLocale = () => digitStyle === 'fa' ? 'fa-IR' : digitStyle === 'en' ? 'en-US' : (lang === 'fa' ? 'fa-IR' : 'en-US');
+  const num = (n, digits = 2) => {
     const v = Number(n);
     if(!Number.isFinite(v)) return '—';
-    return new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(v);
+    return new Intl.NumberFormat(numberLocale(),{maximumFractionDigits:digits}).format(v);
   };
-  const faNum = n => {
-    const v = Number(n);
-    if(!Number.isFinite(v)) return '—';
-    return new Intl.NumberFormat('fa-IR',{maximumFractionDigits:2}).format(v);
-  };
+  const faNum = n => num(n);
   const formatPct = n => {
     const v = Number(n);
     if(!Number.isFinite(v)) return '—';
-    return `${v>0?'+':''}${v.toFixed(2)}%`;
+    const formatted = new Intl.NumberFormat(numberLocale(),{minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.abs(v));
+    return `${v>0?'+':v<0?'−':''}${formatted}%`;
   };
+  const usdtIrrRate = () => Number(latest?.dollarPrice || latest?.usdtPrice || latest?.prices?.USDT?.bestSell || 0);
   const formatPrice = (key, value) => {
     const v = Number(value);
     if(!Number.isFinite(v) || v===0) return '—';
-    if(META[key]?.cat==='forex') return num(v);
+    if(META[key]?.cat==='forex') return num(v, v < 2 ? 5 : 3);
+    const rate = usdtIrrRate();
+    if(META[key]?.cat==='stock' || (META[key]?.cat==='commodity' && isGlobal(key))) {
+      const usd = `$${num(v, v < 1 ? 5 : 2)}`;
+      if(currency==='USD' || !Number.isFinite(rate) || rate<=0) return usd;
+      const irr = v * rate;
+      if(currency==='IRR') return `${num(irr,0)} ریال`;
+      if(currency==='IRT') return `${num(irr/10,0)} تومان`;
+      return `${usd} · ${num(irr,0)} ریال`;
+    }
+    if(META[key]?.cat==='index') return key==='US10Y' ? `${num(v,3)}%` : `${num(v,2)} pts`;
     if(isGlobal(key)) return `$${num(v)}`;
-    if(lang==='fa'){
-      if(currency==='USD'){
-        const r = Number(latest?.dollarPrice || latest?.usdtPrice || 0);
-        return r>0 ? `$${num(v/r)}` : `${faNum(v)} IRR`;
-      }
-      return `${faNum(v)} ریال`;
-    }
-    if(currency==='USD'){
-      const r = Number(latest?.dollarPrice || latest?.usdtPrice || 0);
-      return r>0 ? `$${num(v/r)}` : `${num(v)} IRR`;
-    }
-    return `${num(v)} IRR`;
+    if(currency==='USD') return rate>0 ? `$${num(v/rate, 4)}` : `${num(v,0)} ریال`;
+    if(currency==='IRT') return `${num(v/10,0)} تومان`;
+    if(currency==='DUAL') return `${num(v,0)} ریال · ${rate>0 ? `$${num(v/rate,4)}` : 'USD —'}`;
+    return `${num(v,0)} ریال`;
   };
   const compactNumber = n => {
     const v=Number(n); if(!Number.isFinite(v)) return '—';
-    if(Math.abs(v)>=1e9) return `${(v/1e9).toFixed(1)}B`;
-    if(Math.abs(v)>=1e6) return `${(v/1e6).toFixed(1)}M`;
-    if(Math.abs(v)>=1e3) return `${(v/1e3).toFixed(1)}K`;
+    if(Math.abs(v)>=1e9) return `${num(v/1e9,1)}B`;
+    if(Math.abs(v)>=1e6) return `${num(v/1e6,1)}M`;
+    if(Math.abs(v)>=1e3) return `${num(v/1e3,1)}K`;
     return num(v);
   };
   function formatUSD(value){
     const v=Number(value); if(!Number.isFinite(v)||v===0) return '—';
-    if(Math.abs(v)>=1e12) return `$${(v/1e12).toFixed(2)}T`;
-    if(Math.abs(v)>=1e9) return `$${(v/1e9).toFixed(2)}B`;
-    if(Math.abs(v)>=1e6) return `$${(v/1e6).toFixed(2)}M`;
-    return `$${new Intl.NumberFormat('en-US',{maximumFractionDigits:v<1?6:2}).format(v)}`;
+    if(Math.abs(v)>=1e12) return `$${num(v/1e12,2)}T`;
+    if(Math.abs(v)>=1e9) return `$${num(v/1e9,2)}B`;
+    if(Math.abs(v)>=1e6) return `$${num(v/1e6,2)}M`;
+    return `$${num(v,v<1?6:2)}`;
   }
 
   function renderSignalRadar(){
@@ -384,6 +386,9 @@
   }
   function setCurrency(){
     $$('#currencyToggle button').forEach(b=>b.classList.toggle('active',b.dataset.currency===currency));
+  }
+  function setDigits(){
+    $$('#digitToggle button').forEach(b=>b.classList.toggle('active',b.dataset.digits===digitStyle));
   }
 
   async function fetchJSON(url){
@@ -750,7 +755,7 @@
     $('#chartHeading').textContent=lang==='en'?m.name:m.fa;
   }
 
-  function globalOrLocalChartLabel(v,key){ return META[key]?.cat==='forex'?num(v):isGlobal(key)?`$${num(v)}`:currency==='USD'?`$${num(v/(latest?.dollarPrice||1))}`:lang==='fa'?faNum(v):num(v); }
+  function globalOrLocalChartLabel(v,key){ if(META[key]?.cat==='forex')return num(v,v<2?5:3); if(META[key]?.cat==='stock'||META[key]?.cat==='index'||(META[key]?.cat==='commodity'&&isGlobal(key)))return formatPrice(key,v); if(isGlobal(key))return `$${num(v)}`; if(currency==='USD')return `$${num(v/(usdtIrrRate()||1))}`; if(currency==='IRT')return `${num(v/10,0)} تومان`; if(currency==='DUAL')return `${num(v,0)} ریال`; return `${num(v,0)} ریال`; }
 
   function renderComparison(){
     const keys=allKeys().filter(k=>getSeries(k).length>=2).slice(0,5);
@@ -831,7 +836,8 @@
     $('#detailWatch').addEventListener('click',()=>{if(detailAsset)toggleWatch(detailAsset)});
     $('#scrollTopBtn').addEventListener('click',()=>scrollTo({top:0,behavior:'smooth'}));
     $('#marketFilters').addEventListener('click',e=>{const b=e.target.closest('button[data-filter]');if(!b)return;activeFilter=b.dataset.filter;$$('#marketFilters button').forEach(x=>x.classList.toggle('active',x===b));renderMarkets()});
-    $('#currencyToggle').addEventListener('click',e=>{const b=e.target.closest('button[data-currency]');if(!b)return;currency=b.dataset.currency;localStorage.setItem('arzpulse_currency',currency);setCurrency();renderMarkets();renderOverview();renderGalaxy();renderStats();renderChart();renderComparison()});
+    $('#currencyToggle').addEventListener('click',e=>{const b=e.target.closest('button[data-currency]');if(!b)return;currency=b.dataset.currency;localStorage.setItem('arzpulse_currency',currency);setCurrency();renderAll()});
+    $('#digitToggle').addEventListener('click',e=>{const b=e.target.closest('button[data-digits]');if(!b)return;digitStyle=b.dataset.digits;localStorage.setItem('arzpulse_digits',digitStyle);setDigits();renderAll()});
     $('#densityToggle').addEventListener('click',e=>{const b=e.target.closest('button[data-density]');if(!b)return;density=b.dataset.density;localStorage.setItem('arzpulse_density',density);setDensity()});
     $('#chartRangeControls').addEventListener('click',e=>{const b=e.target.closest('button[data-range]');if(!b)return;chartRange=b.dataset.range;renderChart()});
     addEventListener('scroll',()=>$('#scrollTopBtn').classList.toggle('show',scrollY>500),{passive:true});
@@ -846,7 +852,7 @@
   }
 
   function boot(){
-    setTheme();setDensity();setCurrency();setupAmbient();setupEvents();applyLanguage();loadData();setupTilt();
+    setTheme();setDensity();setCurrency();setDigits();setupAmbient();setupEvents();applyLanguage();loadData();setupTilt();
     // First paint stays useful even if data fetch is delayed.
     renderAll();
   }

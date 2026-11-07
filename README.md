@@ -44,22 +44,22 @@
 - **Gold price** (18K per gram) with USDT reference
 - **Dollar price** (USD/IRR) based on USDT rate
 - **Interactive charts** (24h, 7d, 30d) with Chart.js
-- **Currency toggle** – switch between IRR (Rial) and USD
+- **Currency toggle** – choose IRR, IRT (Toman), USD, or dual display; independently choose Auto / Persian / English digits
 - **Glassmorphism UI**, animated ambience, hover-reactive cards and richer market-status panels
 - **Fully responsive** – works on mobile, tablet, and desktop
 - **Market signal radar** – flags notable crypto moves, broad market direction, extreme Fear & Greed, global market-cap changes, futures funding and macro moves
 - **Market drivers** – total market cap/volume, BTC/ETH dominance, sentiment, BTC open interest, futures funding and cross-asset context
 - **Data resilience** – stale-source markers and preserved prior snapshots when a provider temporarily fails
 
-### 📈 Global Equities & Forex (v7)
+### 📈 Global Equities & Forex (v8)
 - US equities: AAPL, MSFT, NVDA, TSLA, AMZN, GOOGL, META, AVGO, AMD, ORCL, PLTR, COIN and SPCX (SpaceX).
 - Forex: EUR/USD, GBP/USD, USD/JPY, USD/CHF, USD/CAD, AUD/USD, NZD/USD, USD/TRY, EUR/GBP, EUR/JPY, GBP/JPY and USD/CNH.
 - Expanded global macro coverage: Dow Jones, Russell 2000, VIX, Nikkei, FTSE, DAX, Hang Seng, natural gas, copper, platinum, palladium and US 10Y yield.
-- Provider/freshness badges distinguish Alpaca IEX, Twelve Data and delayed Yahoo Finance fallback.
+- Provider/freshness badges identify Yahoo Finance Chart reference quotes as delayed and keep the provider timestamp visible. Indexes render in points, US 10Y yield in percent, and USD-quoted commodities use selected money display units.
 
 ### 🤖 Telegram Bot
 **Core Commands:**
-- `/prices` – Show all current prices with full details
+- `/prices` – Complete market snapshot: local assets, all configured crypto, all stocks, all FX pairs and indices/commodities
 - `/gold` – Show gold price per gram (18K)
 - `/dollar` – Show dollar price (USDT/IRR)
 - `/btc`, `/eth`, `/usdt`, `/not` – Individual asset prices
@@ -72,6 +72,8 @@
 - `/alertscope all|stocks|forex|crypto|macro|local` – choose alert market scope
 - `/crypto` – Global crypto board with USD prices, IRR estimates, daily changes and volume
 - `/macro` – Macro assets, market cap, BTC/ETH dominance, sentiment and derivatives context
+- `/indices` – Global indices, volatility and US 10Y yield
+- `/commodities` – Global gold, energy and metals
 - `/sentiment` – Fear & Greed and broader market sentiment
 - `/alerts`, `/alertson`, `/alertsoff` – Manage automatic alert subscriptions
 - `/alertlevel low|medium|high` – Select alert sensitivity
@@ -93,7 +95,8 @@
 **Smart Features:**
 - **Countdown timer** – When data is stale, the bot triggers GitHub Action and shows a live countdown (45 seconds)
 - **HTML formatting** – Bold, italic, code blocks, strikethrough, underline, and links
-- **Multi-currency display** – Prices shown in both IRR and USD
+- **Per-chat number and currency preferences** – Persian/English digits and USD/IRR/IRT/dual price output
+- **Scheduled market digests** – every 5 minutes to 24 hours, independently scoped per chat
 
 
 ### 🛰️ Smart Alerts & Market Context
@@ -420,3 +423,9 @@ The current collector additionally enriches `docs/data/latest.json` with a `glob
 - Brent, WTI, gold, silver, S&P 500, Nasdaq and DXY: Yahoo Finance chart endpoint; quotes may be delayed.
 
 For tokens without an available local market pair, the dashboard and bot show an estimated IRR equivalent calculated as global USD quote × the snapshot's Nobitex USDT/IRR rate. This is not a local exchange bid/ask price. Funding, Fear & Greed, market cap, dominance and open interest are context indicators, not investment advice or standalone forecasts. If a source fails, the collector preserves a previous value with a `stale` flag rather than inventing values.
+
+## v8 · No-key global markets and configurable Telegram reports
+
+The default collector does not require Alpaca or Twelve Data API keys. US equities, FX and global index/commodity reference quotes are collected through Yahoo Finance Chart (unofficial, potentially delayed, no SLA) with conservative per-asset caching and preservation of prior valid snapshots on failure. `/prices` now renders the full watchlist, not only a legacy sample.
+
+Telegram display settings are per chat: `/numbers fa|en`, `/currency usd|irr|irt|dual`, `/settings`. Personal market summaries can be scheduled with `/digest 15m|30m|2h|1d|off` and scoped with `/digestmarket`. Existing Telegram/GitHub secrets and the current `SETTINGS_KV` namespace remain required for the bot; do not create a new KV namespace. Full Persian setup: [`MARKET-EXPANSION-SETUP-FA.md`](MARKET-EXPANSION-SETUP-FA.md).

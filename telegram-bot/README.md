@@ -4,7 +4,7 @@ This folder is the **Telegram bot Worker only**. It is separate from `../worker/
 
 ## Features
 
-- Market commands: `/start`, `/help`, `/prices`, `/gold`, `/dollar`, `/btc`, `/eth`, `/usdt`, `/not`, `/crypto`, `/coins`, `/macro`, `/market`, `/sentiment`, `/status`, `/chart`, `/chartall`. Major global crypto commands such as `/sol`, `/bnb`, `/xrp`, `/doge`, `/link`, `/avax`, `/dot` and others are supported when present in the latest snapshot.
+- Market commands: `/start`, `/help`, `/prices`, `/gold`, `/dollar`, `/btc`, `/eth`, `/usdt`, `/not`, `/crypto`, `/coins`, `/macro`, `/indices`, `/commodities`, `/market`, `/sentiment`, `/status`, `/chart`, `/chartall`. Major global crypto commands such as `/sol`, `/bnb`, `/xrp`, `/doge`, `/link`, `/avax`, `/dot` and others are supported when present in the latest snapshot.
 - Group/channel reporting using the existing `SETTINGS_KV` key named `channels` (compatibility preserved).
 - `/setchannel` and `/stopchannel` require a chat administrator; `/refresh` requires a numeric user ID listed in `BOT_ADMIN_IDS`.
 - Telegram HTML formatting: bold headings, `<pre><code>` monospace data, and `<blockquote>` status notes; invalid HTML has a controlled plain-text fallback.
@@ -96,13 +96,17 @@ Detection rules include sudden moves between consecutive snapshots, new crossing
 
 Optional Worker vars: `ALERT_CRYPTO_MOVE_PCT` (default `0.85`), `ALERT_LOCAL_MOVE_PCT` (default `0.45`), `ALERT_MACRO_MOVE_PCT` (default `0.55`), and `ALERT_COOLDOWN_MINUTES` (default `25`). They may be set in the deployed Worker’s vars. Alert preferences, cooldowns and the last baseline are stored in the existing `SETTINGS_KV` namespace under new keys; the legacy `channels` key is not overwritten.
 
-The dashboard adds the Market Signal Radar and asset-specific market cards. Cryptocurrency logos are loaded from the open `spothq/cryptocurrency-icons` asset set with a text-symbol fallback if a remote icon is unavailable. Icons are decorative and do not affect market data collection.
+Index quotes are displayed in points (not dollars), US 10Y yield is shown as a percentage, and USD-quoted commodities can be converted using the approximate USDT/IRR Snapshot rate. The dashboard adds the Market Signal Radar and asset-specific market cards. Cryptocurrency logos are loaded from the open `spothq/cryptocurrency-icons` asset set with a text-symbol fallback if a remote icon is unavailable. Icons are decorative and do not affect market data collection.
 
 
-## Global market expansion (v7)
+## Global market expansion and per-chat controls (v8)
 
-Additional commands: `/stocks`, `/stock NVDA`, `/forex`, `/fx EURUSD`, and direct shortcuts `/aapl`, `/nvda`, `/tsla`, `/spcx`. Hourly `/prices` digests now include a compact equity/FX section when those quotes exist in the snapshot. The `/macro` report includes expanded indices and commodities. Historical chart commands now accept listed stocks, FX pairs, and macro tickers too, for example `/chart AAPL 7d`, `/chart SPCX 30d`, and `/chart EURUSD 24h`; charts require enough real stored snapshots.
+The collector no longer requires `ALPACA_API_KEY`, `ALPACA_API_SECRET` or `TWELVE_DATA_API_KEY`. The default equity/FX reference feed is Yahoo Finance Chart, an unofficial endpoint without a data SLA; its values are marked delayed and the prior valid record is preserved on a provider error. Crypto/local market providers remain unchanged. See [`../MARKET-EXPANSION-SETUP-FA.md`](../MARKET-EXPANSION-SETUP-FA.md).
 
-Alert preferences can be scoped per chat with `/alertscope all|stocks|forex|crypto|macro|local`. The existing `/alertson`, `/alertsoff`, and `/alertlevel` settings are preserved when scope changes. Dedicated default move thresholds are `ALERT_STOCK_MOVE_PCT=0.8` and `ALERT_FOREX_MOVE_PCT=0.18`.
+`/prices` now includes all configured local assets, global crypto symbols, all 13 stocks, all 12 FX pairs and the full macro watchlist. Use `/stocks`, `/stock NVDA`, `/forex`, `/fx EURUSD`, `/crypto`, `/macro`, `/indices` and `/commodities` for dedicated reports. `/chart` supports crypto, stocks, FX and macro assets once enough actual history has been collected.
 
-The Worker reads only the public `docs/data/latest.json` snapshot. Provider credentials belong in GitHub Actions repository secrets, never in this Worker or the website bundle. See [`../MARKET-EXPANSION-SETUP-FA.md`](../MARKET-EXPANSION-SETUP-FA.md) for the full setup and data-freshness caveats.
+Each chat can configure display preferences with `/numbers fa|en` and `/currency usd|irr|irt|dual`, then inspect them with `/settings`. Number and currency selections also apply to automatic alert messages and scheduled reports. FX prices remain pair ratios and are never relabeled as IRR/IRT. USD-to-local conversions use the Snapshot's USDT/IRR as an estimate, not an official bank-note rate.
+
+Schedule personal market reports using `/digest 15m|30m|2h|1d|off`; use `/digest status` to view the current setting and `/digestmarket all|stocks forex|crypto|macro|local` to choose the report content. The existing Worker checks due reports on its five-minute Cron. This personal digest is separate from conditional alerts (`/alertson`) and existing hourly `/setchannel` reports.
+
+The scheduled system requires the already-existing `SETTINGS_KV` binding and Worker Cron triggers `*/5 * * * *` and `0 * * * *`. Do not create a new KV namespace; retain the original one to preserve channels and alert subscriptions.
