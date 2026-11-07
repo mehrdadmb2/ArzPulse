@@ -1,17 +1,31 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-07T18:55:20.652Z",
-  "lastUpdate": "2026-11-07T18:55:20.652Z",
+  "lastAttempt": "2026-11-07T19:00:21.094Z",
+  "lastUpdate": "2026-11-07T19:00:21.094Z",
   "retentionDays": 30,
-  "gold18K": 262174710,
-  "usdtPrice": 2676100,
-  "dollarPrice": 2676100,
+  "gold18K": 262011511,
+  "usdtPrice": 2674500,
+  "dollarPrice": 2674500,
   "equityCount": 13,
   "forexCount": 12,
   "marketSummary": {
+    "BRENT": {
+      "last": 98.31999969482422,
+      "change": 0.03052068269147401,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T05:00:00.000Z"
+    },
     "XAUUSD": {
       "last": 4074.89990234375,
       "change": -0.9383760217880152,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T05:00:00.000Z"
+    },
+    "WTI": {
+      "last": 90.83000183105469,
+      "change": 0.3424714974423575,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -23,16 +37,9 @@
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "BRENT": {
-      "last": 98.31999969482422,
-      "change": 0.03052068269147401,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T05:00:00.000Z"
-    },
-    "WTI": {
-      "last": 90.83000183105469,
-      "change": 0.3424714974423575,
+    "DXY": {
+      "last": 102.30000305175781,
+      "change": 0.7385524150282313,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -51,23 +58,9 @@
       "stale": false,
       "timestamp": "2026-11-06T14:30:00.000Z"
     },
-    "DXY": {
-      "last": 102.30000305175781,
-      "change": 0.7385524150282313,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T05:00:00.000Z"
-    },
     "DOW": {
       "last": 51285.73046875,
       "change": -0.4606250705558639,
-      "delayed": true,
-      "stale": false,
-      "timestamp": "2026-11-06T14:30:00.000Z"
-    },
-    "RUSSELL2000": {
-      "last": 2754.110107421875,
-      "change": 0.8872231407427309,
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T14:30:00.000Z"
@@ -78,6 +71,13 @@
       "delayed": true,
       "stale": false,
       "timestamp": "2026-11-06T08:00:00.000Z"
+    },
+    "RUSSELL2000": {
+      "last": 2754.110107421875,
+      "change": 0.8872231407427309,
+      "delayed": true,
+      "stale": false,
+      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "NIKKEI": {
       "last": 57434.76953125,
@@ -152,8 +152,8 @@
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 25,
-    "totalMarketCapUsd": 2565041275029.9443,
-    "btcDominance": 59.28616095936927
+    "totalMarketCapUsd": 2564190275960.6377,
+    "btcDominance": 59.28645627923726
   },
   "successfulSources": 53,
   "successfulLocalSources": 5
