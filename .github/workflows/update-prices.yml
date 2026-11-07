@@ -49,11 +49,6 @@ jobs:
       - name: Collect market data and retry safe push
         if: env.SKIP_COLLECTOR != 'true'
         shell: bash
-        env:
-          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
-          ALPACA_API_SECRET: ${{ secrets.ALPACA_API_SECRET }}
-          ALPACA_DATA_FEED: ${{ vars.ALPACA_DATA_FEED }}
-          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: |
           set -euo pipefail
           git config user.email "action@github.com"
