@@ -1,31 +1,17 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-08T21:40:20.734Z",
-  "lastUpdate": "2026-11-08T21:40:20.734Z",
+  "lastAttempt": "2026-11-08T21:45:20.743Z",
+  "lastUpdate": "2026-11-08T21:45:20.743Z",
   "retentionDays": 30,
-  "gold18K": 260602739,
+  "gold18K": 260621996,
   "usdtPrice": 2662020,
   "dollarPrice": 2662020,
   "equityCount": 0,
   "forexCount": 0,
   "marketSummary": {
-    "SILVER": {
-      "last": 51.803001403808594,
-      "change": -0.8232349110846117,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T05:00:00.000Z"
-    },
     "XAUUSD": {
       "last": 4074.89990234375,
       "change": -0.9383760217880152,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T05:00:00.000Z"
-    },
-    "BRENT": {
-      "last": 98.31999969482422,
-      "change": 0.03052068269147401,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -37,23 +23,23 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "NASDAQ": {
-      "last": 24579.4296875,
-      "change": 1.087516707793543,
+    "SILVER": {
+      "last": 51.803001403808594,
+      "change": -0.8232349110846117,
       "delayed": true,
       "stale": true,
-      "timestamp": "2026-11-06T14:30:00.000Z"
+      "timestamp": "2026-11-06T05:00:00.000Z"
+    },
+    "BRENT": {
+      "last": 98.31999969482422,
+      "change": 0.03052068269147401,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T05:00:00.000Z"
     },
     "SP500": {
       "last": 7376.85986328125,
       "change": 0.3145326640212812,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T14:30:00.000Z"
-    },
-    "DOW": {
-      "last": 51285.73046875,
-      "change": -0.4606250705558639,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T14:30:00.000Z"
@@ -65,12 +51,19 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "VIX": {
-      "last": 25.639999389648438,
-      "change": -9.013487892194329,
+    "DOW": {
+      "last": 51285.73046875,
+      "change": -0.4606250705558639,
       "delayed": true,
       "stale": true,
-      "timestamp": "2026-11-06T08:00:00.000Z"
+      "timestamp": "2026-11-06T14:30:00.000Z"
+    },
+    "NASDAQ": {
+      "last": 24579.4296875,
+      "change": 1.087516707793543,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "RUSSELL2000": {
       "last": 2754.110107421875,
@@ -86,16 +79,16 @@
       "stale": true,
       "timestamp": "2026-11-06T00:00:00.000Z"
     },
-    "FTSE100": {
-      "last": 10673.900390625,
-      "change": -1.0090218842845868,
+    "VIX": {
+      "last": 25.639999389648438,
+      "change": -9.013487892194329,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
     },
-    "DAX": {
-      "last": 25820.359375,
-      "change": -1.9169998230502794,
+    "FTSE100": {
+      "last": 10673.900390625,
+      "change": -1.0090218842845868,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
@@ -106,6 +99,13 @@
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T01:30:00.000Z"
+    },
+    "DAX": {
+      "last": 25820.359375,
+      "change": -1.9169998230502794,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T08:00:00.000Z"
     },
     "NATGAS": {
       "last": 2.997999906539917,
@@ -121,6 +121,13 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
+    "US10Y": {
+      "last": 4.859000205993652,
+      "change": 0.4548338493072306,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T13:20:00.000Z"
+    },
     "PLATINUM": {
       "last": 1538.199951171875,
       "change": 0.9052693870899676,
@@ -134,37 +141,30 @@
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
-    },
-    "US10Y": {
-      "last": 4.859000205993652,
-      "change": 0.4548338493072306,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T13:20:00.000Z"
     }
   },
   "hasError": true,
   "errorCount": 45,
   "errors": [
-    "SILVER: HTTP 429 from upstream",
     "XAUUSD: HTTP 429 from upstream",
-    "BRENT: HTTP 429 from upstream",
     "WTI: HTTP 429 from upstream",
-    "NASDAQ: HTTP 429 from upstream",
+    "SILVER: HTTP 429 from upstream",
+    "BRENT: HTTP 429 from upstream",
     "SP500: HTTP 429 from upstream",
-    "DOW: HTTP 429 from upstream",
     "DXY: HTTP 429 from upstream",
-    "VIX: HTTP 429 from upstream",
+    "DOW: HTTP 429 from upstream",
+    "NASDAQ: HTTP 429 from upstream",
     "RUSSELL2000: HTTP 429 from upstream",
     "NIKKEI: HTTP 429 from upstream",
+    "VIX: HTTP 429 from upstream",
     "FTSE100: HTTP 429 from upstream",
-    "DAX: HTTP 429 from upstream",
     "HANGSENG: HTTP 429 from upstream",
+    "DAX: HTTP 429 from upstream",
     "NATGAS: HTTP 429 from upstream",
     "COPPER: HTTP 429 from upstream",
+    "US10Y: HTTP 429 from upstream",
     "PLATINUM: HTTP 429 from upstream",
     "PALLADIUM: HTTP 429 from upstream",
-    "US10Y: HTTP 429 from upstream",
     "Equity MSFT: HTTP 429 from upstream",
     "Equity NVDA: HTTP 429 from upstream",
     "Equity AAPL: HTTP 429 from upstream",
@@ -177,8 +177,8 @@
     "Equity COIN: HTTP 429 from upstream",
     "Equity PLTR: HTTP 429 from upstream",
     "Equity SPCX: HTTP 429 from upstream",
-    "Forex USDJPY: HTTP 429 from upstream",
     "Forex GBPUSD: HTTP 429 from upstream",
+    "Forex USDJPY: HTTP 429 from upstream",
     "Forex EURUSD: HTTP 429 from upstream",
     "Forex USDCHF: HTTP 429 from upstream",
     "Forex USDCAD: HTTP 429 from upstream",
@@ -195,8 +195,8 @@
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 28,
-    "totalMarketCapUsd": 2516754149277.087,
-    "btcDominance": 60.037643799480556
+    "totalMarketCapUsd": 2520593482954.6255,
+    "btcDominance": 60.04387381650497
   },
   "successfulSources": 9,
   "successfulLocalSources": 5
