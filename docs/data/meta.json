@@ -1,11 +1,11 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-08T09:00:30.415Z",
-  "lastUpdate": "2026-11-08T09:00:30.415Z",
+  "lastAttempt": "2026-11-08T09:06:19.211Z",
+  "lastUpdate": "2026-11-08T09:06:19.211Z",
   "retentionDays": 30,
-  "gold18K": 260675983,
-  "usdtPrice": 2665000,
-  "dollarPrice": 2665000,
+  "gold18K": 260348774,
+  "usdtPrice": 2661130,
+  "dollarPrice": 2661130,
   "equityCount": 0,
   "forexCount": 0,
   "marketSummary": {
@@ -44,19 +44,19 @@
       "stale": true,
       "timestamp": "2026-11-06T14:30:00.000Z"
     },
-    "NASDAQ": {
-      "last": 24579.4296875,
-      "change": 1.087516707793543,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T14:30:00.000Z"
-    },
     "DXY": {
       "last": 102.30000305175781,
       "change": 0.7385524150282313,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
+    },
+    "NASDAQ": {
+      "last": 24579.4296875,
+      "change": 1.087516707793543,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "DOW": {
       "last": 51285.73046875,
@@ -121,13 +121,6 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "PALLADIUM": {
-      "last": 1014.0999755859375,
-      "change": -2.5840561396793946,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T05:00:00.000Z"
-    },
     "PLATINUM": {
       "last": 1538.199951171875,
       "change": 0.9052693870899676,
@@ -141,6 +134,13 @@
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T13:20:00.000Z"
+    },
+    "PALLADIUM": {
+      "last": 1014.0999755859375,
+      "change": -2.5840561396793946,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T05:00:00.000Z"
     }
   },
   "hasError": true,
@@ -151,8 +151,8 @@
     "SILVER: HTTP 429 from upstream",
     "XAUUSD: HTTP 429 from upstream",
     "SP500: HTTP 429 from upstream",
-    "NASDAQ: HTTP 429 from upstream",
     "DXY: HTTP 429 from upstream",
+    "NASDAQ: HTTP 429 from upstream",
     "DOW: HTTP 429 from upstream",
     "RUSSELL2000: HTTP 429 from upstream",
     "NIKKEI: HTTP 429 from upstream",
@@ -162,9 +162,9 @@
     "DAX: HTTP 429 from upstream",
     "NATGAS: HTTP 429 from upstream",
     "COPPER: HTTP 429 from upstream",
-    "PALLADIUM: HTTP 429 from upstream",
     "PLATINUM: HTTP 429 from upstream",
     "US10Y: HTTP 429 from upstream",
+    "PALLADIUM: HTTP 429 from upstream",
     "Equity AAPL: HTTP 429 from upstream",
     "Equity NVDA: HTTP 429 from upstream",
     "Equity MSFT: HTTP 429 from upstream",
@@ -178,11 +178,11 @@
     "Equity PLTR: HTTP 429 from upstream",
     "Equity COIN: HTTP 429 from upstream",
     "Equity SPCX: HTTP 429 from upstream",
-    "Forex GBPUSD: HTTP 429 from upstream",
     "Forex EURUSD: HTTP 429 from upstream",
+    "Forex GBPUSD: HTTP 429 from upstream",
     "Forex USDJPY: HTTP 429 from upstream",
-    "Forex AUDUSD: HTTP 429 from upstream",
     "Forex USDCHF: HTTP 429 from upstream",
+    "Forex AUDUSD: HTTP 429 from upstream",
     "Forex USDCAD: HTTP 429 from upstream",
     "Forex NZDUSD: HTTP 429 from upstream",
     "Forex USDTRY: HTTP 429 from upstream",
