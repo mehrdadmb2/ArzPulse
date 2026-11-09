@@ -102,15 +102,24 @@ function getUsdtIrrRate(data) {
   return positive(rate) ? rate : 0;
 }
 
-function formatUsd(value, usdtIrrRate) {
-  const amount = numeric(value);
-  if (!positive(amount) || !positive(usdtIrrRate)) return '—';
-  return `$${formatNumber(amount / usdtIrrRate, 8)}`;
+function usdFractionDigits(amount) {
+  if (amount >= 1000) return 2;
+  if (amount >= 1) return 4;
+  if (amount >= 0.01) return 6;
+  if (amount >= 0.0001) return 8;
+  return 10;
 }
 
-function formatDualPrice(value, usdtIrrRate) {
+function formatUsd(value, usdtIrrRate, numberFormat = 'fa') {
+  const amount = numeric(value);
+  if (!positive(amount) || !positive(usdtIrrRate)) return '—';
+  const usd = amount / usdtIrrRate;
+  return `$${formatNumber(usd, usdFractionDigits(usd), numberFormat)}`;
+}
+
+function formatDualPrice(value, usdtIrrRate, numberFormat = 'fa') {
   if (!positive(value)) return '—';
-  const usd = formatUsd(value, usdtIrrRate);
+  const usd = formatUsd(value, usdtIrrRate, numberFormat);
   return `${formatPrice(value)} IRR${usd !== '—' ? `  |  ${usd}` : ''}`;
 }
 
@@ -125,10 +134,10 @@ function formatLocalAmount(value, data, settings = {}) {
   if (!positive(amount)) return '—';
   const prefs = normalizeDisplaySettings(settings);
   const rate = getUsdtIrrRate(data);
-  if (prefs.currency === 'usd') return formatUsd(amount, rate);
+  if (prefs.currency === 'usd') return formatUsd(amount, rate, prefs.numberFormat);
   if (prefs.currency === 'irr') return `${formatNumber(amount, 0, prefs.numberFormat)} ریال`;
   if (prefs.currency === 'irt') return `${formatNumber(amount / 10, 0, prefs.numberFormat)} تومان`;
-  const usd = formatUsd(amount, rate);
+  const usd = formatUsd(amount, rate, prefs.numberFormat);
   return `${formatNumber(amount, 0, prefs.numberFormat)} ریال${usd !== '—' ? ` · ${usd}` : ''}`;
 }
 
@@ -137,7 +146,7 @@ function formatSecurityAmount(usdValue, data, settings = {}) {
   if (!positive(amount)) return '—';
   const prefs = normalizeDisplaySettings(settings);
   const rate = getUsdtIrrRate(data);
-  const usd = `$${formatNumber(amount, amount < 1 ? 6 : 2, prefs.numberFormat)}`;
+  const usd = `$${formatNumber(amount, usdFractionDigits(amount), prefs.numberFormat)}`;
   if (prefs.currency === 'usd' || !positive(rate)) return usd;
   const irr = amount * rate;
   if (prefs.currency === 'irr') return `${formatNumber(irr, 0, prefs.numberFormat)} ریال`;
@@ -1189,7 +1198,16 @@ function generatePricesMessage(data, env, settings = {}, requestedMarkets = ['lo
         sections.push(`⚪ <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b> · داده موجود نیست`);
         continue;
       }
-      sections.push(`${changeMark(coin.change)} <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b>${coin.stale ? ' · <i>قدیمی</i>' : ''}\n<pre><code>Last ${formatLocalAmount(coin.lastPrice, data, prefs)} · Buy ${formatLocalAmount(coin.bestBuy, data, prefs)} · Sell ${formatLocalAmount(coin.bestSell, data, prefs)}\nH/L ${formatLocalAmount(coin.high, data, prefs)} / ${formatLocalAmount(coin.low, data, prefs)} · Vol ${formatNumber(coin.volume, 4, prefs.numberFormat)} ${asset.symbol}\n24h ${formatPercent(coin.change)}</code></pre>`);
+      const quoteLines = [
+        `<b>آخرین قیمت:</b> <code>${html(formatLocalAmount(coin.lastPrice, data, prefs))}</code>`,
+        `<b>بهترین خرید:</b> <code>${html(formatLocalAmount(coin.bestBuy, data, prefs))}</code>`,
+        `<b>بهترین فروش:</b> <code>${html(formatLocalAmount(coin.bestSell, data, prefs))}</code>`,
+        `<b>بیشترین قیمت ۲۴ساعت:</b> <code>${html(formatLocalAmount(coin.high, data, prefs))}</code>`,
+        `<b>کمترین قیمت ۲۴ساعت:</b> <code>${html(formatLocalAmount(coin.low, data, prefs))}</code>`,
+        `<b>حجم معاملات:</b> <code>${html(formatNumber(coin.volume, 4, prefs.numberFormat))} ${asset.symbol}</code>`,
+        `<b>تغییر ۲۴ساعت:</b> <b>${html(formatPercent(coin.change))}</b>`
+      ];
+      sections.push(`${changeMark(coin.change)} <b>${asset.emoji} ${asset.symbol} · ${asset.fa}</b>${coin.stale ? ' · <i>قدیمی</i>' : ''}\n<blockquote>${quoteLines.join('\n')}</blockquote>`);
     }
     const usdt = numeric(data?.usdtPrice || data?.prices?.USDT?.bestSell);
     sections.push('🥇 <b>طلا و نرخ مرجع</b>');

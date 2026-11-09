@@ -126,3 +126,11 @@ Each chat can configure display preferences with `/numbers fa|en` and `/currency
 Schedule personal market reports using `/digest 15m|30m|2h|1d|off`; use `/digest status` to view the current setting and `/digestmarket all|stocks forex|crypto|macro|local` to choose the report content. The existing Worker checks due reports on its five-minute Cron. This personal digest is separate from conditional alerts (`/alertson`) and existing hourly `/setchannel` reports.
 
 The scheduled system requires the already-existing `SETTINGS_KV` binding and Worker Cron triggers `*/5 * * * *` and `0 * * * *`. Do not create a new KV namespace; retain the original one to preserve channels and alert subscriptions.
+
+## Readable `/prices` and `/price` output
+
+The local-market section now renders each asset as an independent Telegram HTML card. Last price, best buy, best sell, 24-hour high/low, traded volume, and 24-hour change each occupy their own line. Inline numeric code spans are used instead of one dense `<pre>` row, which improves mixed Persian/Latin text readability in Telegram clients.
+
+USD conversion precision is adaptive: large values are capped at two fractional digits, ordinary values use up to four, and small token values retain additional precision. The user's per-chat `fa` / `en` digit preference and `usd` / `irr` / `irt` / `dual` currency preference are preserved.
+
+Both `/prices` and `/price` use the same renderer. Run `npm test` from this folder to execute regression tests for multiline layout, compact dual-currency formatting, and the alias.

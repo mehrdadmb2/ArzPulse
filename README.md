@@ -38,6 +38,8 @@
 ---
 
 ## ✨ Features | ویژگی‌ها
+- Telegram `/prices` and `/price` use separated, readable per-asset cards with adaptive USD precision and per-chat currency/number preferences.
+
 
 ### 🌐 Website (Dashboard)
 - Distinct asset-card themes with coin logos or accessible fallbacks, per-token colors, market-specific backgrounds, sparklines and daily range position

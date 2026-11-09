@@ -514,7 +514,65 @@ test('v8 /prices includes the full local, crypto, stock, forex and macro watchli
     for (const expected of ['Complete Market Snapshot','MSFT','SPCX','EURGBP','USDCNH','PEPE','NATGAS','Fear & Greed']) assert.match(combined, new RegExp(expected));
     assert.match(combined, /Yahoo Finance Chart/);
     assert.ok(telegramCalls.length >= 1);
+    // Local-market cards must keep every price field on its own visible line.
+    assert.match(combined, /<blockquote><b>آخرین قیمت:<\/b> <code>[\s\S]*?<\/code>\n<b>بهترین خرید:<\/b>/);
+    assert.match(combined, /<b>بهترین فروش:<\/b>[\s\S]*?\n<b>بیشترین قیمت ۲۴ساعت:<\/b>/);
+    assert.match(combined, /<b>کمترین قیمت ۲۴ساعت:<\/b>[\s\S]*?\n<b>حجم معاملات:<\/b>/);
+    assert.match(combined, /<b>تغییر ۲۴ساعت:<\/b>/);
+    // Large converted USD values should not flood the message with eight decimals.
+    assert.match(combined, /\$۹٬۰۰۰(?:\s|<)/);
+    assert.doesNotMatch(combined, /۹٬۰۰۰٫۰۰۰۰۰۰۰۰/);
   } finally { globalThis.fetch = originalFetch; }
+});
+
+
+test('/price alias uses the same readable multi-line local-market card layout', async () => {
+  const originalFetch = globalThis.fetch;
+  const telegramCalls = [];
+  const now = new Date().toISOString();
+  const snapshot = {
+    timestamp: now,
+    usdtPrice: 2655990,
+    prices: {
+      BTC: { lastPrice: 196670010040, bestBuy: 196200020020, bestSell: 196345584670, high: 202540427100, low: 194987637620, volume: 8.9992, change: -2.5 },
+      ETH: { lastPrice: 5602510120, bestBuy: 5590000000, bestSell: 5590478100, high: 5981417430, low: 5520000000, volume: 225.9611, change: -5.98 },
+      USDT: { lastPrice: 2655990, bestBuy: 2650960, bestSell: 2655990, change: -0.24 }
+    }
+  };
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) return new Response(JSON.stringify(snapshot), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.startsWith('https://api.telegram.org/botfake-token/sendMessage')) {
+      telegramCalls.push(JSON.parse(init.body));
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 300 + telegramCalls.length, chat: { id: 4210 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected network call in /price alias test: ${url}`);
+  };
+  try {
+    const { ctx, tasks } = ctxRecorder();
+    const response = await bot.fetch(new Request('https://worker.test/webhook', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'price-alias-secret' },
+      body: JSON.stringify({ update_id: 994099, message: { text: '/price', chat: { id: 4210, type: 'private' }, from: { id: 4210 } } })
+    }), { TELEGRAM_BOT_TOKEN: 'fake-token', TELEGRAM_WEBHOOK_SECRET: 'price-alias-secret' }, ctx);
+    assert.equal(response.status, 200);
+    await Promise.all(tasks);
+    const combined = telegramCalls.map((call) => call.text).join('\n');
+    assert.match(combined, /BTC · بیت‌کوین/);
+    assert.match(combined, /آخرین قیمت:/);
+    assert.match(combined, /بهترین خرید:/);
+    assert.match(combined, /بهترین فروش:/);
+    assert.match(combined, /بیشترین قیمت ۲۴ساعت:/);
+    assert.match(combined, /کمترین قیمت ۲۴ساعت:/);
+    assert.match(combined, /حجم معاملات:/);
+    assert.match(combined, /تغییر ۲۴ساعت:/);
+    assert.match(combined, /\n<b>بهترین خرید:<\/b>/);
+    assert.doesNotMatch(combined, /\\n/);
+    assert.match(combined, /\$۷۴٬/);
+    assert.doesNotMatch(combined, /٫\d{5,}/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('per-chat settings persist English digits and Toman output across subsequent price reports', async () => {

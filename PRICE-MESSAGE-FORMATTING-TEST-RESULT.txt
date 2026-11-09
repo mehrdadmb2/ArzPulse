@@ -1,0 +1,18 @@
+ArzPulse Telegram Price Message Formatting
+Date: 2026-11-09
+
+Node syntax checks:
+- telegram-bot/index.js: PASS
+- telegram-bot/tests/smoke.test.mjs: PASS
+
+Automated tests:
+- Total: 28
+- Passed: 28
+- Failed: 0
+- Skipped: 0
+
+Regression coverage added:
+- /prices local-asset fields render on separate lines
+- USD conversions no longer show unnecessary eight-decimal precision for large values
+- /price alias uses the same readable card renderer
+- Persian number formatting and existing currency preferences continue to work
