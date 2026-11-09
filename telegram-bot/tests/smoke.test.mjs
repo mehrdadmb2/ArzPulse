@@ -632,3 +632,161 @@ test('/indices and /commodities render instrument-appropriate units', async () =
     assert.match(output, /BRENT/);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+
+test('root and public health endpoints are read-only and never dispatch a GitHub workflow', async () => {
+  const originalFetch = globalThis.fetch;
+  let networkCalls = 0;
+  globalThis.fetch = async () => { networkCalls += 1; throw new Error('Public health must not make upstream calls'); };
+  try {
+    const response = await bot.fetch(new Request('https://arzpulse-bot.game-developer-mb.workers.dev/'), {
+      TELEGRAM_BOT_TOKEN: 'fake-token',
+      TELEGRAM_WEBHOOK_SECRET: 'fake-webhook-secret',
+      GITHUB_TOKEN: 'fake-github-token',
+      SETTINGS_KV: { get: async () => null, put: async () => {} },
+      BOT_USERNAME: 'ExRateTrackerBot'
+    }, ctxRecorder().ctx);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.service, 'ArzPulse Telegram Bot');
+    assert.equal(body.botUsername, 'ExRateTrackerBot');
+    assert.equal(body.endpoints.webhook, 'POST /webhook');
+    assert.equal(networkCalls, 0);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('health explicitly reports degraded webhook configuration without exposing secrets', async () => {
+  const response = await bot.fetch(new Request('https://worker.test/health'), {
+    TELEGRAM_BOT_TOKEN: 'secret-token-value',
+    SETTINGS_KV: { get: async () => null }
+  }, ctxRecorder().ctx);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.readiness, 'degraded');
+  assert.equal(body.telegramWebhookSecretConfigured, false);
+  assert.equal(body.adminSecretConfigured, false);
+  assert.ok(body.warnings.some((warning) => warning.includes('TELEGRAM_WEBHOOK_SECRET')));
+  assert.ok(body.warnings.some((warning) => warning.includes('ADMIN_SECRET')));
+  assert.equal(JSON.stringify(body).includes('secret-token-value'), false);
+});
+
+test('protected webhook setup registers the exact worker URL and configured secret', async () => {
+  const originalFetch = globalThis.fetch;
+  const apiCalls = [];
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    const method = url.split('/').pop();
+    apiCalls.push({ method, payload: JSON.parse(init.body || '{}') });
+    if (method === 'setWebhook') {
+      return new Response(JSON.stringify({ ok: true, result: true }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    if (method === 'getWebhookInfo') {
+      return new Response(JSON.stringify({ ok: true, result: {
+        url: 'https://arzpulse-bot.game-developer-mb.workers.dev/webhook',
+        pending_update_count: 0,
+        allowed_updates: ['message', 'channel_post']
+      } }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected Telegram API call: ${url}`);
+  };
+  try {
+    const response = await bot.fetch(new Request('https://arzpulse-bot.game-developer-mb.workers.dev/webhook/setup', {
+      method: 'POST',
+      headers: { authorization: 'Bearer admin-secret' }
+    }), {
+      ADMIN_SECRET: 'admin-secret',
+      TELEGRAM_BOT_TOKEN: 'bot-token',
+      TELEGRAM_WEBHOOK_SECRET: 'strong_webhook_secret-123',
+      BOT_USERNAME: 'ExRateTrackerBot'
+    }, ctxRecorder().ctx);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.urlMatches, true);
+    assert.equal(apiCalls[0].method, 'setWebhook');
+    assert.equal(apiCalls[0].payload.url, 'https://arzpulse-bot.game-developer-mb.workers.dev/webhook');
+    assert.equal(apiCalls[0].payload.secret_token, 'strong_webhook_secret-123');
+    assert.deepEqual(apiCalls[0].payload.allowed_updates, ['message', 'channel_post']);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('webhook setup rejects unauthenticated and missing-secret requests', async () => {
+  const unauthenticated = await bot.fetch(new Request('https://worker.test/webhook/setup', { method: 'POST' }), {
+    TELEGRAM_BOT_TOKEN: 'bot-token',
+    TELEGRAM_WEBHOOK_SECRET: 'secret'
+  }, ctxRecorder().ctx);
+  assert.equal(unauthenticated.status, 503);
+
+  const missingSecret = await bot.fetch(new Request('https://worker.test/webhook/setup', {
+    method: 'POST', headers: { authorization: 'Bearer admin-secret' }
+  }), {
+    ADMIN_SECRET: 'admin-secret',
+    TELEGRAM_BOT_TOKEN: 'bot-token'
+  }, ctxRecorder().ctx);
+  assert.equal(missingSecret.status, 502);
+  const body = await missingSecret.json();
+  assert.match(body.error, /TELEGRAM_WEBHOOK_SECRET/);
+});
+
+test('protected diagnostics verifies Bot API identity, webhook URL and market snapshot', async () => {
+  const originalFetch = globalThis.fetch;
+  const dataSnapshot = {
+    timestamp: new Date().toISOString(),
+    prices: { USDT: { lastPrice: 900000, bestSell: 900000 } },
+    market: {}
+  };
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url.startsWith('https://api.telegram.org/botbot-token/getMe')) {
+      return new Response(JSON.stringify({ ok: true, result: { id: 123, is_bot: true, username: 'ExRateTrackerBot' } }), { status: 200 });
+    }
+    if (url.startsWith('https://api.telegram.org/botbot-token/getWebhookInfo')) {
+      return new Response(JSON.stringify({ ok: true, result: {
+        url: 'https://wrong-worker.example/webhook',
+        pending_update_count: 3,
+        last_error_date: 1794230000,
+        last_error_message: 'Wrong webhook URL'
+      } }), { status: 200 });
+    }
+    if (url.startsWith('https://mehrdadmb2.github.io/ArzPulse/data/latest.json')) {
+      return new Response(JSON.stringify(dataSnapshot), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected diagnostics fetch: ${url}`);
+  };
+  try {
+    const response = await bot.fetch(new Request('https://worker.test/diagnostics', {
+      headers: { 'x-admin-secret': 'admin-secret' }
+    }), {
+      ADMIN_SECRET: 'admin-secret',
+      TELEGRAM_BOT_TOKEN: 'bot-token',
+      TELEGRAM_WEBHOOK_SECRET: 'webhook-secret',
+      BOT_USERNAME: 'ExRateTrackerBot',
+      GITHUB_TOKEN: 'github-token',
+      SETTINGS_KV: { get: async () => null, put: async () => {} }
+    }, ctxRecorder().ctx);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.telegramIdentity.username, 'ExRateTrackerBot');
+    assert.equal(body.telegramIdentity.usernameMatchesExpected, true);
+    assert.equal(body.telegramWebhook.urlMatchesExpected, false);
+    assert.equal(body.telegramWebhook.pendingUpdateCount, 3);
+    assert.equal(body.checks.telegramWebhook.status, 'url-mismatch');
+    assert.equal(body.readiness, 'degraded');
+    assert.ok(body.warnings.some((warning) => warning.includes('does not match')));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+
+test('GITHUB_DISPATCH_ENABLED=false prevents duplicate scheduled dispatch from the bot Worker', async () => {
+  const originalFetch = globalThis.fetch;
+  let networkCalls = 0;
+  globalThis.fetch = async () => { networkCalls += 1; throw new Error('No dispatch expected when disabled'); };
+  try {
+    const { ctx, tasks } = ctxRecorder();
+    await bot.scheduled({ cron: '*/5 * * * *', scheduledTime: Date.now() }, {
+      GITHUB_DISPATCH_ENABLED: 'false'
+    }, ctx);
+    await Promise.all(tasks);
+    assert.equal(networkCalls, 0);
+  } finally { globalThis.fetch = originalFetch; }
+});

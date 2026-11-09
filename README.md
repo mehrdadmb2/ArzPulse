@@ -7,7 +7,7 @@
 [![GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-222222?style=flat-square&logo=github&logoColor=white)](https://mehrdadmb2.github.io/ArzPulse)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](https://github.com/mehrdadmb2/ArzPulse/pulls)
-[![Telegram Bot](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ArzPulseBot)
+[![Telegram Bot](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ExRateTrackerBot)
 [![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)](https://arzpulse-bot.game-developer-mb.workers.dev)
 [![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red?style=flat-square)](https://github.com/mehrdadmb2)
 
@@ -373,7 +373,7 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 ## 📞 Contact & Support | تماس و پشتیبانی
 
 - **GitHub Issues:** [Report a bug or request a feature](https://github.com/mehrdadmb2/ArzPulse/issues)
-- **Telegram Bot:** [@ArzPulseBot](https://t.me/ArzPulseBot)
+- **Telegram Bot:** [@ExRateTrackerBot](https://t.me/ExRateTrackerBot)
 - **Website:** [https://mehrdadmb2.github.io/ArzPulse/](https://mehrdadmb2.github.io/ArzPulse/)
 
 ---
@@ -429,3 +429,8 @@ For tokens without an available local market pair, the dashboard and bot show an
 The default collector does not require Alpaca or Twelve Data API keys. US equities, FX and global index/commodity reference quotes are collected through Yahoo Finance Chart (unofficial, potentially delayed, no SLA) with conservative per-asset caching and preservation of prior valid snapshots on failure. `/prices` now renders the full watchlist, not only a legacy sample.
 
 Telegram display settings are per chat: `/numbers fa|en`, `/currency usd|irr|irt|dual`, `/settings`. Personal market summaries can be scheduled with `/digest 15m|30m|2h|1d|off` and scoped with `/digestmarket`. Existing Telegram/GitHub secrets and the current `SETTINGS_KV` namespace remain required for the bot; do not create a new KV namespace. Full Persian setup: [`MARKET-EXPANSION-SETUP-FA.md`](MARKET-EXPANSION-SETUP-FA.md).
+
+
+## 🛠 Telegram Worker Recovery
+
+For bot deployment, webhook registration, protected diagnostics and troubleshooting, see [TELEGRAM-WORKER-RECOVERY-FA.md](TELEGRAM-WORKER-RECOVERY-FA.md).

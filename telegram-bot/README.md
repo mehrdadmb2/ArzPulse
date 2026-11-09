@@ -9,8 +9,10 @@ This folder is the **Telegram bot Worker only**. It is separate from `../worker/
 - `/setchannel` and `/stopchannel` require a chat administrator; `/refresh` requires a numeric user ID listed in `BOT_ADMIN_IDS`.
 - Telegram HTML formatting: bold headings, `<pre><code>` monospace data, and `<blockquote>` status notes; invalid HTML has a controlled plain-text fallback.
 - Historical charts via QuickChart's POST API and binary photo upload; `/chartall` attempts one Telegram media group to reduce round trips. The collector also appends history values for supported major cryptos.
-- Fast webhook acknowledgement, optional Telegram webhook secret validation, command/update error logs, a bounded manual-refresh lock, and protected diagnostic endpoints.
-- Public `/health` (also `/` and `/test`) only exposes configuration booleans, never secret values.
+- Fast webhook acknowledgement, mandatory Telegram webhook secret validation, structured JSON logs for webhook/update/command/API failures, a bounded manual-refresh lock, and protected diagnostic endpoints.
+- Read-only `/` and `/health` status endpoints; the root URL never dispatches GitHub Actions.
+- Protected `POST /webhook/setup` endpoint to register or repair the Telegram webhook from the Worker itself, plus `/diagnostics` checks for bot identity, webhook URL, pending updates, KV, GitHub token configuration and snapshot freshness.
+- Public `/health` (also `/` and `/test`) returns safe readiness/configuration metadata without secret values. `/diagnostics` performs live Telegram Bot API checks and is protected by `ADMIN_SECRET`.
 - Market context commands expose global market cap/volume, BTC dominance, Alternative.me Fear & Greed sentiment, Binance Spot market breadth, BTC/ETH futures funding, BTC open interest and macro market changes.
 
 ## Required Worker bindings
@@ -30,10 +32,13 @@ Keep the existing `SETTINGS_KV` binding and point it at the **same Namespace ID 
 - `GITHUB_REPO=ArzPulse`
 - `GITHUB_WORKFLOW=update-prices.yml`
 - `GITHUB_REF=main`
+- `BOT_USERNAME=ExRateTrackerBot`
+- `TELEGRAM_WEBHOOK_URL=https://arzpulse-bot.game-developer-mb.workers.dev/webhook`
+- `GITHUB_DISPATCH_ENABLED=true` — keep `true` when this bot Worker is the only five-minute GitHub workflow dispatcher; set `false` if a separate market-updater Worker is already dispatching every five minutes.
 - `DATA_STALE_MINUTES=15`
 - `BOT_ADMIN_IDS=123456789` — comma-separated numeric Telegram user IDs, not usernames. This is required for `/refresh`.
 
-`wrangler.toml.example` is an example only. Copy it to `wrangler.toml` locally and replace the KV namespace ID with the existing ID. The Worker refuses webhook updates until `TELEGRAM_WEBHOOK_SECRET` is configured, by design. Never commit secrets or the actual private token.
+`wrangler.toml.example` is an example only. Copy it to `wrangler.toml` locally and replace the KV namespace ID with the existing ID. The Worker refuses webhook updates until `TELEGRAM_WEBHOOK_SECRET` is configured, by design. `BOT_USERNAME` should be `ExRateTrackerBot`; `TELEGRAM_WEBHOOK_URL` should be the exact `/webhook` URL. Never commit secrets or the actual private token.
 
 ## Deploy from local machine
 
@@ -56,7 +61,15 @@ For Windows PowerShell, use `Copy-Item wrangler.toml.example wrangler.toml` inst
 
 ## Register/check Telegram webhook
 
-Use the exact deployed URL and the same secret configured in Cloudflare. Run locally in PowerShell; the token is prompted so it is not put in shell history as a literal:
+Recommended: configure `TELEGRAM_WEBHOOK_SECRET` and `ADMIN_SECRET` in Cloudflare, deploy the bot Worker, then run the included PowerShell repair helper. It uses the existing Worker secrets and does not ask you to reveal the Telegram bot token:
+
+```powershell
+.\\scripts\\repair-webhook.ps1
+```
+
+The helper calls the protected `POST /webhook/setup` endpoint, which registers the exact Worker URL using Telegram's `setWebhook` API, then reads `/diagnostics` to verify bot identity, webhook URL, pending updates, KV and market snapshot.
+
+Manual alternative: use the exact deployed URL and the same secret configured in Cloudflare. Run locally in PowerShell; the token and webhook secret are prompted rather than embedded in the script:
 
 ```powershell
 $token = Read-Host "Telegram bot token"
@@ -70,14 +83,17 @@ Invoke-RestMethod -Method Post -Uri "https://api.telegram.org/bot$token/setWebho
 Invoke-RestMethod -Uri "https://api.telegram.org/bot$token/getWebhookInfo"
 ```
 
-Check `url`, `pending_update_count`, `last_error_date`, and `last_error_message`. The registered URL must end with `/webhook`. Don't set a webhook on the market-updater Worker.
+Check `url`, `pending_update_count`, `last_error_date`, and `last_error_message`. The registered URL must end with `/webhook`. Don't set a webhook on the market-updater Worker. The public root `/` is now read-only health output; workflow dispatch is only available through the protected `POST /trigger` endpoint.
 
 ## Smoke checks
 
-- `GET /health` returns safe configuration status; a `200` here does **not** prove Telegram webhook registration is correct.
+- `GET /` and `GET /health` return safe worker readiness metadata; a `200` alone does **not** prove Telegram webhook registration is correct.
+- `GET /diagnostics` (with `ADMIN_SECRET`) verifies actual Bot API token identity, `@ExRateTrackerBot`, webhook URL match, Telegram pending updates/errors, KV read, and latest market snapshot.
+- `POST /webhook/setup` (with `ADMIN_SECRET`) registers the webhook using the configured `TELEGRAM_WEBHOOK_SECRET`.
 - `GET /trigger` is intentionally rejected; manual trigger is `POST /trigger` with `Authorization: Bearer <ADMIN_SECRET>`.
 - In Telegram, try `/start`, `/status`, `/prices`, `/chart BTC 24h`, `/chartall`.
-- In Cloudflare Worker logs, inspect failures tagged `[telegram:...]`, `[market-data]`, `[github-dispatch]`, and `[chart]`.
+- In Cloudflare Worker logs, inspect structured `[ArzPulse]` JSON events (`webhook_rejected_missing_secret`, `webhook_rejected_bad_secret`, `telegram_api_failed`, `command_failed`, `telegram_webhook_setup_failed`) plus `[market-data]`, `[github-dispatch]`, `[chart]`, `[alerts]` and `[digest]`.
+- The welcome text and group-command examples now use the actual bot username `@ExRateTrackerBot`.
 
 ## Storage / free-tier behavior
 
@@ -88,7 +104,7 @@ Cloudflare KV has daily operation limits on Free plans. The consolidated alert s
 
 ## Automatic market alerts
 
-The existing `*/5 * * * *` Cron invocation now performs two independent tasks: it dispatches the ArzPulse GitHub Actions workflow and evaluates the latest published snapshot for alert conditions. The hourly channel digest remains on `0 * * * *`.
+The existing `*/5 * * * *` Cron invocation now performs two independent tasks: it dispatches the ArzPulse GitHub Actions workflow and evaluates the latest published snapshot for alert conditions. The hourly channel digest remains on `0 * * * *`. Avoid duplicate five-minute GitHub dispatch: use only one scheduled dispatcher. By default this bot Worker owns dispatch (`GITHUB_DISPATCH_ENABLED=true`). If `arzpulse-market-updater` is also deployed with its five-minute Cron, set the bot variable to `false` or disable the updater Cron. The bot Worker will still evaluate Telegram alerts and personal digests.
 
 Private chats must opt in with `/alertson`. A chat already registered with `/setchannel` receives important/critical alerts by default unless that chat explicitly sends `/alertsoff`. Use `/alerts` for status/help, `/alertlevel low` for all matching signal levels, `/alertlevel medium` for important/critical signals, and `/alertlevel high` for critical signals only. For group destinations, only a chat administrator can change alert preferences.
 

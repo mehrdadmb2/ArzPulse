@@ -247,8 +247,21 @@ async function fetchLatestData() {
   return null;
 }
 
+function logBotEvent(level, event, fields = {}) {
+  const record = {
+    timestamp: new Date().toISOString(),
+    service: 'arzpulse-telegram-bot',
+    event,
+    ...fields
+  };
+  const line = `[ArzPulse] ${JSON.stringify(record)}`;
+  const logger = typeof console[level] === 'function' ? console[level] : console.log;
+  logger.call(console, line);
+}
+
 async function telegramApi(method, token, payload, timeoutMs = HTTP_TIMEOUT_MS) {
   if (!token) throw new Error('TELEGRAM_BOT_TOKEN is not configured');
+  const startedAt = Date.now();
   const response = await fetchWithTimeout(`https://api.telegram.org/bot${token}/${method}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -257,9 +270,22 @@ async function telegramApi(method, token, payload, timeoutMs = HTTP_TIMEOUT_MS) 
   const result = await response.json().catch(() => null);
   if (!response.ok || !result?.ok) {
     const description = result?.description || `Telegram API HTTP ${response.status}`;
-    console.error(`[telegram:${method}]`, response.status, description);
-    throw new Error(description);
+    const error = new Error(description);
+    error.telegramMethod = method;
+    error.httpStatus = response.status;
+    error.telegramErrorCode = result?.error_code || null;
+    error.retryAfter = result?.parameters?.retry_after || null;
+    logBotEvent('error', 'telegram_api_failed', {
+      method,
+      httpStatus: response.status,
+      telegramErrorCode: error.telegramErrorCode,
+      retryAfterSeconds: error.retryAfter,
+      durationMs: Date.now() - startedAt,
+      description: String(description).slice(0, 240)
+    });
+    throw error;
   }
+  logBotEvent('debug', 'telegram_api_ok', { method, durationMs: Date.now() - startedAt });
   return result.result;
 }
 
@@ -1018,14 +1044,14 @@ function getWelcomeMessage() {
 /refresh  درخواست آپدیت دستی
 /help     راهنمای کامل</code></pre>`,
     '<blockquote>نکته: قیمت‌ها اطلاعات بازار هستند و توصیهٔ سرمایه‌گذاری محسوب نمی‌شوند.</blockquote>',
-    '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>  ·  📈 <a href="https://t.me/ArzPulseBot">@ArzPulseBot</a>'
+    '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد ArzPulse</a>  ·  📈 <a href="https://t.me/ExRateTrackerBot">@ExRateTrackerBot</a>'
   ].join('\n');
 }
 
 function getHelpMessage() {
   return [
     '📚 <b>راهنمای ArzPulse</b>',
-    '<blockquote>از دستورها در چت خصوصی استفاده کن. در گروه‌ها نام ربات را هم می‌توانی اضافه کنی؛ مثل <code>/prices@ArzPulseBot</code>.</blockquote>',
+    '<blockquote>از دستورها در چت خصوصی استفاده کن. در گروه‌ها نام ربات را هم می‌توانی اضافه کنی؛ مثل <code>/prices@ExRateTrackerBot</code>.</blockquote>',
     '',
     '<b>بازار</b>',
     `<pre><code>/prices
@@ -1068,7 +1094,7 @@ function getHelpMessage() {
 /stopchannel لغو گزارش همین گروه/کانال
 /id         شناسهٔ چت و کاربر</code></pre>`,
     '<blockquote>بازه‌های نمودار: <code>24h</code>، <code>7d</code> و <code>30d</code>. داده‌های منابع جهانی ممکن است با تأخیر باشند.</blockquote>',
-    '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد</a>  ·  📈 <a href="https://t.me/ArzPulseBot">@ArzPulseBot</a>'
+    '🌐 <a href="https://mehrdadmb2.github.io/ArzPulse/">داشبورد</a>  ·  📈 <a href="https://t.me/ExRateTrackerBot">@ExRateTrackerBot</a>'
   ].join('\n');
 }
 
@@ -2079,21 +2105,46 @@ Updated     ${html(formatTime(data.timestamp))}</code></pre>`,
 }
 
 async function handleUpdate(update, env) {
+  const startedAt = Date.now();
   const message = update?.message || update?.channel_post;
-  if (!message?.chat || !message?.text) return;
-  if (!env.TELEGRAM_BOT_TOKEN) {
-    console.error('[config] TELEGRAM_BOT_TOKEN missing');
+  const updateId = Number.isInteger(update?.update_id) ? update.update_id : null;
+  if (!message?.chat || !message?.text) {
+    logBotEvent('warn', 'update_ignored', {
+      updateId,
+      updateType: update?.message ? 'message-without-text' : update?.channel_post ? 'channel-post-without-text' : 'unsupported',
+      hasTelegramToken: Boolean(env.TELEGRAM_BOT_TOKEN)
+    });
     return;
   }
+  if (!env.TELEGRAM_BOT_TOKEN) {
+    logBotEvent('error', 'update_rejected_missing_bot_token', { updateId, chatType: message.chat.type || 'unknown' });
+    return;
+  }
+
   const command = parseCommand(message.text);
+  const context = {
+    updateId,
+    chatType: message.chat.type || 'unknown',
+    command: command?.name || 'plain-text'
+  };
+  logBotEvent('info', 'update_received', context);
+
   if (command) {
-    try { await handleCommand(message, command, env); }
-    catch (error) {
-      console.error(`[command:${command.name}] failed:`, error?.stack || error);
-      await sendMessage(message.chat.id, `⚠️ <b>فرمان اجرا نشد.</b>\n<blockquote>خطای داخلی ثبت شد. برای جزئیات، Logs در Cloudflare Worker را بررسی کن.</blockquote>`, env.TELEGRAM_BOT_TOKEN);
+    try {
+      await handleCommand(message, command, env);
+      logBotEvent('info', 'command_completed', { ...context, durationMs: Date.now() - startedAt });
+    } catch (error) {
+      logBotEvent('error', 'command_failed', {
+        ...context,
+        durationMs: Date.now() - startedAt,
+        errorName: error?.name || 'Error',
+        error: String(error?.message || error).slice(0, 300)
+      });
+      await sendMessage(message.chat.id, `⚠️ <b>فرمان اجرا نشد.</b>\n<blockquote>خطای داخلی ثبت شد. برای جزئیات، بخش Logs و مسیر <code>/diagnostics</code> در Cloudflare Worker را بررسی کن.</blockquote>`, env.TELEGRAM_BOT_TOKEN);
     }
     return;
   }
+
   if (message.chat.type === 'private') {
     const text = String(message.text || '').toLowerCase();
     if (text.includes('سلام') || /\b(hi|hello|salam)\b/.test(text)) {
@@ -2101,6 +2152,7 @@ async function handleUpdate(update, env) {
     } else if (text.includes('قیمت') || text.includes('price')) {
       await sendMessage(message.chat.id, '📊 برای دیدن بازار <code>/prices</code>، برای نمودار <code>/chart</code> و برای وضعیت سیستم <code>/status</code> را بفرست.', env.TELEGRAM_BOT_TOKEN);
     }
+    logBotEvent('debug', 'plain_text_processed', { ...context, durationMs: Date.now() - startedAt });
   }
 }
 
@@ -2172,32 +2224,87 @@ function jsonResponse(body, status = 200) {
   });
 }
 
+function scheduledDispatcherEnabled(env) {
+  return String(env.GITHUB_DISPATCH_ENABLED ?? 'true').trim().toLowerCase() !== 'false';
+}
+
 function safeHealth(env) {
+  const tokenConfigured = Boolean(env.TELEGRAM_BOT_TOKEN);
+  const webhookSecretConfigured = Boolean(env.TELEGRAM_WEBHOOK_SECRET);
+  const kvBound = Boolean(env.SETTINGS_KV);
+  const githubTokenConfigured = Boolean(env.GITHUB_TOKEN);
+  const githubDispatchEnabled = scheduledDispatcherEnabled(env);
+  const adminSecretConfigured = Boolean(env.ADMIN_SECRET);
+  const adminAllowlistConfigured = adminIdSet(env).size > 0;
+  const readiness = !tokenConfigured ? 'down'
+    : (!webhookSecretConfigured || !kvBound || !adminSecretConfigured || (!githubTokenConfigured && githubDispatchEnabled)) ? 'degraded'
+      : 'ready';
+
+  const warnings = [];
+  if (!tokenConfigured) warnings.push('TELEGRAM_BOT_TOKEN is missing; Telegram API calls cannot work.');
+  if (!webhookSecretConfigured) warnings.push('TELEGRAM_WEBHOOK_SECRET is missing; Telegram webhook requests are intentionally rejected with HTTP 503.');
+  if (!kvBound) warnings.push('SETTINGS_KV is missing; per-chat settings, alerts, digest and channel configuration are unavailable.');
+  if (!adminSecretConfigured) warnings.push('ADMIN_SECRET is missing; protected diagnostics and webhook setup endpoints cannot be used.');
+  if (!githubTokenConfigured && githubDispatchEnabled) warnings.push('GITHUB_TOKEN is missing; the bot cannot dispatch market-data GitHub Actions.');
+  if (!githubDispatchEnabled) warnings.push('Scheduled GitHub dispatch is disabled on this bot Worker; confirm that the dedicated market-updater Worker or GitHub Actions schedule is active.');
+  if (!adminAllowlistConfigured) warnings.push('BOT_ADMIN_IDS is empty; user-ID-based admin commands such as /refresh are disabled.');
+
   return {
     status: 'ok',
+    readiness,
     service: 'ArzPulse Telegram Bot',
+    version: 'v8.1-recovery',
     timestamp: new Date().toISOString(),
-    telegramTokenConfigured: Boolean(env.TELEGRAM_BOT_TOKEN),
-    telegramWebhookSecretConfigured: Boolean(env.TELEGRAM_WEBHOOK_SECRET),
-    githubTokenConfigured: Boolean(env.GITHUB_TOKEN),
-    settingsKvBound: Boolean(env.SETTINGS_KV),
-    adminAllowlistConfigured: adminIdSet(env).size > 0,
-    githubRepository: `${env.GITHUB_OWNER || 'mehrdadmb2'}/${env.GITHUB_REPO || 'ArzPulse'}`
+    botUsername: String(env.BOT_USERNAME || 'ExRateTrackerBot').replace(/^@/, ''),
+    webhookPath: '/webhook',
+    telegramTokenConfigured: tokenConfigured,
+    telegramWebhookSecretConfigured: webhookSecretConfigured,
+    githubTokenConfigured,
+    githubScheduledDispatchEnabled: githubDispatchEnabled,
+    settingsKvBound: kvBound,
+    adminSecretConfigured,
+    adminAllowlistConfigured,
+    githubRepository: `${env.GITHUB_OWNER || 'mehrdadmb2'}/${env.GITHUB_REPO || 'ArzPulse'}`,
+    warnings
   };
 }
 
-async function diagnosticDetails(env) {
+function expectedWebhookUrl(requestUrl, env) {
+  const configured = String(env.TELEGRAM_WEBHOOK_URL || '').trim();
+  const candidate = configured || new URL('/webhook', requestUrl).toString();
+  const parsed = new URL(candidate);
+  if (parsed.protocol !== 'https:') throw new Error('TELEGRAM_WEBHOOK_URL must use HTTPS.');
+  if (parsed.pathname !== '/webhook') throw new Error('TELEGRAM_WEBHOOK_URL path must be exactly /webhook.');
+  parsed.search = '';
+  parsed.hash = '';
+  return parsed.toString();
+}
+
+async function diagnosticDetails(env, requestUrl) {
   const health = safeHealth(env);
+  health.checks = {
+    telegramToken: { configured: health.telegramTokenConfigured, status: health.telegramTokenConfigured ? 'configured' : 'missing' },
+    webhookSecret: { configured: health.telegramWebhookSecretConfigured, status: health.telegramWebhookSecretConfigured ? 'configured' : 'missing' },
+    settingsKv: { configured: health.settingsKvBound, status: health.settingsKvBound ? 'configured' : 'missing' },
+    githubToken: { configured: health.githubTokenConfigured, status: health.githubTokenConfigured ? 'configured' : 'missing' },
+    githubScheduledDispatch: { enabled: health.githubScheduledDispatchEnabled, status: health.githubScheduledDispatchEnabled ? 'enabled' : 'disabled' },
+    adminSecret: { configured: health.adminSecretConfigured, status: health.adminSecretConfigured ? 'configured' : 'missing' },
+    adminAllowlist: { configured: health.adminAllowlistConfigured, status: health.adminAllowlistConfigured ? 'configured' : 'missing' }
+  };
+
   if (env.SETTINGS_KV) {
     try {
       const channels = await getChannelSettings(env);
       health.settingsKv = { readOk: true, configuredDestinations: channels.length };
+      health.checks.settingsKv.status = 'ok';
     } catch (error) {
-      health.settingsKv = { readOk: false, error: error.message };
+      health.settingsKv = { readOk: false, error: String(error.message || error).slice(0, 240) };
+      health.checks.settingsKv.status = 'error';
     }
   } else {
     health.settingsKv = { readOk: false, error: 'SETTINGS_KV binding is missing' };
   }
+
   const latest = await fetchLatestData();
   health.marketData = latest ? {
     available: true,
@@ -2207,75 +2314,136 @@ async function diagnosticDetails(env) {
     hasError: Boolean(latest.hasError),
     errorCount: Number(latest.errorCount || latest.errorDetails?.length || 0)
   } : { available: false };
+  health.checks.marketData = {
+    status: !latest ? 'unavailable' : isDataStale(latest, env) ? 'stale' : 'ok',
+    available: Boolean(latest)
+  };
+
   if (env.TELEGRAM_BOT_TOKEN) {
     try {
-      const webhook = await telegramApi('getWebhookInfo', env.TELEGRAM_BOT_TOKEN, {});
+      const [me, webhook] = await Promise.all([
+        telegramApi('getMe', env.TELEGRAM_BOT_TOKEN, {}),
+        telegramApi('getWebhookInfo', env.TELEGRAM_BOT_TOKEN, {})
+      ]);
+      const expected = expectedWebhookUrl(requestUrl, env);
+      const actual = String(webhook?.url || '');
+      const expectedUsername = String(env.BOT_USERNAME || 'ExRateTrackerBot').replace(/^@/, '').toLowerCase();
+      const actualUsername = String(me?.username || '');
+      health.telegramIdentity = {
+        validToken: true,
+        id: me?.id || null,
+        username: actualUsername || null,
+        expectedUsername,
+        usernameMatchesExpected: !expectedUsername || actualUsername.toLowerCase() === expectedUsername
+      };
       health.telegramWebhook = {
-        configured: Boolean(webhook?.url),
+        configured: Boolean(actual),
+        urlMatchesExpected: Boolean(actual) && actual.replace(/\/$/, '') === expected.replace(/\/$/, ''),
+        expectedUrl: expected,
         pendingUpdateCount: Number(webhook?.pending_update_count || 0),
         lastErrorDate: webhook?.last_error_date ? new Date(webhook.last_error_date * 1000).toISOString() : null,
         lastErrorMessage: webhook?.last_error_message || null,
-        allowedUpdates: webhook?.allowed_updates || []
+        allowedUpdates: webhook?.allowed_updates || [],
+        maxConnections: webhook?.max_connections || null
       };
+      health.checks.telegramApi = { status: 'ok', username: actualUsername || null };
+      health.checks.telegramWebhook = {
+        status: !actual ? 'not-registered' : health.telegramWebhook.urlMatchesExpected ? 'ok' : 'url-mismatch',
+        configured: Boolean(actual),
+        urlMatchesExpected: health.telegramWebhook.urlMatchesExpected
+      };
+      if (!webhook?.url) health.warnings.push('Telegram webhook is not registered. Run POST /webhook/setup with ADMIN_SECRET.');
+      else if (!health.telegramWebhook.urlMatchesExpected) health.warnings.push('Telegram webhook URL does not match this Worker. Run POST /webhook/setup.');
+      if (webhook?.last_error_message) health.warnings.push(`Telegram reports a recent webhook error: ${String(webhook.last_error_message).slice(0, 180)}`);
+      if (!health.telegramIdentity.usernameMatchesExpected) health.warnings.push(`The configured bot token belongs to @${actualUsername}, not the expected @${expectedUsername}. Check TELEGRAM_BOT_TOKEN.`);
+      if (!health.telegramWebhook.urlMatchesExpected || !health.telegramIdentity.usernameMatchesExpected || webhook?.last_error_message) health.readiness = 'degraded';
     } catch (error) {
-      health.telegramWebhook = { configured: false, diagnosticError: error.message };
+      health.telegramIdentity = { validToken: false, error: String(error.message || error).slice(0, 240) };
+      health.telegramWebhook = { configured: false, diagnosticError: String(error.message || error).slice(0, 240) };
+      health.checks.telegramApi = { status: 'error', error: String(error.message || error).slice(0, 180) };
+      health.checks.telegramWebhook = { status: 'unknown' };
+      health.readiness = 'degraded';
     }
+  } else {
+    health.telegramIdentity = { validToken: false, error: 'TELEGRAM_BOT_TOKEN is missing' };
+    health.telegramWebhook = { configured: false, error: 'TELEGRAM_BOT_TOKEN is missing' };
+    health.checks.telegramApi = { status: 'missing-token' };
+    health.checks.telegramWebhook = { status: 'blocked' };
   }
   return health;
 }
 
-async function handlePublicRootTrigger(env) {
-  // The deployed public root URL is intentionally a trigger endpoint as well as
-  // a health response. A short KV cooldown prevents repeated visits from flooding
-  // GitHub Actions; scheduled five-minute runs do not depend on this lock.
-  try {
-    const lock = await requestRefreshLock(env);
-    if (!lock.acquired) {
-      return jsonResponse({
-        ...safeHealth(env),
-        workflowDispatch: {
-          ok: true,
-          dispatched: false,
-          reason: 'recent-refresh-lock',
-          retryAfterSeconds: lock.remaining
-        }
-      });
-    }
-    await dispatchGitHubUpdate(env);
-    return jsonResponse({
-      ...safeHealth(env),
-      workflowDispatch: {
-        ok: true,
-        dispatched: true,
-        workflow: String(env.GITHUB_WORKFLOW || 'update-prices.yml'),
-        ref: String(env.GITHUB_REF || 'main'),
-        message: 'GitHub Actions workflow_dispatch accepted; the workflow runs asynchronously.'
-      }
-    });
-  } catch (error) {
-    console.error('[root-trigger] failed:', error?.stack || error);
-    return jsonResponse({
-      ...safeHealth(env),
-      workflowDispatch: { ok: false, dispatched: false, error: error.message }
-    }, 502);
-  }
+async function registerTelegramWebhook(request, env) {
+  if (!env.TELEGRAM_BOT_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN is not configured in this Worker.');
+  if (!env.TELEGRAM_WEBHOOK_SECRET) throw new Error('TELEGRAM_WEBHOOK_SECRET is missing. Add it as a Cloudflare Worker Secret before registering the webhook.');
+  const secret = String(env.TELEGRAM_WEBHOOK_SECRET);
+  if (!/^[A-Za-z0-9_-]{1,256}$/.test(secret)) throw new Error('TELEGRAM_WEBHOOK_SECRET must contain only A-Z, a-z, 0-9, underscore or hyphen and be at most 256 characters.');
+  const url = expectedWebhookUrl(request.url, env);
+  const result = await telegramApi('setWebhook', env.TELEGRAM_BOT_TOKEN, {
+    url,
+    secret_token: secret,
+    allowed_updates: ['message', 'channel_post'],
+    drop_pending_updates: false,
+    max_connections: 40
+  });
+  const info = await telegramApi('getWebhookInfo', env.TELEGRAM_BOT_TOKEN, {});
+  const matches = String(info?.url || '').replace(/\/$/, '') === url.replace(/\/$/, '');
+  logBotEvent('info', 'telegram_webhook_registered', {
+    url,
+    telegramAccepted: Boolean(result),
+    urlMatches: matches,
+    pendingUpdateCount: Number(info?.pending_update_count || 0)
+  });
+  return {
+    ok: Boolean(result) && matches,
+    registered: Boolean(info?.url),
+    url,
+    urlMatches: matches,
+    pendingUpdateCount: Number(info?.pending_update_count || 0),
+    lastErrorMessage: info?.last_error_message || null
+  };
 }
 
 async function handleAdminEndpoint(request, env, route) {
-  if (!authorizedAdminRequest(request, env)) return jsonResponse({ error: 'unauthorized', message: 'Configure ADMIN_SECRET and send it via x-admin-secret or Authorization: Bearer.' }, env.ADMIN_SECRET ? 401 : 503);
-  if (route === '/diagnostics') return jsonResponse(await diagnosticDetails(env));
+  if (!authorizedAdminRequest(request, env)) return jsonResponse({
+    error: 'unauthorized',
+    message: env.ADMIN_SECRET
+      ? 'Send the configured ADMIN_SECRET using Authorization: Bearer <secret> or x-admin-secret.'
+      : 'ADMIN_SECRET is not configured in this Worker.'
+  }, env.ADMIN_SECRET ? 401 : 503);
+
+  if (route === '/diagnostics') {
+    if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
+    return jsonResponse(await diagnosticDetails(env, request.url));
+  }
+
+  if (route === '/webhook/setup') {
+    if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
+    try {
+      const result = await registerTelegramWebhook(request, env);
+      return jsonResponse({ ...result, message: result.ok ? 'Telegram webhook successfully registered.' : 'Telegram accepted the request but the registered URL did not match.' }, result.ok ? 200 : 502);
+    } catch (error) {
+      logBotEvent('error', 'telegram_webhook_setup_failed', { error: String(error.message || error).slice(0, 240) });
+      return jsonResponse({ ok: false, error: String(error.message || error).slice(0, 300) }, 502);
+    }
+  }
+
   if (route === '/send') {
+    if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
     await sendAutoUpdates(env);
     return jsonResponse({ ok: true, message: 'Channel update pass completed. Check Worker logs for per-destination failures.' });
   }
+
   if (route === '/check' || route === '/trigger') {
+    if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
     try {
       const lock = await requestRefreshLock(env);
       if (!lock.acquired) return jsonResponse({ ok: true, dispatched: false, reason: 'recent-refresh-lock', retryAfterSeconds: lock.remaining });
       await dispatchGitHubUpdate(env);
       return jsonResponse({ ok: true, dispatched: true, message: 'Workflow dispatch accepted; collection completes asynchronously.' });
     } catch (error) {
-      return jsonResponse({ ok: false, error: error.message }, 502);
+      logBotEvent('error', 'manual_workflow_dispatch_failed', { error: String(error.message || error).slice(0, 240) });
+      return jsonResponse({ ok: false, error: String(error.message || error).slice(0, 300) }, 502);
     }
   }
   return jsonResponse({ error: 'not-found' }, 404);
@@ -2286,55 +2454,88 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/webhook') {
       if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
+      if (!env.TELEGRAM_BOT_TOKEN) {
+        logBotEvent('error', 'webhook_rejected_missing_bot_token');
+        return new Response('Bot token is not configured', { status: 503, headers: { 'Cache-Control': 'no-store' } });
+      }
       if (!env.TELEGRAM_WEBHOOK_SECRET) {
-        console.error('[webhook] TELEGRAM_WEBHOOK_SECRET is not configured; refusing unauthenticated updates.');
-        return new Response('Webhook secret is not configured', { status: 503, headers: { 'Cache-Control': 'no-store' } });
+        logBotEvent('error', 'webhook_rejected_missing_secret');
+        return new Response('Webhook secret is not configured. Add TELEGRAM_WEBHOOK_SECRET and run POST /webhook/setup.', { status: 503, headers: { 'Cache-Control': 'no-store' } });
       }
       const provided = request.headers.get('x-telegram-bot-api-secret-token') || '';
-      if (provided !== env.TELEGRAM_WEBHOOK_SECRET) return new Response('Unauthorized', { status: 401 });
+      if (provided !== env.TELEGRAM_WEBHOOK_SECRET) {
+        logBotEvent('warn', 'webhook_rejected_bad_secret');
+        return new Response('Unauthorized', { status: 401 });
+      }
       const contentLength = Number(request.headers.get('content-length') || 0);
       if (contentLength > 1024 * 1024) return new Response('Payload Too Large', { status: 413 });
       let update;
       try { update = await request.json(); }
-      catch { return new Response('Bad Request', { status: 400 }); }
+      catch {
+        logBotEvent('warn', 'webhook_rejected_invalid_json');
+        return new Response('Bad Request', { status: 400 });
+      }
       if (!update || typeof update !== 'object' || !Number.isInteger(update.update_id)) {
+        logBotEvent('warn', 'webhook_rejected_invalid_update');
         return new Response('Invalid Telegram update', { status: 400 });
       }
 
       // Telegram receives an immediate 200 response; processing continues under waitUntil,
       // preventing slow chart rendering or upstream requests from causing webhook retries.
-      const updateId = update?.update_id;
-      if (Number.isInteger(updateId)) {
-        const now = Date.now();
-        for (const [id, at] of recentUpdateIds) if (now - at > 10 * 60 * 1000) recentUpdateIds.delete(id);
-        if (recentUpdateIds.has(updateId)) return new Response('OK', { status: 200 });
-        recentUpdateIds.set(updateId, now);
-        while (recentUpdateIds.size > 512) recentUpdateIds.delete(recentUpdateIds.keys().next().value);
+      const updateId = update.update_id;
+      const now = Date.now();
+      for (const [id, at] of recentUpdateIds) if (now - at > 10 * 60 * 1000) recentUpdateIds.delete(id);
+      if (recentUpdateIds.has(updateId)) {
+        logBotEvent('debug', 'duplicate_update_ignored', { updateId });
+        return new Response('OK', { status: 200 });
       }
-      ctx.waitUntil(handleUpdate(update, env).catch((error) => console.error('[webhook] background handler failed:', error?.stack || error)));
+      recentUpdateIds.set(updateId, now);
+      while (recentUpdateIds.size > 512) recentUpdateIds.delete(recentUpdateIds.keys().next().value);
+      logBotEvent('info', 'webhook_accepted', { updateId, updateType: update.message ? 'message' : update.channel_post ? 'channel_post' : 'other' });
+      ctx.waitUntil(handleUpdate(update, env).catch((error) => {
+        logBotEvent('error', 'webhook_background_failed', {
+          updateId,
+          errorName: error?.name || 'Error',
+          error: String(error?.message || error).slice(0, 300)
+        });
+      }));
       return new Response('OK', { status: 200, headers: { 'Cache-Control': 'no-store' } });
     }
 
-    if (url.pathname === '/') {
-      if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
-      return handlePublicRootTrigger(env);
+    // The root is intentionally read-only. Opening the Worker URL must never
+    // trigger a GitHub workflow or mutate KV; use the protected POST /trigger endpoint.
+    if (url.pathname === '/' || url.pathname === '/health' || url.pathname === '/ready' || url.pathname === '/test') {
+      return jsonResponse({
+        ...safeHealth(env),
+        message: 'ArzPulse Telegram Worker is online. Telegram updates are received at POST /webhook.',
+        endpoints: {
+          webhook: 'POST /webhook',
+          health: 'GET /health',
+          diagnostics: 'GET /diagnostics (ADMIN_SECRET required)',
+          webhookSetup: 'POST /webhook/setup (ADMIN_SECRET required)',
+          manualRefresh: 'POST /trigger (ADMIN_SECRET required)'
+        }
+      });
     }
-    if (url.pathname === '/health' || url.pathname === '/test') {
-      return jsonResponse(safeHealth(env));
-    }
-    if (url.pathname === '/diagnostics' || url.pathname === '/check' || url.pathname === '/send' || url.pathname === '/trigger') {
+
+    if (url.pathname === '/diagnostics' || url.pathname === '/check' || url.pathname === '/send' || url.pathname === '/trigger' || url.pathname === '/webhook/setup') {
       return handleAdminEndpoint(request, env, url.pathname);
     }
-    return jsonResponse({ error: 'not-found', service: 'ArzPulse Telegram Bot' }, 404);
+    return jsonResponse({ error: 'not-found', service: 'ArzPulse Telegram Bot', path: url.pathname }, 404);
   },
 
   async scheduled(event, env, ctx) {
     // The existing public `arzpulse-bot` Worker dispatches GitHub Actions and
     // independently evaluates Telegram alert thresholds every five minutes.
     if (event?.cron === '*/5 * * * *') {
-      const dispatchTask = dispatchGitHubUpdate(env)
-        .then(() => console.log('[scheduled] GitHub workflow dispatch accepted for', `${env.GITHUB_OWNER || 'mehrdadmb2'}/${env.GITHUB_REPO || 'ArzPulse'}`, env.GITHUB_WORKFLOW || 'update-prices.yml'))
-        .catch((error) => console.error('[scheduled] market workflow dispatch failed:', error?.stack || error));
+      const dispatchTask = scheduledDispatcherEnabled(env)
+        ? dispatchGitHubUpdate(env)
+          .then(() => logBotEvent('info', 'scheduled_github_dispatch_accepted', {
+            repository: `${env.GITHUB_OWNER || 'mehrdadmb2'}/${env.GITHUB_REPO || 'ArzPulse'}`,
+            workflow: env.GITHUB_WORKFLOW || 'update-prices.yml'
+          }))
+          .catch((error) => logBotEvent('error', 'scheduled_github_dispatch_failed', { error: String(error?.message || error).slice(0, 240) }))
+        : Promise.resolve(logBotEvent('info', 'scheduled_github_dispatch_skipped', { reason: 'GITHUB_DISPATCH_ENABLED=false' }));
       const alertTask = processAutomaticAlerts(env)
         .catch((error) => console.error('[scheduled] automatic alerts failed:', error?.stack || error));
       const digestTask = processScheduledDigests(env)
