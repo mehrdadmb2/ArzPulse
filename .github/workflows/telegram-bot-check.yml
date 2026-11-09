@@ -1,0 +1,43 @@
+name: Telegram Bot Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'telegram-bot/**'
+      - '.github/workflows/telegram-bot-check.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'telegram-bot/**'
+      - '.github/workflows/telegram-bot-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: telegram-bot-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Syntax and smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check Worker syntax
+        working-directory: telegram-bot
+        run: npm run check
+
+      - name: Run Telegram Worker smoke tests
+        working-directory: telegram-bot
+        run: npm test
