@@ -1,24 +1,24 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-09T08:30:22.540Z",
-  "lastUpdate": "2026-11-09T08:30:22.540Z",
+  "lastAttempt": "2026-11-09T08:35:19.205Z",
+  "lastUpdate": "2026-11-09T08:35:19.205Z",
   "retentionDays": 30,
-  "gold18K": 261103929,
-  "usdtPrice": 2654000,
-  "dollarPrice": 2654000,
+  "gold18K": 261013599,
+  "usdtPrice": 2655490,
+  "dollarPrice": 2655490,
   "equityCount": 0,
   "forexCount": 0,
   "marketSummary": {
-    "WTI": {
-      "last": 90.83000183105469,
-      "change": 0.3424714974423575,
+    "XAUUSD": {
+      "last": 4074.89990234375,
+      "change": -0.9383760217880152,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "XAUUSD": {
-      "last": 4074.89990234375,
-      "change": -0.9383760217880152,
+    "WTI": {
+      "last": 90.83000183105469,
+      "change": 0.3424714974423575,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
@@ -93,19 +93,19 @@
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
     },
-    "DAX": {
-      "last": 25820.359375,
-      "change": -1.9169998230502794,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T08:00:00.000Z"
-    },
     "HANGSENG": {
       "last": 24481.859375,
       "change": -1.2708042987214767,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T01:30:00.000Z"
+    },
+    "DAX": {
+      "last": 25820.359375,
+      "change": -1.9169998230502794,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T08:00:00.000Z"
     },
     "NATGAS": {
       "last": 2.997999906539917,
@@ -146,8 +146,8 @@
   "hasError": true,
   "errorCount": 46,
   "errors": [
-    "WTI: HTTP 429 from upstream",
     "XAUUSD: HTTP 429 from upstream",
+    "WTI: HTTP 429 from upstream",
     "SILVER: HTTP 429 from upstream",
     "BRENT: HTTP 429 from upstream",
     "SP500: HTTP 429 from upstream",
@@ -158,46 +158,46 @@
     "VIX: HTTP 429 from upstream",
     "NIKKEI: HTTP 429 from upstream",
     "FTSE100: HTTP 429 from upstream",
-    "DAX: HTTP 429 from upstream",
     "HANGSENG: HTTP 429 from upstream",
+    "DAX: HTTP 429 from upstream",
     "NATGAS: HTTP 429 from upstream",
     "COPPER: HTTP 429 from upstream",
     "PLATINUM: HTTP 429 from upstream",
     "PALLADIUM: HTTP 429 from upstream",
     "US10Y: HTTP 429 from upstream",
-    "Equity NVDA: HTTP 429 from upstream",
     "Equity MSFT: HTTP 429 from upstream",
+    "Equity NVDA: HTTP 429 from upstream",
     "Equity AAPL: HTTP 429 from upstream",
-    "Equity AMZN: HTTP 429 from upstream",
     "Equity TSLA: HTTP 429 from upstream",
+    "Equity AMZN: HTTP 429 from upstream",
     "Equity GOOGL: HTTP 429 from upstream",
-    "Equity META: HTTP 429 from upstream",
     "Equity AVGO: HTTP 429 from upstream",
     "Equity AMD: HTTP 429 from upstream",
-    "Equity PLTR: HTTP 429 from upstream",
+    "Equity META: HTTP 429 from upstream",
     "Equity ORCL: HTTP 429 from upstream",
+    "Equity PLTR: HTTP 429 from upstream",
     "Equity COIN: HTTP 429 from upstream",
     "Equity SPCX: HTTP 429 from upstream",
     "Forex USDJPY: HTTP 429 from upstream",
-    "Forex GBPUSD: HTTP 429 from upstream",
     "Forex EURUSD: HTTP 429 from upstream",
+    "Forex GBPUSD: HTTP 429 from upstream",
     "Forex USDCHF: HTTP 429 from upstream",
     "Forex USDCAD: HTTP 429 from upstream",
     "Forex AUDUSD: HTTP 429 from upstream",
     "Forex NZDUSD: HTTP 429 from upstream",
     "Forex USDTRY: HTTP 429 from upstream",
     "Forex EURGBP: HTTP 429 from upstream",
-    "Forex GBPJPY: HTTP 429 from upstream",
     "Forex EURJPY: HTTP 429 from upstream",
     "Forex USDCNH: HTTP 429 from upstream",
+    "Forex GBPJPY: HTTP 429 from upstream",
     "Binance futures funding: HTTP 451 from upstream",
     "Binance BTC open interest: HTTP 451 from upstream"
   ],
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 29,
-    "totalMarketCapUsd": 2469113681265.6436,
-    "btcDominance": 60.19756423830989
+    "totalMarketCapUsd": 2469657026663.176,
+    "btcDominance": 60.189492320466634
   },
   "successfulSources": 9,
   "successfulLocalSources": 5
