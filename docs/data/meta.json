@@ -1,9 +1,9 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-12T05:10:19.920Z",
-  "lastUpdate": "2026-11-12T05:10:19.920Z",
+  "lastAttempt": "2026-11-12T05:15:20.502Z",
+  "lastUpdate": "2026-11-12T05:15:20.502Z",
   "retentionDays": 30,
-  "gold18K": 254761881,
+  "gold18K": 254710665,
   "usdtPrice": 2655000,
   "dollarPrice": 2655000,
   "equityCount": 0,
@@ -23,6 +23,13 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
+    "XAUUSD": {
+      "last": 4074.89990234375,
+      "change": -0.9383760217880152,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T05:00:00.000Z"
+    },
     "BRENT": {
       "last": 98.31999969482422,
       "change": 0.03052068269147401,
@@ -30,12 +37,12 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "XAUUSD": {
-      "last": 4074.89990234375,
-      "change": -0.9383760217880152,
+    "SP500": {
+      "last": 7376.85986328125,
+      "change": 0.3145326640212812,
       "delayed": true,
       "stale": true,
-      "timestamp": "2026-11-06T05:00:00.000Z"
+      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "NASDAQ": {
       "last": 25065.869140625,
@@ -51,13 +58,6 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "SP500": {
-      "last": 7376.85986328125,
-      "change": 0.3145326640212812,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T14:30:00.000Z"
-    },
     "DOW": {
       "last": 52231.890625,
       "change": 0.8596231331121161,
@@ -71,13 +71,6 @@
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
-    },
-    "RUSSELL2000": {
-      "last": 2754.110107421875,
-      "change": 0.8872231407427309,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "NIKKEI": {
       "last": 57434.76953125,
@@ -93,12 +86,12 @@
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
     },
-    "HANGSENG": {
-      "last": 24380.75,
-      "change": 1.928342983758022,
+    "RUSSELL2000": {
+      "last": 2754.110107421875,
+      "change": 0.8872231407427309,
       "delayed": true,
       "stale": true,
-      "timestamp": "2026-11-11T01:30:00.000Z"
+      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "DAX": {
       "last": 25820.359375,
@@ -106,6 +99,13 @@
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
+    },
+    "HANGSENG": {
+      "last": 24380.75,
+      "change": 1.928342983758022,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-11T01:30:00.000Z"
     },
     "NATGAS": {
       "last": 2.997999906539917,
@@ -148,25 +148,25 @@
   "errors": [
     "WTI: HTTP 429 from upstream",
     "SILVER: HTTP 429 from upstream",
-    "BRENT: HTTP 429 from upstream",
     "XAUUSD: HTTP 429 from upstream",
+    "BRENT: HTTP 429 from upstream",
+    "SP500: HTTP 429 from upstream",
     "NASDAQ: HTTP 429 from upstream",
     "DXY: HTTP 429 from upstream",
-    "SP500: HTTP 429 from upstream",
     "DOW: HTTP 429 from upstream",
     "VIX: HTTP 429 from upstream",
-    "RUSSELL2000: HTTP 429 from upstream",
     "NIKKEI: HTTP 429 from upstream",
     "FTSE100: HTTP 429 from upstream",
-    "HANGSENG: HTTP 429 from upstream",
+    "RUSSELL2000: HTTP 429 from upstream",
     "DAX: HTTP 429 from upstream",
+    "HANGSENG: HTTP 429 from upstream",
     "NATGAS: HTTP 429 from upstream",
     "COPPER: HTTP 429 from upstream",
     "PLATINUM: HTTP 429 from upstream",
     "PALLADIUM: HTTP 429 from upstream",
     "US10Y: HTTP 429 from upstream",
-    "Equity NVDA: HTTP 429 from upstream",
     "Equity MSFT: HTTP 429 from upstream",
+    "Equity NVDA: HTTP 429 from upstream",
     "Equity AAPL: HTTP 429 from upstream",
     "Equity AMZN: HTTP 429 from upstream",
     "Equity GOOGL: HTTP 429 from upstream",
@@ -174,15 +174,15 @@
     "Equity META: HTTP 429 from upstream",
     "Equity AVGO: HTTP 429 from upstream",
     "Equity AMD: HTTP 429 from upstream",
+    "Equity ORCL: HTTP 429 from upstream",
     "Equity PLTR: HTTP 429 from upstream",
     "Equity COIN: HTTP 429 from upstream",
-    "Equity ORCL: HTTP 429 from upstream",
     "Equity SPCX: HTTP 429 from upstream",
-    "Forex USDJPY: HTTP 429 from upstream",
     "Forex GBPUSD: HTTP 429 from upstream",
+    "Forex USDJPY: HTTP 429 from upstream",
     "Forex EURUSD: HTTP 429 from upstream",
-    "Forex USDCHF: HTTP 429 from upstream",
     "Forex USDCAD: HTTP 429 from upstream",
+    "Forex USDCHF: HTTP 429 from upstream",
     "Forex AUDUSD: HTTP 429 from upstream",
     "Forex NZDUSD: HTTP 429 from upstream",
     "Forex USDTRY: HTTP 429 from upstream",
@@ -196,8 +196,8 @@
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 28,
-    "totalMarketCapUsd": 2463958068598.1846,
-    "btcDominance": 59.87054430553835
+    "totalMarketCapUsd": 2460995070239.333,
+    "btcDominance": 59.87531971288645
   },
   "successfulSources": 9,
   "successfulLocalSources": 5
