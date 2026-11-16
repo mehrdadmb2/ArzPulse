@@ -1,9 +1,9 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-16T01:05:24.824Z",
-  "lastUpdate": "2026-11-16T01:05:24.824Z",
+  "lastAttempt": "2026-11-16T01:10:19.632Z",
+  "lastUpdate": "2026-11-16T01:10:19.632Z",
   "retentionDays": 30,
-  "gold18K": 250783699,
+  "gold18K": 251284525,
   "usdtPrice": 2697390,
   "dollarPrice": 2697390,
   "equityCount": 0,
@@ -37,19 +37,19 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "SP500": {
-      "last": 7376.85986328125,
-      "change": 0.3145326640212812,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T14:30:00.000Z"
-    },
     "NASDAQ": {
       "last": 25065.869140625,
       "change": -1.2066086186116054,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-10T14:30:00.000Z"
+    },
+    "SP500": {
+      "last": 7376.85986328125,
+      "change": 0.3145326640212812,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T14:30:00.000Z"
     },
     "DXY": {
       "last": 102.30000305175781,
@@ -65,19 +65,19 @@
       "stale": true,
       "timestamp": "2026-11-10T14:30:00.000Z"
     },
-    "VIX": {
-      "last": 25.639999389648438,
-      "change": -9.013487892194329,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T08:00:00.000Z"
-    },
     "RUSSELL2000": {
       "last": 2754.110107421875,
       "change": 0.8872231407427309,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T14:30:00.000Z"
+    },
+    "VIX": {
+      "last": 25.639999389648438,
+      "change": -9.013487892194329,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-06T08:00:00.000Z"
     },
     "FTSE100": {
       "last": 10673.900390625,
@@ -150,12 +150,12 @@
     "SILVER: HTTP 429 from upstream",
     "WTI: HTTP 429 from upstream",
     "BRENT: HTTP 429 from upstream",
-    "SP500: HTTP 429 from upstream",
     "NASDAQ: HTTP 429 from upstream",
+    "SP500: HTTP 429 from upstream",
     "DXY: HTTP 429 from upstream",
     "DOW: HTTP 429 from upstream",
-    "VIX: HTTP 429 from upstream",
     "RUSSELL2000: HTTP 429 from upstream",
+    "VIX: HTTP 429 from upstream",
     "FTSE100: HTTP 429 from upstream",
     "NIKKEI: HTTP 429 from upstream",
     "HANGSENG: HTTP 429 from upstream",
@@ -165,25 +165,25 @@
     "PLATINUM: HTTP 429 from upstream",
     "PALLADIUM: HTTP 429 from upstream",
     "US10Y: HTTP 429 from upstream",
-    "Equity AAPL: HTTP 429 from upstream",
-    "Equity NVDA: HTTP 429 from upstream",
     "Equity MSFT: HTTP 429 from upstream",
-    "Equity AMZN: HTTP 429 from upstream",
-    "Equity GOOGL: HTTP 429 from upstream",
+    "Equity NVDA: HTTP 429 from upstream",
+    "Equity AAPL: HTTP 429 from upstream",
     "Equity TSLA: HTTP 429 from upstream",
+    "Equity GOOGL: HTTP 429 from upstream",
+    "Equity AMZN: HTTP 429 from upstream",
     "Equity META: HTTP 429 from upstream",
     "Equity AVGO: HTTP 429 from upstream",
     "Equity AMD: HTTP 429 from upstream",
-    "Equity ORCL: HTTP 429 from upstream",
-    "Equity COIN: HTTP 429 from upstream",
     "Equity PLTR: HTTP 429 from upstream",
+    "Equity COIN: HTTP 429 from upstream",
+    "Equity ORCL: HTTP 429 from upstream",
     "Equity SPCX: HTTP 429 from upstream",
-    "Forex USDJPY: HTTP 429 from upstream",
-    "Forex EURUSD: HTTP 429 from upstream",
     "Forex GBPUSD: HTTP 429 from upstream",
+    "Forex EURUSD: HTTP 429 from upstream",
+    "Forex USDJPY: HTTP 429 from upstream",
+    "Forex USDCHF: HTTP 429 from upstream",
     "Forex AUDUSD: HTTP 429 from upstream",
     "Forex USDCAD: HTTP 429 from upstream",
-    "Forex USDCHF: HTTP 429 from upstream",
     "Forex USDTRY: HTTP 429 from upstream",
     "Forex EURGBP: HTTP 429 from upstream",
     "Forex NZDUSD: HTTP 429 from upstream",
@@ -196,8 +196,8 @@
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 10,
-    "totalMarketCapUsd": 2191306675866.653,
-    "btcDominance": 59.379481520864196
+    "totalMarketCapUsd": 2190506213234.4846,
+    "btcDominance": 59.38162037815433
   },
   "successfulSources": 9,
   "successfulLocalSources": 5
