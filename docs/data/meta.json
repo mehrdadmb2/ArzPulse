@@ -1,11 +1,11 @@
 {
   "version": 7,
-  "lastAttempt": "2026-11-17T16:45:24.586Z",
-  "lastUpdate": "2026-11-17T16:45:24.586Z",
+  "lastAttempt": "2026-11-17T16:50:19.720Z",
+  "lastUpdate": "2026-11-17T16:50:19.720Z",
   "retentionDays": 30,
-  "gold18K": 251514682,
-  "usdtPrice": 2703990,
-  "dollarPrice": 2703990,
+  "gold18K": 251551878,
+  "usdtPrice": 2704460,
+  "dollarPrice": 2704460,
   "equityCount": 0,
   "forexCount": 0,
   "marketSummary": {
@@ -51,13 +51,6 @@
       "stale": true,
       "timestamp": "2026-11-10T14:30:00.000Z"
     },
-    "DOW": {
-      "last": 52347.55078125,
-      "change": 2.070402003149798,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-13T14:30:00.000Z"
-    },
     "DXY": {
       "last": 103.59100341796875,
       "change": 0.4080676727428015,
@@ -65,19 +58,19 @@
       "stale": true,
       "timestamp": "2026-11-17T05:00:00.000Z"
     },
+    "DOW": {
+      "last": 52347.55078125,
+      "change": 2.070402003149798,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-13T14:30:00.000Z"
+    },
     "RUSSELL2000": {
       "last": 2754.110107421875,
       "change": 0.8872231407427309,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T14:30:00.000Z"
-    },
-    "VIX": {
-      "last": 25.639999389648438,
-      "change": -9.013487892194329,
-      "delayed": true,
-      "stale": true,
-      "timestamp": "2026-11-06T08:00:00.000Z"
     },
     "NIKKEI": {
       "last": 57434.76953125,
@@ -93,12 +86,19 @@
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
     },
-    "DAX": {
-      "last": 25820.359375,
-      "change": -1.9169998230502794,
+    "VIX": {
+      "last": 25.639999389648438,
+      "change": -9.013487892194329,
       "delayed": true,
       "stale": true,
       "timestamp": "2026-11-06T08:00:00.000Z"
+    },
+    "HANGSENG": {
+      "last": 24380.75,
+      "change": 1.928342983758022,
+      "delayed": true,
+      "stale": true,
+      "timestamp": "2026-11-11T01:30:00.000Z"
     },
     "NATGAS": {
       "last": 2.997999906539917,
@@ -107,12 +107,12 @@
       "stale": true,
       "timestamp": "2026-11-06T05:00:00.000Z"
     },
-    "HANGSENG": {
-      "last": 24380.75,
-      "change": 1.928342983758022,
+    "DAX": {
+      "last": 25820.359375,
+      "change": -1.9169998230502794,
       "delayed": true,
       "stale": true,
-      "timestamp": "2026-11-11T01:30:00.000Z"
+      "timestamp": "2026-11-06T08:00:00.000Z"
     },
     "COPPER": {
       "last": 6.2179999351501465,
@@ -152,25 +152,25 @@
     "BRENT: HTTP 429 from upstream",
     "SP500: HTTP 429 from upstream",
     "NASDAQ: HTTP 429 from upstream",
-    "DOW: HTTP 429 from upstream",
     "DXY: HTTP 429 from upstream",
+    "DOW: HTTP 429 from upstream",
     "RUSSELL2000: HTTP 429 from upstream",
-    "VIX: HTTP 429 from upstream",
     "NIKKEI: HTTP 429 from upstream",
     "FTSE100: HTTP 429 from upstream",
-    "DAX: HTTP 429 from upstream",
-    "NATGAS: HTTP 429 from upstream",
+    "VIX: HTTP 429 from upstream",
     "HANGSENG: HTTP 429 from upstream",
+    "NATGAS: HTTP 429 from upstream",
+    "DAX: HTTP 429 from upstream",
     "COPPER: HTTP 429 from upstream",
     "PALLADIUM: HTTP 429 from upstream",
     "PLATINUM: HTTP 429 from upstream",
     "US10Y: HTTP 429 from upstream",
     "Equity MSFT: HTTP 429 from upstream",
-    "Equity NVDA: HTTP 429 from upstream",
     "Equity AAPL: HTTP 429 from upstream",
+    "Equity NVDA: HTTP 429 from upstream",
+    "Equity TSLA: HTTP 429 from upstream",
     "Equity AMZN: HTTP 429 from upstream",
     "Equity GOOGL: HTTP 429 from upstream",
-    "Equity TSLA: HTTP 429 from upstream",
     "Equity META: HTTP 429 from upstream",
     "Equity AVGO: HTTP 429 from upstream",
     "Equity AMD: HTTP 429 from upstream",
@@ -196,8 +196,8 @@
   "globalCryptoCount": 28,
   "contextSummary": {
     "fearGreed": 12,
-    "totalMarketCapUsd": 2198763901218.894,
-    "btcDominance": 58.394515438066655
+    "totalMarketCapUsd": 2190945683533.7673,
+    "btcDominance": 58.373072534254966
   },
   "successfulSources": 9,
   "successfulLocalSources": 5
