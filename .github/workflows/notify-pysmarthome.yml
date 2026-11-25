@@ -1,0 +1,103 @@
+name: Notify PySmartHome after ArzPulse update
+
+on:
+  workflow_run:
+    workflows: ["Update Market Data"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notify-pysmarthome-market
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Notify PySmartHome that fresh market data is available
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout the just-published ArzPulse main snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate the published snapshot and dispatch target repository
+        shell: bash
+        env:
+          PYSMARTHOME_DISPATCH_TOKEN: ${{ secrets.PYSMARTHOME_DISPATCH_TOKEN }}
+          SOURCE_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          SOURCE_WORKFLOW_RUN_URL: ${{ github.event.workflow_run.html_url }}
+          SOURCE_TRIGGER_EVENT: ${{ github.event.workflow_run.event }}
+          SOURCE_COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PYSMARTHOME_DISPATCH_TOKEN:-}" ]]; then
+            echo "::error::Missing repository secret PYSMARTHOME_DISPATCH_TOKEN. Add a fine-grained token scoped to mehrdadmb2/PySmartHome-PC with Contents: read/write."
+            exit 1
+          fi
+
+          test -s docs/data/latest.json
+          source_timestamp="$(jq -er '.timestamp | strings | select(length > 0)' docs/data/latest.json)"
+          dollar="$(jq -er '(.dollarPrice | if type == "string" then tonumber else . end) | select(type == "number" and . > 0)' docs/data/latest.json)"
+          gold="$(jq -er '(.gold18K | if type == "string" then tonumber else . end) | select(type == "number" and . > 0)' docs/data/latest.json)"
+          echo "Published ArzPulse snapshot: timestamp=$source_timestamp"
+          echo "Validated positive dollarPrice and gold18K fields."
+
+          # The 15-minute scheduled workflow is only a safety fallback. Its
+          # collector intentionally skips when the five-minute Cloudflare
+          # updater already refreshed ArzPulse within seven minutes. Do not
+          # dispatch duplicate downstream work for that skipped fallback.
+          if [[ "$SOURCE_TRIGGER_EVENT" == "schedule" ]]; then
+            source_epoch="$(date -u -d "$source_timestamp" +%s)"
+            age_seconds="$(( $(date -u +%s) - source_epoch ))"
+            if [[ "$age_seconds" -ge 0 && "$age_seconds" -lt 420 ]]; then
+              echo "Scheduled fallback found a recent ArzPulse snapshot (${age_seconds}s old); no downstream dispatch is needed."
+              exit 0
+            fi
+          fi
+
+          payload="$(jq -cn \
+            --arg timestamp "$source_timestamp" \
+            --arg run_id "$SOURCE_WORKFLOW_RUN_ID" \
+            --arg run_url "$SOURCE_WORKFLOW_RUN_URL" \
+            --arg source_sha "$SOURCE_COMMIT_SHA" \
+            '{event_type:"arzpulse_prices_updated",client_payload:{source:"ArzPulse",source_timestamp:$timestamp,source_run_id:$run_id,source_run_url:$run_url,source_sha:$source_sha}}')"
+
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+
+          for attempt in 1 2 3; do
+            http_code="$(curl --silent --show-error --location \
+              --connect-timeout 10 --max-time 30 \
+              --output "$response_file" --write-out '%{http_code}' \
+              --request POST \
+              --header 'Accept: application/vnd.github+json' \
+              --header "Authorization: Bearer $PYSMARTHOME_DISPATCH_TOKEN" \
+              --header 'X-GitHub-Api-Version: 2022-11-28' \
+              --header 'Content-Type: application/json' \
+              --data "$payload" \
+              'https://api.github.com/repos/mehrdadmb2/PySmartHome-PC/dispatches' || true)"
+
+            if [[ "$http_code" == "204" ]]; then
+              echo "::notice::PySmartHome accepted the market update event (attempt $attempt/3)."
+              exit 0
+            fi
+
+            echo "Dispatch attempt $attempt/3 failed with HTTP $http_code."
+            cat "$response_file" || true
+            if [[ "$http_code" =~ ^(401|403|404|422)$ ]]; then
+              echo "::error::GitHub rejected the repository_dispatch request. Check token expiry, selected repository and Contents: write permission."
+              exit 1
+            fi
+            if [[ "$attempt" -lt 3 ]]; then sleep $((attempt * 3)); fi
+          done
+
+          echo "::error::Could not dispatch PySmartHome after three attempts."
+          exit 1
